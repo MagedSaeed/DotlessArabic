@@ -2,10 +2,9 @@ from pathlib import Path
 
 from tqdm.auto import tqdm
 
+from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
 from dotless_arabic.experiments.nlms.src.utils import log_to_file
-from dotless_arabic.experiments.nlms.training_pipeline import training_pipeline
 from dotless_arabic.processing import process, undot
-
 
 ################################################
 ############# Dataset Preparation ##############

@@ -3,7 +3,7 @@ import os
 import wandb
 from pytorch_lightning import seed_everything
 
-from .src import constants
+from dotless_arabic.experiments.nlms.src import constants
 
 CONFIGURED = False
 
