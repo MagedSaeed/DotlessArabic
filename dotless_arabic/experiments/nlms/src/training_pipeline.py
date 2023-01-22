@@ -1,6 +1,7 @@
 from pytorch_lightning.callbacks import Timer
 from pytorch_lightning.loggers import WandbLogger
 from sklearn.model_selection import train_test_split
+from pytorch_lightning.utilities.model_summary import ModelSummary
 
 from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.experiments.nlms.src.callbacks import LossMetricsCallback
@@ -111,6 +112,14 @@ def training_pipeline(
 
     loss_metrics_callback = LossMetricsCallback()
     lm_model = LitNeuralLanguageModel(vocab_size=tokenizer.vocab_size)
+
+    log_to_file(
+        text=f"""
+        {ModelSummary(lm_model)}
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
 
     wandb_logger = WandbLogger(
         id=dataset_id,
