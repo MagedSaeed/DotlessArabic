@@ -2,10 +2,10 @@ from pytorch_lightning.callbacks import Timer
 from pytorch_lightning.loggers import WandbLogger
 from sklearn.model_selection import train_test_split
 
-from dotless_arabic.experiments.nlms.settings import configure_environment
 from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.experiments.nlms.src.callbacks import LossMetricsCallback
 from dotless_arabic.experiments.nlms.src.models import LitNeuralLanguageModel
+from dotless_arabic.experiments.nlms.src.settings import configure_environment
 from dotless_arabic.experiments.nlms.src.utils import (
     calculate_perplexity,
     generate_text,
