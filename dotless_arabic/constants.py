@@ -1,7 +1,6 @@
-import pyarabic.araby as araby
-
 import os
 
+import pyarabic.araby as araby
 
 RANDOM_SEED = 42
 
@@ -68,3 +67,6 @@ LETTERS_MAPPING = {
     "ئ": YAA_SHAPE,
     "ء": HAMZA_SHAPE,
 }
+
+
+NEW_LINE = "\n"
