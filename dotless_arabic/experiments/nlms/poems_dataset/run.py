@@ -78,7 +78,6 @@ log_to_file(
 )
 
 dataset_name = "poems_dataset"
-dataset_id = f"dotted-{dataset_name}".upper()
 
 dataset = baits
 
@@ -102,10 +101,12 @@ log_to_file(
 ###### Dotted Dataset Training #################
 ################################################
 
+dataset_id = f"dotted-{dataset_name}".upper()
+
 training_pipeline(
     dataset=dataset,
-    dataset_name="dotted-quran_dataset",
-    dataset_id="dotted-qurand_dataset".upper(),
+    dataset_name=dataset_id.lower(),
+    dataset_id=dataset_id,
     is_dotted=True,
     results_file=dotted_results_file_path,
 )
@@ -156,7 +157,7 @@ log_to_file(
 
 training_pipeline(
     dataset=undotted_dataset,
-    dataset_name=dataset_name,
+    dataset_name=dataset_id.lower(),
     dataset_id=dataset_id,
     is_dotted=False,
     results_file=undotted_results_file_path,
