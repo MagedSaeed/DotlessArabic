@@ -1,0 +1,7 @@
+Script started on 2023-01-22 09:30:10+03:00 [TERM="screen" TTY="/dev/pts/5" COLUMNS="190" LINES="53"]
+Traceback (most recent call last):
+  File "/home/g201381710/ExperimentsGH/DotlessArabic/dotless_arabic/experiments/nlms/quran_dataset/run.py", line 5, in <module>
+    from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
+ModuleNotFoundError: No module named 'dotless_arabic'
+
+Script done on 2023-01-22 09:30:10+03:00 [COMMAND_EXIT_CODE="1"]
