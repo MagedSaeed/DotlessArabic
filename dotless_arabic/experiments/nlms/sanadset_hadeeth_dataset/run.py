@@ -29,7 +29,9 @@ if "sanadset.csv" not in os.listdir(current_dir):
         output_dir=current_dir,
     )
 
-sanadset_hadeeth_dataset = list(pd.read_csv("sanadset.csv")["Matn"].dropna())
+sanadset_hadeeth_dataset = list(
+    pd.read_csv(f"{current_dir}/sanadset.csv")["Matn"].dropna()
+)
 sanadset_hadeeth_dataset = list(set(sanadset_hadeeth_dataset))
 
 
