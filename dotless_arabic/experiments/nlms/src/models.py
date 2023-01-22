@@ -1,7 +1,7 @@
 import torch
+import torch.nn.functional as F
 from pytorch_lightning import LightningModule
 from torch import nn
-import torch.nn.functional as F
 
 from dotless_arabic.experiments.nlms.src import constants
 
@@ -154,6 +154,6 @@ class LitNeuralLanguageModel(LightningModule):
         )
         return {
             "optimizer": optimizer,
-            "scheduler": scheduler,
+            "lr_scheduler": scheduler,
             "monitor": "val_loss",
         }
