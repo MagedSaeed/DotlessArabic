@@ -1,0 +1,14 @@
+# NLMs
+tqdm
+rich
+torch
+wandb
+pandas
+sklearn
+datasets
+pyarabic
+scikit-learn
+transformers
+pytorch-lightning
+git+https://github.com/MagedSaeed/tkseem.git
+
