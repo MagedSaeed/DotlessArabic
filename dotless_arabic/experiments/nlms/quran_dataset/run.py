@@ -1,6 +1,10 @@
+import sys
 from pathlib import Path
 
 from tqdm.auto import tqdm
+
+if "." not in sys.path:
+    sys.path.append(".")
 
 from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
 from dotless_arabic.experiments.nlms.src.utils import log_to_file

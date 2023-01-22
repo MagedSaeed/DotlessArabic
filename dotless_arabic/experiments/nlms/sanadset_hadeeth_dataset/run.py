@@ -1,8 +1,13 @@
 import os
+import sys
 from pathlib import Path
 
 import pandas as pd
 from tqdm.auto import tqdm
+
+if "." not in sys.path:
+    sys.path.append(".")
+
 
 from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.experiments.nlms.src.datasets import dataset_dot_transform
