@@ -5,12 +5,12 @@ from pathlib import Path
 
 import numpy as np
 import torch
+import wandb
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichProgressBar
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-import wandb
 from dotless_arabic.experiments.nlms.src import constants, datasets
 
 
@@ -111,7 +111,7 @@ def train_lm(
         callbacks=callbacks,
         max_epochs=max_epochs,
         logger=wandb_logger,
-        val_check_interval=0.2,
+        val_check_interval=0.5,
         fast_dev_run=one_run,
         log_every_n_steps=max(len(train_dataloader) // 25, 1),
         # default_root_dir=f"LMsModels/{previous_hiddens}",
