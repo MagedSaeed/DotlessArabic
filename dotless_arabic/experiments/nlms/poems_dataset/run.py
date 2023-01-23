@@ -63,7 +63,7 @@ log_to_file(
 
 baits = list(
     filter(
-        lambda bait: 25 > len(bait.replace(" ", "")) > 5,
+        lambda bait: 50 > len(bait.replace(" ", "")) >= 10,
         baits,
     )
 )
