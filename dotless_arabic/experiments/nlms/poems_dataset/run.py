@@ -36,11 +36,14 @@ ashaar = datasets.load_dataset("arbml/ashaar", split="train")
 
 baits = list()
 
-for poem in ashaar["poem verses"]:
-    baits.extend(poem)
-
-baits = list(set(baits))
-
+for poem in tqdm(ashaar["poem verses"]):
+    index = 1
+    for shatr in poem:
+        if index % 2 == 0:
+            baits.append(f"{prev_shatr} {shatr}")
+        else:
+            prev_shatr = shatr
+        index += 1
 
 log_to_file(
     text=f"""
