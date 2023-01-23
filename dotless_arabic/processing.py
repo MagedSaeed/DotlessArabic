@@ -1,5 +1,7 @@
 import re
 
+from tqdm.auto import tqdm
+
 from dotless_arabic import constants
 
 
@@ -77,3 +79,26 @@ def undot(text, process_first=False):
         if not word.isspace():
             undotted_text += " "
     return undotted_text.strip()
+
+
+def dataset_dot_transform(dataset, use_tqdm=True):
+    # split on dots
+    transformed_dataset = list()
+    dataset = tqdm(dataset) if use_tqdm else dataset
+    for document in dataset:
+        transformed_dataset.extend(
+            paragraph.strip() for paragraph in document.split(".") if paragraph.strip()
+        )
+    return transformed_dataset
+
+
+def dataset_newline_transform(dataset, use_tqdm=True):
+    # split on newlines
+    transformed_dataset = list()
+    dataset = tqdm(dataset) if use_tqdm else dataset
+    for document in dataset:
+        paragraphs = document.splitlines()
+        transformed_dataset.extend(
+            paragraph.strip() for paragraph in paragraphs if paragraph.strip()
+        )
+    return transformed_dataset
