@@ -1,27 +1,6 @@
 import torch
-from tqdm.auto import tqdm
 from torch.utils.data import Dataset
-
-
-def dataset_dot_transform(dataset):
-    # split on dots
-    transformed_dataset = list()
-    for document in dataset:
-        transformed_dataset.extend(
-            paragraph.strip() for paragraph in document.split(".") if paragraph.strip()
-        )
-    return transformed_dataset
-
-
-def dataset_newline_transform(dataset):
-    # split on newlines
-    transformed_dataset = list()
-    for document in dataset:
-        paragraphs = document.splitlines()
-        transformed_dataset.extend(
-            paragraph.strip() for paragraph in paragraphs if paragraph.strip()
-        )
-    return transformed_dataset
+from tqdm.auto import tqdm
 
 
 class LanguageModelDataset(Dataset):
