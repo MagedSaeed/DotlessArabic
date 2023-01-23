@@ -96,7 +96,7 @@ dataset = list(
 
 log_to_file(
     text=f"""
-    Some of the Dataset Samples before training:
+    Some of the Dataset Samples after processing:
     {constants.NEW_LINE.join(dataset[:5])}
     """,
     results_file=dotted_results_file_path,
@@ -153,7 +153,7 @@ undotted_dataset = list(
 
 log_to_file(
     text=f"""
-    Some of the Dataset Samples before training:
+    Some of the Dataset Samples after undotting:
     {constants.NEW_LINE.join(undotted_dataset[:5])}
     """,
     results_file=undotted_results_file_path,
