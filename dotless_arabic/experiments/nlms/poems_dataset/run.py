@@ -70,7 +70,7 @@ baits = list(
 
 log_to_file(
     text=f"""
-    Number of baits after deleting 50>len(bait)>10 chars:
+    Number of baits after deleting 60>len(bait)>=5 chars:
     {len(baits):,}
     """,
     results_file=dotted_results_file_path,
