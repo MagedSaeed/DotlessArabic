@@ -1,9 +1,7 @@
-import os
 import sys
 from pathlib import Path
 
 import datasets
-import pandas as pd
 from tqdm.auto import tqdm
 
 if "." not in sys.path:
@@ -11,11 +9,9 @@ if "." not in sys.path:
 
 
 from dotless_arabic.experiments.nlms.src import constants
-from dotless_arabic.experiments.nlms.src.datasets import dataset_dot_transform
 from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
 from dotless_arabic.experiments.nlms.src.utils import log_to_file
 from dotless_arabic.processing import process, undot
-from dotless_arabic.utils import download_file
 
 ################################################
 ############# Dataset Preparation ##############
@@ -91,7 +87,7 @@ dataset = list(
 
 log_to_file(
     text=f"""
-    Some of the Dataset Samples before training:
+    Some of the Dataset Samples after processing:
     {constants.NEW_LINE.join(dataset[:5])}
     """,
     results_file=dotted_results_file_path,
@@ -148,7 +144,7 @@ undotted_dataset = list(
 
 log_to_file(
     text=f"""
-    Some of the Dataset Samples before training:
+    Some of the Dataset Samples after undotting:
     {constants.NEW_LINE.join(undotted_dataset[:5])}
     """,
     results_file=undotted_results_file_path,
