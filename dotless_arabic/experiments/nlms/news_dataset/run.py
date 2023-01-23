@@ -56,7 +56,7 @@ dataset = hf_news_dataset["text"]
 log_to_file(
     text=f"""
     Sample of datasets samples:
-    {constants.NEW_LINE.join(dataset['text'][:2])}
+    {constants.NEW_LINE.join(dataset[:2])}
     """,
     results_file=dotted_results_file_path,
 )
@@ -64,7 +64,7 @@ log_to_file(
 log_to_file(
     text=f"""
     Number of Samples before transformations:
-    {len(dataset['text']):,}
+    {len(dataset):,}
     """,
     results_file=dotted_results_file_path,
 )
@@ -75,7 +75,7 @@ dataset = dataset_dot_transform(dataset_newline_transform(dataset))
 log_to_file(
     text=f"""
     Number of Samples after transformations:
-    {len(dataset['text']):,}
+    {len(dataset):,}
     """,
     results_file=dotted_results_file_path,
 )
