@@ -63,14 +63,14 @@ log_to_file(
 
 baits = list(
     filter(
-        lambda bait: 50 > len(bait.replace(" ", "")) >= 10,
+        lambda bait: 60 > len(bait.replace(" ", "")) >= 5,
         baits,
     )
 )
 
 log_to_file(
     text=f"""
-    Number of baits after deleting 25>bait>5 chars:
+    Number of baits after deleting 50>len(bait)>10 chars:
     {len(baits):,}
     """,
     results_file=dotted_results_file_path,
