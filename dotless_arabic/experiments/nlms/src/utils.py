@@ -105,14 +105,14 @@ def train_lm(
     if use_rich_progressbar:
         callbacks.append(RichProgressBar())
     trainer = Trainer(
-        devices=1,
         accelerator="auto",
         deterministic=True,
         callbacks=callbacks,
-        max_epochs=max_epochs,
         logger=wandb_logger,
-        val_check_interval=0.5,
         fast_dev_run=one_run,
+        max_epochs=max_epochs,
+        val_check_interval=0.5,
+        devices=constants.GPU_DEVICES,
         log_every_n_steps=max(len(train_dataloader) // 25, 1),
         # default_root_dir=f"LMsModels/{previous_hiddens}",
     )
