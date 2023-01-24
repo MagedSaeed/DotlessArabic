@@ -13,18 +13,10 @@ if "." not in sys.path:
 import datasets
 
 from dotless_arabic.experiments.nlms.src import constants
-from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
 from dotless_arabic.experiments.nlms.src.utils import log_to_file
-from dotless_arabic.processing import (
-    dataset_dot_transform,
-    dataset_newline_transform,
-    process,
-    undot,
-)
-
-################################################
-############# Dataset Preparation ##############
-################################################
+from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
+from dotless_arabic.experiments.nlms.wikipedia_dataset.collect import collect_dataset
+from dotless_arabic.processing import process, undot
 
 
 current_dir = Path(__file__).resolve().parent
@@ -42,50 +34,7 @@ log_to_file(
     results_file=dotted_results_file_path,
 )
 
-with open("../wikipedia_dataset.txt", "r") as news_dataset_file:
-    wikipedia_dataset = news_dataset_file.read().splitlines()
-
-
-dataset = wikipedia_dataset
-
-log_to_file(
-    text=f"""
-    Sample of datasets samples:
-    {constants.NEW_LINE.join(dataset[:2])}
-    """,
-    results_file=dotted_results_file_path,
-)
-
-log_to_file(
-    text=f"""
-    Number of Samples before transformations:
-    {len(dataset):,}
-    """,
-    results_file=dotted_results_file_path,
-)
-
-dataset = dataset_dot_transform(dataset_newline_transform(dataset))
-
-
-log_to_file(
-    text=f"""
-    Number of Samples after transformations:
-    {len(dataset):,}
-    """,
-    results_file=dotted_results_file_path,
-)
-
-# consider only those samples who have 10 tokens or more
-
-dataset = list(filter(lambda document: len(document.split())>=30, tqdm(dataset)))
-
-log_to_file(
-    text=f"""
-    Number of Samples when considering sample with 30 tokens or more:
-    {len(dataset):,}
-    """,
-    results_file=dotted_results_file_path,
-)
+dataset = collect_dataset()
 
 dataset_name = "wikipedia_dataset"
 

@@ -6,32 +6,11 @@ from tqdm.auto import tqdm
 if "." not in sys.path:
     sys.path.append(".")
 
-from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
-from dotless_arabic.experiments.nlms.src.utils import log_to_file
 from dotless_arabic.processing import process, undot
-
-################################################
-############# Dataset Preparation ##############
-################################################
-
-quran_dataset_path = (
-    # f"{PROJECT_ROOT_DIR}/DatasetsAndTokenizers/Quran/Arabic-Original.csv"
-    f"dotless_arabic/experiments/nlms/quran_dataset/Arabic-Original.csv"
-)
-quran_dataset = [
-    line.split("|")[-1] for line in open(quran_dataset_path).read().splitlines()
-]
-# split on بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ as it appears on every begining of surah
-basmala = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
-no_basmala_quran_dataset = []
-for ayiah in quran_dataset:
-    if ayiah.startswith(basmala) and len(ayiah) > len(basmala):
-        ayiah = ayiah[len(basmala) :].strip()
-        if ayiah:
-            no_basmala_quran_dataset.append(ayiah)
-    else:
-        no_basmala_quran_dataset.append(ayiah.strip())
-quran_dataset = no_basmala_quran_dataset
+from dotless_arabic.experiments.nlms.src import constants
+from dotless_arabic.experiments.nlms.src.utils import log_to_file
+from dotless_arabic.experiments.nlms.quran_dataset.collect import collect_dataset
+from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
 
 current_dir = Path(__file__).resolve().parent
 
@@ -43,26 +22,25 @@ Path(dotted_results_file_path).unlink(missing_ok=True)
 
 log_to_file(
     text=f"""
-    Dotted Training Started
-    """,
+        Dotted Training Started
+        """,
     results_file=dotted_results_file_path,
 )
 
+dataset = collect_dataset()
 dataset_name = "quran_dataset"
 
 dataset = list(
     map(
         process,
-        tqdm(quran_dataset),
+        tqdm(dataset),
     ),
 )
 
-newline = "\n"
-
 log_to_file(
     text=f"""
-    Dataset Sample:
-    {newline.join(dataset[:5])}
+    Dataset Samples before training:
+    {constants.NEW_LINE.join(dataset[:5])}
     """,
     results_file=dotted_results_file_path,
 )
@@ -117,7 +95,7 @@ dataset_id = f"undotted-{dataset_name}".upper()
 log_to_file(
     text=f"""
     Undotted Dataset Sample:
-    {newline.join(undotted_dataset[:5])}
+    {constants.NEW_LINE.join(undotted_dataset[:5])}
     """,
     results_file=undotted_results_file_path,
 )
