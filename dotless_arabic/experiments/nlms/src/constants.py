@@ -18,3 +18,5 @@ DEVICE = "cpu"
 
 TEST_SIZE = 0.1
 VAL_SIZE = 0.01
+
+GPU_DEVICES = [0]
