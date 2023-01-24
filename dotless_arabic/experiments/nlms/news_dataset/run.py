@@ -43,14 +43,17 @@ log_to_file(
 )
 
 
-hf_news_dataset = datasets.concatenate_datasets(
-    [
-        datasets.load_dataset("arabic_billion_words", "Alittihad", split="train"),
-    ]
-)
+# hf_news_dataset = datasets.concatenate_datasets(
+#     [
+#         datasets.load_dataset("arabic_billion_words", "Alittihad", split="train"),
+#     ]
+# )
+
+with open("../news_dataset.txt", "r") as news_dataset_file:
+    news_dataset = news_dataset_file.read().splitlines()
 
 
-dataset = hf_news_dataset["text"]
+dataset = news_dataset
 
 
 log_to_file(
