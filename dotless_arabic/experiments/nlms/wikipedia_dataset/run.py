@@ -48,7 +48,6 @@ with open("../wikipedia_dataset.txt", "r") as news_dataset_file:
 
 dataset = wikipedia_dataset
 
-
 log_to_file(
     text=f"""
     Sample of datasets samples:
@@ -71,6 +70,18 @@ dataset = dataset_dot_transform(dataset_newline_transform(dataset))
 log_to_file(
     text=f"""
     Number of Samples after transformations:
+    {len(dataset):,}
+    """,
+    results_file=dotted_results_file_path,
+)
+
+# consider only those samples who have 10 tokens or more
+
+dataset = list(filter(lambda document: len(document.split())>=10, tqdm(dataset)))
+
+log_to_file(
+    text=f"""
+    Number of Samples when considering sample with 10 tokens or more:
     {len(dataset):,}
     """,
     results_file=dotted_results_file_path,
