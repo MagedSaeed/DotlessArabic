@@ -5,6 +5,7 @@ torch
 wandb
 pandas
 sklearn
+rarfile
 datasets
 pyarabic
 requests
