@@ -77,11 +77,11 @@ log_to_file(
 
 # consider only those samples who have 10 tokens or more
 
-dataset = list(filter(lambda document: len(document.split())>=10, tqdm(dataset)))
+dataset = list(filter(lambda document: len(document.split())>=30, tqdm(dataset)))
 
 log_to_file(
     text=f"""
-    Number of Samples when considering sample with 10 tokens or more:
+    Number of Samples when considering sample with 30 tokens or more:
     {len(dataset):,}
     """,
     results_file=dotted_results_file_path,
