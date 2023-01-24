@@ -2,7 +2,6 @@ import os
 import sys
 from pathlib import Path
 
-import datasets
 import pandas as pd
 from tqdm.auto import tqdm
 
@@ -10,22 +9,15 @@ if "." not in sys.path:
     sys.path.append(".")
 
 
-import datasets
-
+from dotless_arabic.processing import process, undot
 from dotless_arabic.experiments.nlms.src import constants
-from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
 from dotless_arabic.experiments.nlms.src.utils import log_to_file
-from dotless_arabic.processing import (
-    dataset_dot_transform,
-    dataset_newline_transform,
-    process,
-    undot,
-)
+from dotless_arabic.experiments.nlms.news_dataset.collect import collect_dataset
+from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
 
 ################################################
 ############# Dataset Preparation ##############
 ################################################
-
 
 current_dir = Path(__file__).resolve().parent
 
@@ -35,53 +27,15 @@ dotted_results_file_path = f"{current_dir}/results_dotted.txt"
 
 Path(dotted_results_file_path).unlink(missing_ok=True)
 
-log_to_file(
-    text=f"""
-    Dotted Training Started
-    """,
-    results_file=dotted_results_file_path,
-)
-
-
-# hf_news_dataset = datasets.concatenate_datasets(
-#     [
-#         datasets.load_dataset("arabic_billion_words", "Alittihad", split="train"),
-#     ]
-# )
-
-with open("../news_dataset.txt", "r") as news_dataset_file:
-    news_dataset = news_dataset_file.read().splitlines()
-
-
-dataset = news_dataset
-
 
 log_to_file(
     text=f"""
-    Sample of datasets samples:
-    {constants.NEW_LINE.join(dataset[:2])}
-    """,
+        Dotted Training Started
+        """,
     results_file=dotted_results_file_path,
 )
 
-log_to_file(
-    text=f"""
-    Number of Samples before transformations:
-    {len(dataset):,}
-    """,
-    results_file=dotted_results_file_path,
-)
-
-dataset = dataset_dot_transform(dataset_newline_transform(dataset))
-
-
-log_to_file(
-    text=f"""
-    Number of Samples after transformations:
-    {len(dataset):,}
-    """,
-    results_file=dotted_results_file_path,
-)
+dataset = collect_dataset()
 
 dataset_name = "news_dataset"
 
@@ -127,12 +81,12 @@ log_to_file(
 ###### Undotted Dataset Training ###############
 ################################################
 
+
 undotted_results_file_path = f"{current_dir}/results_undotted.txt"
 
 # delete the current logging file, if exists
 
 Path(undotted_results_file_path).unlink(missing_ok=True)
-
 
 log_to_file(
     text=f"""

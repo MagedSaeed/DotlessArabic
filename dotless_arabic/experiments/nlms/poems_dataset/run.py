@@ -8,10 +8,11 @@ if "." not in sys.path:
     sys.path.append(".")
 
 
-from dotless_arabic.experiments.nlms.src import constants
-from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
-from dotless_arabic.experiments.nlms.src.utils import log_to_file
 from dotless_arabic.processing import process, undot
+from dotless_arabic.experiments.nlms.src import constants
+from dotless_arabic.experiments.nlms.src.utils import log_to_file
+from dotless_arabic.experiments.nlms.poems_dataset.collect import collect_dataset
+from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
 
 ################################################
 ############# Dataset Preparation ##############
@@ -32,53 +33,10 @@ log_to_file(
     results_file=dotted_results_file_path,
 )
 
-ashaar = datasets.load_dataset("arbml/ashaar", split="train")
-
-baits = list()
-
-for poem in tqdm(ashaar["poem verses"]):
-    index = 1
-    for shatr in poem:
-        if index % 2 == 0:
-            baits.append(f"{prev_shatr} {shatr}")
-        else:
-            prev_shatr = shatr
-        index += 1
-
-log_to_file(
-    text=f"""
-    Sample of datasets samples:
-    {constants.NEW_LINE.join(baits[:5])}
-    """,
-    results_file=dotted_results_file_path,
-)
-
-log_to_file(
-    text=f"""
-    Number of Baits:
-    {len(baits):,}
-    """,
-    results_file=dotted_results_file_path,
-)
-
-baits = list(
-    filter(
-        lambda bait: 60 > len(bait.replace(" ", "")) >= 5,
-        baits,
-    )
-)
-
-log_to_file(
-    text=f"""
-    Number of baits after deleting 60>len(bait)>=5 chars:
-    {len(baits):,}
-    """,
-    results_file=dotted_results_file_path,
-)
+dataset = collect_dataset()
 
 dataset_name = "poems_dataset"
 
-dataset = baits
 
 dataset = list(
     map(
