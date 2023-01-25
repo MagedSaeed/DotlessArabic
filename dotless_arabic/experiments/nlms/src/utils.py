@@ -5,12 +5,12 @@ from pathlib import Path
 
 import numpy as np
 import torch
-import wandb
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichProgressBar
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
+import wandb
 from dotless_arabic.experiments.nlms.src import constants, datasets
 
 
@@ -233,7 +233,7 @@ def get_dataloader(
 #     return len([word for word, freq in words_frequencies.items() if freq >= freq_threshold])
 
 
-def get_vocab_size(dataset, vocab_coverage=0.9):
+def get_vocab_size(dataset, vocab_coverage=constants.VOCAB_COVERAGE):
     words_frequencies = defaultdict(int)
     for document in dataset:
         for word in document.split():
