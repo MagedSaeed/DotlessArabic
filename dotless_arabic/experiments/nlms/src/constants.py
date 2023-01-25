@@ -5,7 +5,7 @@ from dotless_arabic.constants import *
 
 DEFAULT_TOKENIZER_CLASS = tk.WordTokenizer
 
-NUM_LAYERS = 3  # for GRU
+NUM_LAYERS = 4  # for GRU
 
 
 MAX_EPOCHS = 100
@@ -15,9 +15,9 @@ DROPOUT_PROB = 0.333
 EMBEDDING_SIZE = 400
 LEARNING_RATE = 0.001
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-VOCAB_COVERAGE = 0.9  # for tokenizer to consider only tokens that cover this value of the running text
+VOCAB_COVERAGE = 0.95  # for tokenizer to consider only tokens that cover this value of the running text
 
 TEST_SIZE = 0.1
-VAL_SIZE = 0.01
+VAL_SIZE = 0.03
 
 GPU_DEVICES = [0]
