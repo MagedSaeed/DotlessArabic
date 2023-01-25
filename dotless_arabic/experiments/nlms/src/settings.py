@@ -1,11 +1,9 @@
 import os
 
-import wandb
 from pytorch_lightning import seed_everything
 
+import wandb
 from dotless_arabic.experiments.nlms.src import constants
-
-CONFIGURED = False
 
 
 def configure_environment():
