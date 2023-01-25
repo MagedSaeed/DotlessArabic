@@ -7,7 +7,7 @@ from tqdm.auto import tqdm
 if "." not in sys.path:
     sys.path.append(".")
 
-
+from dotless_arabic.processing import process
 from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.experiments.nlms.src.utils import log_to_file
 
@@ -55,15 +55,15 @@ def collect_dataset(log_steps=True):
 
     baits = list(
         filter(
-            lambda bait: 60 > len(bait.replace(" ", "")) >= 5,
-            baits,
+            lambda bait: 60 >= len(process(bait).replace(" ", "")) >= 30,
+            tqdm(baits),
         )
     )
 
     if log_steps:
         log_to_file(
             text=f"""
-            Number of baits after deleting 60>len(bait)>=5 chars:
+            Number of baits after deleting 60>= len(bait) chars >= 30 chars:
             {len(baits):,}
             """,
             results_file=dotted_results_file_path,
