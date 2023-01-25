@@ -1,116 +1,24 @@
 import sys
 from pathlib import Path
 
-from tqdm.auto import tqdm
+import tkseem as tk
 
 if "." not in sys.path:
     sys.path.append(".")
 
-from dotless_arabic.processing import process, undot
-from dotless_arabic.experiments.nlms.src import constants
-from dotless_arabic.experiments.nlms.src.utils import log_to_file
+
 from dotless_arabic.experiments.nlms.quran_dataset.collect import collect_dataset
-from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
+from dotless_arabic.experiments.nlms.run_experiment import run
 
 current_dir = Path(__file__).resolve().parent
 
-dotted_results_file_path = f"{current_dir}/results_dotted.txt"
-
-# delete the current logging file, if exists
-
-Path(dotted_results_file_path).unlink(missing_ok=True)
-
-log_to_file(
-    text=f"""
-        Dotted Training Started
-        """,
-    results_file=dotted_results_file_path,
-)
-
 dataset = collect_dataset()
 dataset_name = "quran_dataset"
+tokenizer_class = tk.WordTokenizer
 
-dataset = list(
-    map(
-        process,
-        tqdm(dataset),
-    ),
-)
-
-log_to_file(
-    text=f"""
-    Dataset Samples before training:
-    {constants.NEW_LINE.join(dataset[:5])}
-    """,
-    results_file=dotted_results_file_path,
-)
-
-################################################
-###### Dotted Dataset Training #################
-################################################
-
-dataset_id = f"dotted-{dataset_name}".upper()
-
-training_pipeline(
+run(
     dataset=dataset,
-    dataset_name=dataset_id.lower(),
-    dataset_id=dataset_id,
-    is_dotted=True,
-    results_file=dotted_results_file_path,
-)
-
-log_to_file(
-    text=f"""
-    Dotted Training Finished
-    """,
-    results_file=dotted_results_file_path,
-)
-
-################################################
-###### Undotted Dataset Training ###############
-################################################
-
-undotted_results_file_path = f"{current_dir}/results_undotted.txt"
-
-# delete the current logging file, if exists
-
-Path(undotted_results_file_path).unlink(missing_ok=True)
-
-log_to_file(
-    text=f"""
-    Undotted Training Started
-    """,
-    results_file=undotted_results_file_path,
-)
-
-undotted_dataset = list(
-    map(
-        undot,
-        tqdm(dataset),
-    ),
-)
-
-dataset_id = f"undotted-{dataset_name}".upper()
-
-log_to_file(
-    text=f"""
-    Undotted Dataset Sample:
-    {constants.NEW_LINE.join(undotted_dataset[:5])}
-    """,
-    results_file=undotted_results_file_path,
-)
-
-training_pipeline(
-    dataset=undotted_dataset,
-    dataset_name=dataset_id.lower(),
-    dataset_id=dataset_id,
-    is_dotted=False,
-    results_file=undotted_results_file_path,
-)
-
-log_to_file(
-    text=f"""
-    Undotted Training Finished
-    """,
-    results_file=undotted_results_file_path,
+    results_dir=current_dir,
+    dataset_name=dataset_name,
+    tokenizer_class=tokenizer_class,
 )

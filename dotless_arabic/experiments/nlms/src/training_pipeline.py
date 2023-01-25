@@ -1,7 +1,7 @@
 from pytorch_lightning.callbacks import Timer
 from pytorch_lightning.loggers import WandbLogger
-from sklearn.model_selection import train_test_split
 from pytorch_lightning.utilities.model_summary import ModelSummary
+from sklearn.model_selection import train_test_split
 
 from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.experiments.nlms.src.callbacks import LossMetricsCallback
@@ -26,6 +26,7 @@ def training_pipeline(
     dataset_id,
     results_file,
     is_dotted,
+    tokenizer_class,
     print_to_console=True,
 ):
     configure_environment()
@@ -63,8 +64,9 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
     tokenizer = get_tokenizer(
-        train_dataset=train_dataset,
         vocab_size=vocab_size,
+        train_dataset=train_dataset,
+        tokenizer_class=tokenizer_class,
     )
     log_to_file(
         text=f"""
