@@ -181,7 +181,7 @@ def calculate_perplexity(
 def get_tokenizer(
     train_dataset,
     vocab_size,
-    tokenizer_class=constants.get_tokenizer,
+    tokenizer_class=constants.DEFAULT_TOKENIZER_CLASS,
 ):
     with open("tmp_dataset.txt", "w") as f:
         f.write("\n".join(item for item in train_dataset if item.strip()))
