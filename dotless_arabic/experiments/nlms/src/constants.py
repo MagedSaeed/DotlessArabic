@@ -3,7 +3,7 @@ import torch
 
 from dotless_arabic.constants import *
 
-# TOKENIZER_CLASS = tk.WordTokenizer
+DEFAULT_TOKENIZER_CLASS = tk.WordTokenizer
 
 NUM_LAYERS = 3  # for GRU
 
