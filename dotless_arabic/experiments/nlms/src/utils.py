@@ -184,7 +184,7 @@ def get_tokenizer(
     tokenizer_class=constants.get_tokenizer,
 ):
     with open("tmp_dataset.txt", "w") as f:
-        f.write(" ".join(item for item in train_dataset if item.strip()))
+        f.write("\n".join(item for item in train_dataset if item.strip()))
 
     # with open("tmp_dataset.txt") as f:
     #     vocab_size = len(set(
