@@ -27,6 +27,7 @@ def training_pipeline(
     results_file,
     is_dotted,
     tokenizer_class,
+    vocab_coverage,
     print_to_console=True,
 ):
     configure_environment()
@@ -53,8 +54,16 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
 
-    vocab_size = get_vocab_size(dataset=train_dataset)
-    all_vocab = get_vocab_size(dataset=train_dataset, vocab_coverage=1)
+    vocab_size = get_vocab_size(
+        dataset=train_dataset,
+        vocab_coverage=vocab_coverage,
+        tokenizer_class=tokenizer_class,
+    )
+    all_vocab = get_vocab_size(
+        dataset=train_dataset,
+        tokenizer_class=tokenizer_class,
+        vocab_coverage=1,
+    )
     log_to_file(
         text=f"""
         Considered Vocab: {vocab_size:,}
@@ -124,8 +133,8 @@ def training_pipeline(
     )
 
     wandb_logger = WandbLogger(
-        id=dataset_id,
         project=f"NLMs",
+        id=dataset_id,
         name=dataset_name,
         group=dataset_name,
         job_type="dotted" if is_dotted else "undotted",
@@ -136,7 +145,9 @@ def training_pipeline(
         dataset_id=dataset_id,
         wandb_logger=wandb_logger,
         val_dataloader=val_dataloader,
+        vocab_coverage=vocab_coverage,
         max_epochs=constants.MAX_EPOCHS,
+        tokenizer_class=tokenizer_class,
         train_dataloader=train_dataloader,
         callbacks=[loss_metrics_callback, timer_callback],
     )

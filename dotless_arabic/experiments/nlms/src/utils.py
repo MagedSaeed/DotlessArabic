@@ -1,5 +1,6 @@
 import os
 import shutil
+import tkseem as tk
 from collections import defaultdict
 from pathlib import Path
 
@@ -9,6 +10,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichProgressBar
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
+from farasa.segmenter import FarasaSegmenter
 
 import wandb
 from dotless_arabic.experiments.nlms.src import constants, datasets
@@ -22,7 +24,7 @@ def generate_text(
     num_tokens=10,
     device=constants.DEVICE,
     print_generated_token=True,
-    temperature=0.5,
+    temperature=0.75,
 ):
     lm_model.to(device)
     lm_model.eval()
@@ -47,6 +49,7 @@ def generate_text(
                 in [
                     tokenizer.token_to_id(tokenizer.pad_token),
                     tokenizer.token_to_id(tokenizer.unk_token),
+                    tokenizer.token_to_id("<eos>"),
                 ]
                 and counter < 100
             ):
@@ -60,20 +63,22 @@ def generate_text(
             if print_generated_token:
                 print("predicting:", predicted_token)
             if predicted_token == "<eos>":
-                prompt = "<bos>"
+                prompt = "<bos> "
                 hiddens = None
                 generated_text += f" {predicted_token}\n"
             else:
                 prompt += f" {predicted_token}"
                 generated_text += f" {predicted_token}"
             print("prompt is:", prompt)
-    return generated_text
+    return tokenizer.detokenize(generated_text.split())
 
 
 def train_lm(
     lm_model,
     dataset_id,
     wandb_logger,
+    vocab_coverage,
+    tokenizer_class,
     train_dataloader,
     val_dataloader,
     callbacks=[],
@@ -85,14 +90,17 @@ def train_lm(
     checkpoints_path = Path(f"NLMs/{dataset_id}")
     shutil.rmtree(checkpoints_path, ignore_errors=True)
     checkpoint_callback = ModelCheckpoint(
-        monitor="val_loss",
+        mode="min",
+        save_top_k=1,
         verbose=False,
         save_last=True,
-        save_top_k=1,
+        monitor="val_loss",
         save_weights_only=False,
-        mode="min",
         auto_insert_metric_name=True,
         save_on_train_epoch_end=False,
+        dirpath=f"NLMs/{dataset_id}/checkpoints",
+        filename="{epoch}-{val_loss:.2f}-{step}"
+        + f"-{tokenizer_class.__name__}-{vocab_coverage}",
     )
     callbacks.append(checkpoint_callback)
     early_stopping_callback = EarlyStopping(
@@ -233,14 +241,26 @@ def get_dataloader(
 #     return len([word for word, freq in words_frequencies.items() if freq >= freq_threshold])
 
 
-def get_vocab_size(dataset, vocab_coverage=constants.VOCAB_COVERAGE):
-    words_frequencies = defaultdict(int)
+def get_vocab_size(
+    dataset,
+    tokenizer_class,
+    vocab_coverage=constants.DEFAULT_VOCAB_COVERAGE,
+):
+    tokens_frequencies = defaultdict(int)
+    splitter = tokenizer_class
+    if isinstance(splitter, tk.FarasaMorphologicalTokenizer):
+        segmenter = FarasaSegmenter(interactive=True)
     for document in dataset:
-        for word in document.split():
-            words_frequencies[word] += 1
+        if isinstance(splitter, tk.FarasaMorphologicalTokenizer):
+            for token in tokenizer_class.split_text(document, segmenter=segmenter):
+                tokens_frequencies[token] += 1
+        else:
+            for token in tokenizer_class.split_text(document):
+                tokens_frequencies[token] += 1
+
     sorted_words_frequencies = dict(
         sorted(
-            words_frequencies.items(),
+            tokens_frequencies.items(),
             key=lambda item: item[1],
             reverse=True,
         )
@@ -248,7 +268,7 @@ def get_vocab_size(dataset, vocab_coverage=constants.VOCAB_COVERAGE):
     current_words_count = 0
     vocab = 0
     all_words_counts = sum(sorted_words_frequencies.values())
-    for word, counts in sorted_words_frequencies.items():
+    for token, counts in sorted_words_frequencies.items():
         current_words_count += counts
         current_coverage = current_words_count / all_words_counts
         vocab += 1
