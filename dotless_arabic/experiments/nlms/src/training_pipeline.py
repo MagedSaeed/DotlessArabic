@@ -135,9 +135,9 @@ def training_pipeline(
     wandb_logger = WandbLogger(
         project=f"NLMs",
         id=dataset_id,
-        name=dataset_name,
         group=dataset_name,
         job_type="dotted" if is_dotted else "undotted",
+        name=dataset_name + f"_{tokenizer_class.__name__}",
     )
     trainer = train_lm(
         # one_run=True,
