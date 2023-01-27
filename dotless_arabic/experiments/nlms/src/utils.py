@@ -244,14 +244,15 @@ def get_dataloader(
 def get_vocab_size(
     dataset,
     tokenizer_class,
+    use_tqdm=True,
     vocab_coverage=constants.DEFAULT_VOCAB_COVERAGE,
 ):
     tokens_frequencies = defaultdict(int)
-    splitter = tokenizer_class
-    if isinstance(splitter, tk.FarasaMorphologicalTokenizer):
+    if tokenizer_class == tk.FarasaMorphologicalTokenizer:
         segmenter = FarasaSegmenter(interactive=True)
+    dataset = tqdm(dataset) if use_tqdm else dataset
     for document in dataset:
-        if isinstance(splitter, tk.FarasaMorphologicalTokenizer):
+        if tokenizer_class == tk.FarasaMorphologicalTokenizer:
             for token in tokenizer_class.split_text(document, segmenter=segmenter):
                 tokens_frequencies[token] += 1
         else:
