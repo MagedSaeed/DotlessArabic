@@ -1,4 +1,5 @@
 import sys
+import tkseem as tk
 from datetime import datetime
 from pathlib import Path
 
@@ -18,12 +19,12 @@ def run(
     dataset,
     dataset_name,
     results_dir,
+    vocab_coverage,
     tokenizer_class,
 ):
+    tokenizer_class = getattr(tk, tokenizer_class)
 
-    dotted_results_file_path = (
-        f"{results_dir}/results_dotted_{tokenizer_class.__name__}.txt"
-    )
+    dotted_results_file_path = f"{results_dir}/results_dotted_tokenizer_{tokenizer_class.__name__}_vocab_coverage_{vocab_coverage}.txt"
 
     # delete the current logging file, if exists
 
@@ -61,6 +62,7 @@ def run(
         is_dotted=True,
         dataset=dataset,
         dataset_id=dataset_id,
+        vocab_coverage=vocab_coverage,
         dataset_name=dataset_id.lower(),
         tokenizer_class=tokenizer_class,
         results_file=dotted_results_file_path,
@@ -77,9 +79,7 @@ def run(
     ###### Undotted Dataset Training ###############
     ################################################
 
-    undotted_results_file_path = (
-        f"{results_dir}/results_undotted_{tokenizer_class.__name__}.txt"
-    )
+    undotted_results_file_path = f"{results_dir}/results_undotted_tokenizer_{tokenizer_class.__name__}_vocab_coverage_{vocab_coverage}.txt"
 
     # delete the current logging file, if exists
 
@@ -113,6 +113,7 @@ def run(
         is_dotted=False,
         dataset_id=dataset_id,
         dataset=undotted_dataset,
+        vocab_coverage=vocab_coverage,
         dataset_name=dataset_id.lower(),
         tokenizer_class=tokenizer_class,
         results_file=undotted_results_file_path,

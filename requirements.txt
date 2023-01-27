@@ -3,6 +3,7 @@ tqdm
 rich
 torch
 wandb
+click
 pandas
 sklearn
 rarfile
