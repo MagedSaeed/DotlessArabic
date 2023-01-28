@@ -21,6 +21,7 @@ def run(
     results_dir,
     vocab_coverage,
     tokenizer_class,
+    sequence_length=None,
 ):
     tokenizer_class = getattr(tk, tokenizer_class)
 
@@ -65,6 +66,7 @@ def run(
         vocab_coverage=vocab_coverage,
         dataset_name=dataset_id.lower(),
         tokenizer_class=tokenizer_class,
+        sequence_length=sequence_length,
         results_file=dotted_results_file_path,
     )
 
@@ -116,6 +118,7 @@ def run(
         vocab_coverage=vocab_coverage,
         dataset_name=dataset_id.lower(),
         tokenizer_class=tokenizer_class,
+        sequence_length=sequence_length,
         results_file=undotted_results_file_path,
     )
 
