@@ -28,6 +28,7 @@ def training_pipeline(
     is_dotted,
     tokenizer_class,
     vocab_coverage,
+    sequence_length=None,
     print_to_console=True,
 ):
     configure_environment()
@@ -84,7 +85,8 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
-    sequence_length = get_average_sequence_length(dataset=train_dataset)
+    if sequence_length is None:
+        sequence_length = get_average_sequence_length(dataset=train_dataset)
     log_to_file(
         text=f"""
         Sequence Length: {sequence_length:,}

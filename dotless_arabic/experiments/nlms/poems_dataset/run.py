@@ -29,6 +29,7 @@ dataset_name = "poems_dataset"
 def run_experiment(tokenizer_class, vocab_coverage):
     run(
         dataset=dataset,
+        sequence_length=18,
         results_dir=current_dir,
         dataset_name=dataset_name,
         vocab_coverage=vocab_coverage,
