@@ -149,8 +149,8 @@ class LitNeuralLanguageModel(LightningModule):
         )
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer=optimizer,
-            factor=0.05,
-            patience=5,
+            factor=0.1,
+            patience=3,
         )
         return {
             "optimizer": optimizer,
