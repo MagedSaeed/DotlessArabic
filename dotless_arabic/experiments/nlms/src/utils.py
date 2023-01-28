@@ -284,7 +284,7 @@ def get_best_checkpoint(dataset_id, checkpoints_base_path="NLMs"):
             return f"{checkpoints_base_path}/{dataset_id}/checkpoints/{file_name}"
 
 
-def get_average_sequence_length(dataset, extra_tokens=2):
+def get_average_sequence_length(dataset, extra_tokens=2, add_upto_median=True):
     """
     extra token arg is used to control special tokens.
     In our case, there are two: <bos> and <eos>
@@ -292,6 +292,9 @@ def get_average_sequence_length(dataset, extra_tokens=2):
     lengths = 0
     for document in dataset:
         lengths += len(document.split())
+    median_length = sorted(lengths)[len(lengths // 2)]
+    if add_upto_median:
+        return int(lengths / len(dataset)) + median_length + extra_tokens
     return int(lengths / len(dataset)) + extra_tokens
 
 
