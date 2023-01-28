@@ -25,45 +25,85 @@ def collect_dataset(log_steps=True):
 
     ashaar = datasets.load_dataset("arbml/ashaar", split="train")
 
-    baits = list()
+    non_accepted_meters = [
+        "التفعيله",
+        "الحداء",
+        "الدوبيت",
+        "السلسلة",
+        "الصخري",
+        "الكان كان",
+        "اللويحاني",
+        "المسحوب",
+        "المواليا",
+        "الموشح",
+        "الهجيني",
+        "بحر التفعيله",
+        "بحر الدوبيت",
+        "بحر السلسلة",
+        "بحر القوما",
+        "بحر المواليا",
+        "بحر تفعيلة الرجز",
+        "بحر تفعيلة الرمل",
+        "بحر تفعيلة الكامل",
+        "بحر تفعيلة المتقارب",
+        "بحر مجزوء الدوبيت",
+        "بحر مجزوء المواليا",
+        "بحر مخلع موشح",
+        "زجل",
+        "شعر التفعيلة",
+        "شعر حر",
+        "عدة أبحر",
+    ]
+    ashaar = ashaar.filter(
+        lambda example: example["poem meter"] not in non_accepted_meters
+    )
+
+    poems = list()
 
     for poem in tqdm(ashaar["poem verses"]):
-        index = 1
+        clean_poem = list()
         for shatr in poem:
-            if index % 2 == 0:
-                baits.append(f"{prev_shatr} {shatr}")
-            else:
-                prev_shatr = shatr
-            index += 1
+            processed_shatr = process(shatr)
+            if (
+                len(processed_shatr.replace(" ", "")) < 10
+                or len(processed_shatr.replace(" ", "")) > 30
+            ):
+                continue
+            if len(processed_shatr) > 0:
+                clean_poem.append(processed_shatr)
+        if clean_poem:
+            poems.append(clean_poem)
 
     if log_steps:
         log_to_file(
             text=f"""
             Sample of datasets samples:
-            {constants.NEW_LINE.join(baits[:5])}
+            {constants.NEW_LINE.join(poems[0][:5])}
             """,
             results_file=dotted_results_file_path,
         )
 
-        log_to_file(
-            text=f"""
-            Number of Baits:
-            {len(baits):,}
-            """,
-            results_file=dotted_results_file_path,
-        )
-
-    baits = list(
-        filter(
-            lambda bait: 60 >= len(process(bait).replace(" ", "")) >= 30,
-            tqdm(baits),
-        )
+    log_to_file(
+        text=f"""
+        Number of Poems:
+        {len(poems):,}
+        """,
+        results_file=dotted_results_file_path,
     )
+
+    baits = list()
+    for poem in tqdm(poems):
+        bait = ""
+        for i, shatr in enumerate(poem, start=1):
+            bait += f"{shatr} "
+            if i % 2 == 0:
+                baits.append(bait.strip())
+                bait = ""
 
     if log_steps:
         log_to_file(
             text=f"""
-            Number of baits after deleting 60>= len(bait) chars >= 30 chars:
+            Number of baits after deleting 30>= len(shatr) chars >= 10 chars:
             {len(baits):,}
             """,
             results_file=dotted_results_file_path,
