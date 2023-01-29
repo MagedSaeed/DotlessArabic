@@ -1,3 +1,4 @@
+import math
 import os
 import shutil
 import tkseem as tk
@@ -24,7 +25,7 @@ def generate_text(
     num_tokens=10,
     device=constants.DEVICE,
     print_generated_token=True,
-    temperature=0.75,
+    temperature=0.5,
 ):
     lm_model.to(device)
     lm_model.eval()
@@ -287,15 +288,24 @@ def get_best_checkpoint(dataset_id, checkpoints_base_path="NLMs"):
             return f"{checkpoints_base_path}/{dataset_id}/checkpoints/{file_name}"
 
 
-def get_average_sequence_length(dataset, extra_tokens=2):
+def get_sequence_length(
+    dataset,
+    extra_tokens=2,
+    percentile=constants.SEQUENCE_LENGTH_PERCENTILE,
+):
     """
+    The dataset is expected to be tokenized
     extra token arg is used to control special tokens.
     In our case, there are two: <bos> and <eos>
     """
-    lengths = 0
+    lengths = []
     for document in dataset:
-        lengths += len(document.split())
-    return int(lengths / len(dataset)) + extra_tokens
+        lengths.append(len(document))
+    lengths = sorted(lengths)
+    lengths_count = len(lengths)
+    percentile_index = math.floor(lengths_count * percentile)
+    length = lengths[percentile_index] + extra_tokens
+    return length
 
 
 def get_oovs_rate(
