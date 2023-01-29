@@ -206,9 +206,9 @@ def training_pipeline(
 
     log_to_file(
         text=f"""
-        Training OOVs rate: {training_oov_rate:,}
-        Validation OOVs rate: {val_oov_rate:,}
-        Test OOVs rate: {test_oov_rate:,}
+        Training OOVs rate: {training_oov_rate}
+        Validation OOVs rate: {val_oov_rate}
+        Test OOVs rate: {test_oov_rate}
         """,
         results_file=results_file,
         print_to_console=print_to_console,
