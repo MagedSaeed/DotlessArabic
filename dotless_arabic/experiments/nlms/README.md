@@ -9,7 +9,7 @@ Note that this will run the dotted and undotted experiments for the selected dat
 ### Sample run with different GPUs Devices:
 
 ```
-on one tmux session:
+# on one tmux session:
 python dotless_arabic/experiments/nlms/run_experiment.py --dataset=quran --tokenizer_class=WordTokenizer --gpu_devices=0;
 python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --tokenizer_class=WordTokenizer --gpu_devices=0;
 python dotless_arabic/experiments/nlms/run_experiment.py --dataset=news --tokenizer_class=WordTokenizer --gpu_devices=0;
