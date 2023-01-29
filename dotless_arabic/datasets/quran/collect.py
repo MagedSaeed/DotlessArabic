@@ -11,7 +11,7 @@ def collect_dataset(results_file=None):
 
     quran_dataset_path = (
         # f"{PROJECT_ROOT_DIR}/DatasetsAndTokenizers/Quran/Arabic-Original.csv"
-        f"dotless_arabic/datasets/quran_dataset/Arabic-Original.csv"
+        f"dotless_arabic/datasets/quran/Arabic-Original.csv"
     )
     quran_dataset = [
         line.split("|")[-1] for line in open(quran_dataset_path).read().splitlines()
