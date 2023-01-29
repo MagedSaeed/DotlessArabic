@@ -1,5 +1,4 @@
 import sys
-from pathlib import Path
 
 
 if "." not in sys.path:
@@ -8,16 +7,7 @@ if "." not in sys.path:
 from dotless_arabic.experiments.nlms.src.utils import log_to_file
 
 
-def collect_dataset(log_steps=True):
-
-    if log_steps:
-        current_dir = Path(__file__).resolve().parent
-
-        dotted_results_file_path = f"{current_dir}/results_dotted.txt"
-
-        # delete the current logging file, if exists
-
-        Path(dotted_results_file_path).unlink(missing_ok=True)
+def collect_dataset(results_file=None):
 
     quran_dataset_path = (
         # f"{PROJECT_ROOT_DIR}/DatasetsAndTokenizers/Quran/Arabic-Original.csv"
@@ -38,13 +28,13 @@ def collect_dataset(log_steps=True):
             no_basmala_quran_dataset.append(ayiah.strip())
     quran_dataset = no_basmala_quran_dataset
 
-    if log_steps:
+    if results_file is not None:
         log_to_file(
             text=f"""
             Number of samples:
             {len(quran_dataset)}
             """,
-            results_file=dotted_results_file_path,
+            results_file=results_file,
         )
 
     return quran_dataset

@@ -1,9 +1,9 @@
 import os
 import sys
-from pathlib import Path
-
 import pandas as pd
+from pathlib import Path
 from tqdm.auto import tqdm
+
 
 if "." not in sys.path:
     sys.path.append(".")
@@ -15,16 +15,9 @@ from dotless_arabic.processing import dataset_dot_transform
 from dotless_arabic.experiments.nlms.src.utils import log_to_file
 
 
-def collect_dataset(log_steps=True):
+def collect_dataset(results_file=None):
 
-    if log_steps:
-        current_dir = Path(__file__).resolve().parent
-
-        dotted_results_file_path = f"{current_dir}/results_dotted.txt"
-
-        # delete the current logging file, if exists
-
-        Path(dotted_results_file_path).unlink(missing_ok=True)
+    current_dir = Path(__file__).resolve().parent
 
     if "sanadset.csv" not in os.listdir(current_dir):
         download_file(
@@ -38,13 +31,13 @@ def collect_dataset(log_steps=True):
     )
     sanadset_hadeeth_dataset = sorted(list(set(sanadset_hadeeth_dataset)))
 
-    if log_steps:
+    if results_file is not None:
         log_to_file(
             text=f"""
             Sample of datasets documents:
             {constants.NEW_LINE.join(sanadset_hadeeth_dataset[:5])}
             """,
-            results_file=dotted_results_file_path,
+            results_file=results_file,
         )
 
         log_to_file(
@@ -52,29 +45,29 @@ def collect_dataset(log_steps=True):
             Original Number of Samples:
             {len(sanadset_hadeeth_dataset):,}
             """,
-            results_file=dotted_results_file_path,
+            results_file=results_file,
         )
 
     dataset = list(set(sanadset_hadeeth_dataset))
 
-    if log_steps:
+    if results_file is not None:
         log_to_file(
             text=f"""
             Number of Samples after dropping duplicates:
             {len(dataset):,}
             """,
-            results_file=dotted_results_file_path,
+            results_file=results_file,
         )
 
     dataset = dataset_dot_transform(tqdm(sanadset_hadeeth_dataset))
 
-    if log_steps:
+    if results_file is not None:
         log_to_file(
             text=f"""
             Number of Samples after splitting on dots:
             {len(dataset):,}
             """,
-            results_file=dotted_results_file_path,
+            results_file=results_file,
         )
 
     return dataset

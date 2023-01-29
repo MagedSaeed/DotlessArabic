@@ -109,8 +109,6 @@ def run(
 
     gpu_devices = list(map(int, gpu_devices.split(",")))
 
-    dataset = COLLECT_DATASET[dataset]()
-
     current_dir = Path(__file__).resolve().parent
 
     results_dir = f"{current_dir}/results/{dataset_name}"
@@ -121,6 +119,8 @@ def run(
     tokenizer_class = getattr(tk, tokenizer_class)
 
     dotted_results_file_path = f"{results_dir}/results_dotted_tokenizer_{tokenizer_class.__name__}_vocab_coverage_{vocab_coverage}.txt"
+
+    dataset = COLLECT_DATASET[dataset](results_file=dotted_results_file_path)
 
     # delete the current logging file, if exists
 

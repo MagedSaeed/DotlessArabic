@@ -1,8 +1,7 @@
 import sys
-from pathlib import Path
-
 import datasets
 from tqdm.auto import tqdm
+
 
 if "." not in sys.path:
     sys.path.append(".")
@@ -12,16 +11,7 @@ from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.experiments.nlms.src.utils import log_to_file
 
 
-def collect_dataset(log_steps=True):
-
-    if log_steps:
-        current_dir = Path(__file__).resolve().parent
-
-        dotted_results_file_path = f"{current_dir}/results_dotted.txt"
-
-        # delete the current logging file, if exists
-
-        Path(dotted_results_file_path).unlink(missing_ok=True)
+def collect_dataset(results_file=None):
 
     ashaar = datasets.load_dataset("arbml/ashaar", split="train")
 
@@ -57,26 +47,26 @@ def collect_dataset(log_steps=True):
         # None,
     ]
 
-    if log_steps:
+    if results_file is not None:
         log_to_file(
             text=f"""
             Number datasets samples:
             {len(ashaar)}
             """,
-            results_file=dotted_results_file_path,
+            results_file=results_file,
         )
 
     ashaar = ashaar.filter(
         lambda example: example["poem meter"] not in non_accepted_meters
     )
 
-    if log_steps:
+    if results_file is not None:
         log_to_file(
             text=f"""
             Number datasets samples after filtering non accepted meters:
             {len(ashaar)}
             """,
-            results_file=dotted_results_file_path,
+            results_file=results_file,
         )
 
     baits = list()
@@ -90,13 +80,13 @@ def collect_dataset(log_steps=True):
                 prev_shatr = shatr
             index += 1
 
-    if log_steps:
+    if results_file is not None:
         log_to_file(
             text=f"""
             Sample of datasets samples:
             {constants.NEW_LINE.join(baits[:5])}
             """,
-            results_file=dotted_results_file_path,
+            results_file=results_file,
         )
 
         log_to_file(
@@ -104,7 +94,7 @@ def collect_dataset(log_steps=True):
             Number of Baits:
             {len(baits):,}
             """,
-            results_file=dotted_results_file_path,
+            results_file=results_file,
         )
 
     baits = list(
@@ -114,13 +104,13 @@ def collect_dataset(log_steps=True):
         )
     )
 
-    if log_steps:
+    if results_file is not None:
         log_to_file(
             text=f"""
             Number of baits after deleting 60>= len(bait) chars >= 30 chars:
             {len(baits):,}
             """,
-            results_file=dotted_results_file_path,
+            results_file=results_file,
         )
 
     return baits
