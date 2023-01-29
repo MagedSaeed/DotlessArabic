@@ -81,10 +81,12 @@ def train_lm(
     tokenizer_class,
     train_dataloader,
     val_dataloader,
+    gpu_devices,
+    cpu_devices,
     callbacks=[],
+    one_run=False,
     use_rich_progressbar=True,
     max_epochs=constants.MAX_EPOCHS,
-    one_run=False,
 ):
     # remove any previous checkpoints
     checkpoints_path = Path(f"NLMs/{dataset_id}")
@@ -112,15 +114,16 @@ def train_lm(
     callbacks.append(early_stopping_callback)
     if use_rich_progressbar:
         callbacks.append(RichProgressBar())
+    devices = gpu_devices if constants.DEVICE == "cuda" else cpu_devices
     trainer = Trainer(
-        accelerator="auto",
+        devices=devices,
         deterministic=True,
         callbacks=callbacks,
         logger=wandb_logger,
         fast_dev_run=one_run,
         max_epochs=max_epochs,
         val_check_interval=0.5,
-        devices=constants.GPU_DEVICES,
+        accelerator=constants.LIGHTING_ACCELERATOR,
         log_every_n_steps=max(len(train_dataloader) // 25, 1),
         # default_root_dir=f"LMsModels/{previous_hiddens}",
     )

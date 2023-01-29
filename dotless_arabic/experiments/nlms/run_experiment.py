@@ -84,16 +84,30 @@ COLLECT_DATASET = {
     type=int,
     default=None,
 )
+@click.option(
+    "--gpu_devices",
+    help="GPU devices indexes to consider if the machine has GPUs. Expected input to be index,index...",
+    type=str,
+    default=str(constants.GPU_DEVICES),
+)
+@click.option(
+    "--cpu_devices",
+    help="CPU devices (processes) to consider if the code will run on CPU",
+    type=int,
+    default=constants.CPU_DEVICES,
+)
 def run(
     dataset,
-    dataset_name,
-    results_dir,
     vocab_coverage,
     tokenizer_class,
+    gpu_devices,
+    cpu_devices,
     sequence_length=None,
 ):
 
     dataset_name = dataset + "_dataset"
+
+    gpu_devices = list(map(int, gpu_devices.split(",")))
 
     dataset = COLLECT_DATASET[dataset]()
 
@@ -144,6 +158,8 @@ def run(
         is_dotted=True,
         dataset=dataset,
         dataset_id=dataset_id,
+        gpu_devices=gpu_devices,
+        cpu_devices=cpu_devices,
         vocab_coverage=vocab_coverage,
         dataset_name=dataset_id.lower(),
         tokenizer_class=tokenizer_class,
@@ -195,6 +211,8 @@ def run(
     training_pipeline(
         is_dotted=False,
         dataset_id=dataset_id,
+        gpu_devices=gpu_devices,
+        cpu_devices=cpu_devices,
         dataset=undotted_dataset,
         vocab_coverage=vocab_coverage,
         dataset_name=dataset_id.lower(),
