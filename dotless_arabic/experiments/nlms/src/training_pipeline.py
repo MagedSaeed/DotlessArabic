@@ -28,6 +28,8 @@ def training_pipeline(
     is_dotted,
     tokenizer_class,
     vocab_coverage,
+    gpu_devices,
+    cpu_devices,
     sequence_length=None,
     print_to_console=True,
 ):
@@ -145,6 +147,8 @@ def training_pipeline(
         # one_run=True,
         lm_model=lm_model,
         dataset_id=dataset_id,
+        cpu_devices=cpu_devices,
+        gpu_devices=gpu_devices,
         wandb_logger=wandb_logger,
         val_dataloader=val_dataloader,
         vocab_coverage=vocab_coverage,

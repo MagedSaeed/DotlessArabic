@@ -16,8 +16,11 @@ EMBEDDING_SIZE = 400
 LEARNING_RATE = 0.001
 DEFAULT_VOCAB_COVERAGE = 0.95  # for tokenizer to consider only tokens that cover this value of the running text
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+LIGHTING_ACCELERATOR = "auto"  # used by pytorch_lightning
 
 TEST_SIZE = 0.1
 VAL_SIZE = 0.05
 
-GPU_DEVICES = [0]
+GPU_DEVICES = "0"  # consider only one CPU core if there is no GPU
+
+CPU_DEVICES = 1  # I tried with higher values but this did not work
