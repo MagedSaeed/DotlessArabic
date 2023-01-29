@@ -20,6 +20,14 @@ dataset_name = "aggregated_dataset"
     "--tokenizer_class",
     default=constants.DEFAULT_TOKENIZER_CLASS,
     help="Tokenizer class to tokenize the dataset",
+    type=click.Choice(
+        [
+            "CharacterTokenizer",
+            "DisjointLetterTokenizer",
+            "FarasaMorphologicalTokenizer",
+            "WordTokenizer",
+        ]
+    ),
 )
 @click.option(
     "--vocab_coverage",
