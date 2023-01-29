@@ -10,7 +10,7 @@ from dotless_arabic.experiments.nlms.src.settings import configure_environment
 from dotless_arabic.experiments.nlms.src.utils import (
     calculate_perplexity,
     generate_text,
-    get_average_sequence_length,
+    get_sequence_length,
     get_best_checkpoint,
     get_dataloader,
     get_tokenizer,
@@ -88,7 +88,14 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
     if sequence_length is None:
-        sequence_length = get_average_sequence_length(dataset=train_dataset)
+        sequence_length = get_sequence_length(
+            dataset=list(
+                map(
+                    tokenizer.split_text,
+                    train_dataset,
+                )
+            )
+        )
     log_to_file(
         text=f"""
         Sequence Length: {sequence_length:,}
