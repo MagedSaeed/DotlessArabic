@@ -1,6 +1,6 @@
 import torch
-from torch.utils.data import Dataset
 from tqdm.auto import tqdm
+from torch.utils.data import Dataset
 
 
 class LanguageModelDataset(Dataset):

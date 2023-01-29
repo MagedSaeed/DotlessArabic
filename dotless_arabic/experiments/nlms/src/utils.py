@@ -324,7 +324,7 @@ def get_oovs_rate(
             elif token_id in [pad_token_id] + special_tokens_ids:
                 continue
             tokens_sum += 1
-    return float(f"{(oovs / tokens_sum) * 100:.2f}")
+    return f"{(oovs / tokens_sum) * 100:.2f}"
 
 
 def log_to_file(text, results_file, print_to_console=True):
