@@ -17,6 +17,7 @@ from dotless_arabic.experiments.nlms.src.utils import (
     get_vocab_size,
     log_to_file,
     train_lm,
+    get_oovs_rate,
 )
 
 
@@ -194,6 +195,20 @@ def training_pipeline(
         Training Perplexity: {training_perplexity}
         Perplexity with OOVs: {perplexity_with_oovs}
         Perplexity without OOVs: {perplexity_without_oovs:,}
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
+    training_oov_rate = get_oovs_rate(dataloader=train_dataloader)
+    val_oov_rate = get_oovs_rate(dataloader=train_dataloader)
+    test_oov_rate = get_oovs_rate(dataloader=train_dataloader)
+
+    log_to_file(
+        text=f"""
+        Training OOVs rate: {training_oov_rate:,}
+        Validation OOVs rate: {val_oov_rate:,}
+        Test OOVs rate: {test_oov_rate:,}
         """,
         results_file=results_file,
         print_to_console=print_to_console,
