@@ -65,7 +65,7 @@ def generate_text(
             if predicted_token == "<eos>":
                 prompt = "<bos> "
                 hiddens = None
-                generated_text += f" {predicted_token}\n"
+                generated_text += f" {predicted_token}\n<bos> "
             else:
                 prompt += f" {predicted_token}"
                 generated_text += f" {predicted_token}"
@@ -316,15 +316,15 @@ def get_oovs_rate(
 
 def log_to_file(text, results_file, print_to_console=True):
     with open(results_file, "a") as file:
-        file.write("#" * 80)
+        file.write("#" * 100)
         file.write("\n")
         for line in text.strip().splitlines():
             file.write(line.strip())
             file.write("\n")
-        file.write("#" * 80)
+        file.write("#" * 100)
         file.write("\n")
     if print_to_console:
-        print("#" * 80)
+        print("#" * 100)
         for line in text.strip().splitlines():
             print(line.strip())
-        print("#" * 80)
+        print("#" * 100)
