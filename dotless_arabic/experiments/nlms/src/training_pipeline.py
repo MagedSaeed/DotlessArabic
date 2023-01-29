@@ -1,7 +1,7 @@
 from pytorch_lightning.callbacks import Timer
 from pytorch_lightning.loggers import WandbLogger
-from pytorch_lightning.utilities.model_summary import ModelSummary
 from sklearn.model_selection import train_test_split
+from pytorch_lightning.utilities.model_summary import ModelSummary
 
 from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.experiments.nlms.src.callbacks import LossMetricsCallback
