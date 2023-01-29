@@ -1,9 +1,10 @@
 import sys
+import click
 import tkseem as tk
-from datetime import datetime
 from pathlib import Path
-
 from tqdm.auto import tqdm
+from datetime import datetime
+
 
 if "." not in sys.path:
     sys.path.append(".")
@@ -13,8 +14,76 @@ from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
 from dotless_arabic.experiments.nlms.src.utils import log_to_file
 from dotless_arabic.processing import process, undot
+from dotless_arabic.datasets.quran.collect import (
+    collect_dataset as collect_quran_dataset,
+)
+from dotless_arabic.datasets.sanadset_hadeeth.collect import (
+    collect_dataset as collect_sanadset_hadeeth_dataset,
+)
+from dotless_arabic.datasets.poems.collect import (
+    collect_dataset as collect_poems_dataset,
+)
+from dotless_arabic.datasets.news.collect import (
+    collect_dataset as collect_news_dataset,
+)
+from dotless_arabic.datasets.wikipedia.collect import (
+    collect_dataset as collect_wikipedia_dataset,
+)
+from dotless_arabic.datasets.aggregated.collect import (
+    collect_dataset as collect_aggregated_dataset,
+)
 
 
+COLLECT_DATASET = {
+    "quran": collect_quran_dataset,
+    "sanadset_hadeeth": collect_sanadset_hadeeth_dataset,
+    "poems": collect_poems_dataset,
+    "news": collect_news_dataset,
+    "wikipedia": collect_wikipedia_dataset,
+    "aggregated": collect_aggregated_dataset,
+}
+
+
+@click.command()
+@click.option(
+    "--tokenizer_class",
+    default=constants.DEFAULT_TOKENIZER_CLASS,
+    help="Tokenizer class to tokenize the dataset",
+    type=click.Choice(
+        [
+            "CharacterTokenizer",
+            "DisjointLetterTokenizer",
+            "FarasaMorphologicalTokenizer",
+            "WordTokenizer",
+        ]
+    ),
+)
+@click.option(
+    "--vocab_coverage",
+    default=constants.DEFAULT_VOCAB_COVERAGE,
+    help="Vocab coverage to consider, the tokenizer will consider vocabs that covers this percentage of the running text",
+)
+@click.option(
+    "--dataset",
+    help="dataset name to train. Note that results files will be saved in '{current_dir_of_this_file}'/{dataset}_dataset/",
+    required=True,
+    type=click.Choice(
+        [
+            "quran",
+            "sanadset_hadeeth",
+            "poems",
+            "news",
+            "wikipedia",
+            "aggregated",
+        ]
+    ),
+)
+@click.option(
+    "--sequence_length",
+    help="sequence length to consider when tokenizing dataset samples",
+    type=int,
+    default=None,
+)
 def run(
     dataset,
     dataset_name,
@@ -23,6 +92,18 @@ def run(
     tokenizer_class,
     sequence_length=None,
 ):
+
+    dataset_name = dataset + "_dataset"
+
+    dataset = COLLECT_DATASET[dataset]()
+
+    current_dir = Path(__file__).resolve().parent
+
+    results_dir = f"{current_dir}/results/{dataset_name}"
+
+    # create results dir if not exists
+    Path(results_dir).mkdir(parents=True, exist_ok=True)
+
     tokenizer_class = getattr(tk, tokenizer_class)
 
     dotted_results_file_path = f"{results_dir}/results_dotted_tokenizer_{tokenizer_class.__name__}_vocab_coverage_{vocab_coverage}.txt"
@@ -128,3 +209,7 @@ def run(
         """,
         results_file=undotted_results_file_path,
     )
+
+
+if __name__ == "__main__":
+    run()
