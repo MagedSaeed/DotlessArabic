@@ -1,9 +1,7 @@
 import torch
 
-from dotless_arabic.constants import *
+from dotless_arabic.experiments.constants import *
 
-
-DEFAULT_TOKENIZER_CLASS = "WordTokenizer"
 
 NUM_LAYERS = 4  # for GRU
 
