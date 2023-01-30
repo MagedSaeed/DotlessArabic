@@ -24,14 +24,15 @@ from dotless_arabic.experiments.nlms.src.utils import (
 
 def training_pipeline(
     dataset,
-    dataset_name,
-    dataset_id,
-    results_file,
     is_dotted,
-    tokenizer_class,
-    vocab_coverage,
+    dataset_id,
+    batch_size,
     gpu_devices,
     cpu_devices,
+    dataset_name,
+    results_file,
+    vocab_coverage,
+    tokenizer_class,
     sequence_length=None,
     print_to_console=True,
 ):
@@ -124,20 +125,23 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
     train_dataloader = get_dataloader(
-        dataset=train_dataset,
-        tokenizer=tokenizer,
         shuffle=True,
+        tokenizer=tokenizer,
+        dataset=train_dataset,
+        batch_size=batch_size,
         sequence_length=sequence_length,
     )
     val_dataloader = get_dataloader(
         dataset=val_dataset,
         tokenizer=tokenizer,
+        batch_size=batch_size,
         sequence_length=sequence_length,
-        drop_last=constants.BATCH_SIZE < len(val_dataset),
+        drop_last=constants.DEFAULT_BATCH_SIZE < len(val_dataset),
     )
     test_dataloader = get_dataloader(
-        dataset=test_dataset,
         tokenizer=tokenizer,
+        dataset=test_dataset,
+        batch_size=batch_size,
         sequence_length=sequence_length,
     )
     log_to_file(
@@ -191,6 +195,7 @@ def training_pipeline(
         lm_model=lm_model,
         tokenizer=tokenizer,
         dataset=train_dataset,
+        batch_size=batch_size,
         sequence_length=sequence_length,
     )
 

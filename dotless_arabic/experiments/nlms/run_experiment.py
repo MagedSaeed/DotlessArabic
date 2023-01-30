@@ -96,12 +96,19 @@ COLLECT_DATASET = {
     type=int,
     default=constants.CPU_DEVICES,
 )
+@click.option(
+    "--batch_size",
+    help="Batch size to consider in various data setups",
+    type=int,
+    default=constants.DEFAULT_BATCH_SIZE,
+)
 def run(
     dataset,
     vocab_coverage,
     tokenizer_class,
     gpu_devices,
     cpu_devices,
+    batch_size,
     sequence_length=None,
 ):
 
@@ -157,6 +164,7 @@ def run(
     training_pipeline(
         is_dotted=True,
         dataset=dataset,
+        batch_size=batch_size,
         dataset_id=dataset_id,
         gpu_devices=gpu_devices,
         cpu_devices=cpu_devices,
@@ -211,6 +219,7 @@ def run(
     training_pipeline(
         is_dotted=False,
         dataset_id=dataset_id,
+        batch_size=batch_size,
         gpu_devices=gpu_devices,
         cpu_devices=cpu_devices,
         dataset=undotted_dataset,

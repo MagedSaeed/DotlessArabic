@@ -149,7 +149,7 @@ def calculate_perplexity(
     sequence_length,
     use_tqdm=True,
     device=constants.DEVICE,
-    batch_size=constants.BATCH_SIZE,
+    batch_size=constants.DEFAULT_BATCH_SIZE,
     ignore_oovs=False,
 ):
     # https://towardsdatascience.com/the-relationship-between-perplexity-and-entropy-in-nlp-f81888775ccc
@@ -219,7 +219,7 @@ def get_dataloader(
     shuffle=False,
     drop_last=True,
     workers=constants.CPU_COUNT,
-    batch_size=constants.BATCH_SIZE,
+    batch_size=constants.DEFAULT_BATCH_SIZE,
 ):
     lm_dataset = datasets.LanguageModelDataset(
         dataset=dataset,
