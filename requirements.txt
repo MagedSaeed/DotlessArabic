@@ -14,4 +14,5 @@ scikit-learn
 transformers
 pytorch-lightning
 git+https://github.com/MagedSaeed/tkseem.git
+https://github.com/kpu/kenlm/archive/master.zip
 

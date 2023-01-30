@@ -6,9 +6,9 @@ from tqdm.auto import tqdm
 if "." not in sys.path:
     sys.path.append(".")
 
+from dotless_arabic.utils import log_content
 from dotless_arabic.processing import process
 from dotless_arabic.experiments.nlms.src import constants
-from dotless_arabic.experiments.nlms.src.utils import log_to_file
 
 
 def collect_dataset(results_file=None):
@@ -48,8 +48,8 @@ def collect_dataset(results_file=None):
     ]
 
     if results_file is not None:
-        log_to_file(
-            text=f"""
+        log_content(
+            content=f"""
             Number datasets samples:
             {len(ashaar)}
             """,
@@ -61,8 +61,8 @@ def collect_dataset(results_file=None):
     )
 
     if results_file is not None:
-        log_to_file(
-            text=f"""
+        log_content(
+            content=f"""
             Number datasets samples after filtering non accepted meters:
             {len(ashaar)}
             """,
@@ -81,16 +81,16 @@ def collect_dataset(results_file=None):
             index += 1
 
     if results_file is not None:
-        log_to_file(
-            text=f"""
+        log_content(
+            content=f"""
             Sample of datasets samples:
             {constants.NEW_LINE.join(baits[:5])}
             """,
             results_file=results_file,
         )
 
-        log_to_file(
-            text=f"""
+        log_content(
+            content=f"""
             Number of Baits:
             {len(baits):,}
             """,
@@ -105,8 +105,8 @@ def collect_dataset(results_file=None):
     )
 
     if results_file is not None:
-        log_to_file(
-            text=f"""
+        log_content(
+            content=f"""
             Number of baits after deleting 60>= len(bait) chars >= 30 chars:
             {len(baits):,}
             """,

@@ -9,10 +9,10 @@ if "." not in sys.path:
     sys.path.append(".")
 
 
+from dotless_arabic.utils import log_content
 from dotless_arabic.utils import download_file
 from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.processing import dataset_dot_transform
-from dotless_arabic.experiments.nlms.src.utils import log_to_file
 
 
 def collect_dataset(results_file=None):
@@ -32,16 +32,16 @@ def collect_dataset(results_file=None):
     sanadset_hadeeth_dataset = sorted(list(set(sanadset_hadeeth_dataset)))
 
     if results_file is not None:
-        log_to_file(
-            text=f"""
+        log_content(
+            content=f"""
             Sample of datasets documents:
             {constants.NEW_LINE.join(sanadset_hadeeth_dataset[:5])}
             """,
             results_file=results_file,
         )
 
-        log_to_file(
-            text=f"""
+        log_content(
+            content=f"""
             Original Number of Samples:
             {len(sanadset_hadeeth_dataset):,}
             """,
@@ -51,8 +51,8 @@ def collect_dataset(results_file=None):
     dataset = list(set(sanadset_hadeeth_dataset))
 
     if results_file is not None:
-        log_to_file(
-            text=f"""
+        log_content(
+            content=f"""
             Number of Samples after dropping duplicates:
             {len(dataset):,}
             """,
@@ -62,8 +62,8 @@ def collect_dataset(results_file=None):
     dataset = dataset_dot_transform(tqdm(sanadset_hadeeth_dataset))
 
     if results_file is not None:
-        log_to_file(
-            text=f"""
+        log_content(
+            content=f"""
             Number of Samples after splitting on dots:
             {len(dataset):,}
             """,
