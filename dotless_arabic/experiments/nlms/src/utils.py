@@ -249,6 +249,7 @@ def get_vocab_size(
     dataset,
     tokenizer_class,
     use_tqdm=True,
+    return_all_vocab=True,
     vocab_coverage=constants.DEFAULT_VOCAB_COVERAGE,
 ):
     tokens_frequencies = defaultdict(int)
@@ -279,6 +280,8 @@ def get_vocab_size(
         vocab += 1
         if current_coverage > vocab_coverage:
             break
+    if return_all_vocab:
+        return vocab, len(sorted_words_frequencies.keys())
     return vocab
 
 
@@ -290,6 +293,7 @@ def get_best_checkpoint(dataset_id, checkpoints_base_path="NLMs"):
 
 def get_sequence_length(
     dataset,
+    use_tqdm=True,
     extra_tokens=2,
     percentile=constants.SEQUENCE_LENGTH_PERCENTILE,
 ):
@@ -299,6 +303,7 @@ def get_sequence_length(
     In our case, there are two: <bos> and <eos>
     """
     lengths = []
+    dataset = tqdm(dataset) if use_tqdm else dataset
     for document in dataset:
         lengths.append(len(document))
     lengths = sorted(lengths)
