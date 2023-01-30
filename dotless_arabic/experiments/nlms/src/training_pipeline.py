@@ -1,3 +1,4 @@
+from tqdm.auto import tqdm
 from pytorch_lightning.callbacks import Timer
 from pytorch_lightning.loggers import WandbLogger
 from sklearn.model_selection import train_test_split
@@ -48,6 +49,7 @@ def training_pipeline(
         test_size=constants.VAL_SIZE,
         random_state=constants.RANDOM_SEED,
     )
+
     log_to_file(
         text=f"""
         Train Samples: {len(train_dataset):,}
@@ -58,15 +60,18 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
 
-    vocab_size = get_vocab_size(
+    log_to_file(
+        text=f"""
+        Calculating vocab size:
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
+    vocab_size, all_vocab = get_vocab_size(
         dataset=train_dataset,
         vocab_coverage=vocab_coverage,
         tokenizer_class=tokenizer_class,
-    )
-    all_vocab = get_vocab_size(
-        dataset=train_dataset,
-        tokenizer_class=tokenizer_class,
-        vocab_coverage=1,
     )
     log_to_file(
         text=f"""
@@ -88,18 +93,32 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+    log_to_file(
+        text=f"""
+        Calculating Sequence Length:
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
     if sequence_length is None:
         sequence_length = get_sequence_length(
             dataset=list(
                 map(
                     tokenizer.split_text,
-                    train_dataset,
+                    tqdm(train_dataset),
                 )
             )
         )
     log_to_file(
         text=f"""
         Sequence Length: {sequence_length:,}
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+    log_to_file(
+        text=f"""
+        Building DataLoaders
         """,
         results_file=results_file,
         print_to_console=print_to_console,
