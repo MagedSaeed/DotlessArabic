@@ -4,6 +4,7 @@ import tkseem as tk
 from pathlib import Path
 from tqdm.auto import tqdm
 from datetime import datetime
+from farasa.segmenter import FarasaSegmenter
 
 
 if "." not in sys.path:
@@ -11,9 +12,9 @@ if "." not in sys.path:
 
 
 from dotless_arabic.utils import log_content
-from dotless_arabic.experiments.ngrams import constants
-from dotless_arabic.experiments.ngrams.src.training_pipeline import training_pipeline
 from dotless_arabic.processing import process, undot
+from dotless_arabic.experiments.ngrams.src import constants
+from dotless_arabic.experiments.ngrams.src.train import training_pipeline
 
 
 @click.command()
@@ -34,7 +35,7 @@ from dotless_arabic.processing import process, undot
     "--dataset",
     help="dataset name to train. Note that results files will be saved in '{current_dir_of_this_file}'/{dataset}_dataset/",
     required=True,
-    type=click.Choice(type=click.Choice(list(constants.COLLECT_DATASET.keys()))),
+    type=click.Choice(list(constants.COLLECT_DATASET.keys())),
 )
 def run(dataset, tokenizer_class):
 
@@ -75,6 +76,40 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
+        Some of the Dataset Samples before tokenization:
+        {constants.NEW_LINE.join(dataset[:5])}
+        """,
+        results_file=dotted_results_file_path,
+    )
+
+    log_content(
+        "Tokenize the dataset",
+        results_file=dotted_results_file_path,
+    )
+
+    if tokenizer_class == tk.FarasaMorphologicalTokenizer:
+        segmenter = FarasaSegmenter(interactive=True)
+        dataset = list(
+            map(
+                lambda item: " ".join(
+                    tokenizer_class.split_text(
+                        item,
+                        segmenter=segmenter,
+                    )
+                ),
+                tqdm(dataset),
+            ),
+        )
+    else:
+        dataset = list(
+            map(
+                lambda item: " ".join(tokenizer_class.split_text(item)),
+                tqdm(dataset),
+            ),
+        )
+
+    log_content(
+        content=f"""
         Some of the Dataset Samples before training:
         {constants.NEW_LINE.join(dataset[:5])}
         """,
@@ -90,7 +125,6 @@ def run(dataset, tokenizer_class):
     training_pipeline(
         dataset=dataset,
         dataset_name=dataset_id.lower(),
-        tokenizer_class=tokenizer_class,
         results_file=dotted_results_file_path,
     )
 
@@ -140,7 +174,6 @@ def run(dataset, tokenizer_class):
     training_pipeline(
         dataset=undotted_dataset,
         dataset_name=dataset_id.lower(),
-        tokenizer_class=tokenizer_class,
         results_file=undotted_results_file_path,
     )
 

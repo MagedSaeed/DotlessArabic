@@ -1,8 +1,9 @@
 import os
+import json
 from tqdm.auto import tqdm
 from sklearn.model_selection import train_test_split
 
-from dotless_arabic.utils import execute_bash
+from dotless_arabic.utils import execute_bash, log_content
 from dotless_arabic.experiments.ngrams.src import constants
 from dotless_arabic.experiments.ngrams.src.settings import configure_environment
 from dotless_arabic.experiments.ngrams.src.utils import (
@@ -16,10 +17,14 @@ def train_lm_model(
     train_dataset,
     dataset_name,
     use_tqdm=True,
-    overwrite_files=False,
+    overwrite_files=True,
+    print_to_console=True,
     delete_train_file=False,
 ):
-    execute_bash(f"mkdir -p {constants.LMs_DIR}/LMs/{dataset_name}/{ngram}")
+    execute_bash(
+        f"mkdir -p {constants.LMs_DIR}/LMs/{dataset_name}/{ngram}",
+        print_to_console=print_to_console,
+    )
     if (
         not os.path.isfile(f"{constants.LMs_DIR}/LMs/{dataset_name}/train_dataset.txt")
         or overwrite_files
@@ -27,7 +32,8 @@ def train_lm_model(
         print(" Writing train_dataset into file ".center(80, "#"))
         train_dataset = tqdm(train_dataset) if use_tqdm else train_dataset
         with open(
-            f"{constants.LMs_DIR}/LMs/{dataset_name}/train_dataset.txt", "w"
+            f"{constants.LMs_DIR}/LMs/{dataset_name}/train_dataset.txt",
+            "w",
         ) as train_dataset_file:
             for item in train_dataset:
                 train_dataset_file.write(item)
@@ -36,15 +42,20 @@ def train_lm_model(
         margin=50
     )  # increase the margin not to overhead the workstation
     execute_bash(
-        f"kenlm/build/bin/lmplz -o {ngram} -S {memory_to_use}% --discount_fallback < {constants.LMs_DIR}/LMs/{dataset_name}/train_dataset.txt > {constants.LMs_DIR}/LMs/{dataset_name}/{ngram}/lm.arpa"
+        f"kenlm/build/bin/lmplz -o {ngram} -S {memory_to_use}% --discount_fallback < {constants.LMs_DIR}/LMs/{dataset_name}/train_dataset.txt > {constants.LMs_DIR}/LMs/{dataset_name}/{ngram}/lm.arpa",
+        print_to_console=print_to_console,
     )
     print("#" * 80)
     print(" Converting .arpa file to binary file. ".center(80, "#"))
     execute_bash(
-        f"kenlm/build/bin/build_binary {constants.LMs_DIR}/LMs/{dataset_name}/{ngram}/lm.arpa {constants.LMs_DIR}/LMs/{dataset_name}/{ngram}/lm.binary"
+        f"kenlm/build/bin/build_binary {constants.LMs_DIR}/LMs/{dataset_name}/{ngram}/lm.arpa {constants.LMs_DIR}/LMs/{dataset_name}/{ngram}/lm.binary",
+        print_to_console=print_to_console,
     )
     if delete_train_file:
-        execute_bash(f"rm {constants.LMs_DIR}/LMs/{dataset_name}/train_dataset.txt")
+        execute_bash(
+            f"rm {constants.LMs_DIR}/LMs/{dataset_name}/train_dataset.txt",
+            print_to_console=print_to_console,
+        )
 
 
 def get_perplexity_and_OOVs(
@@ -52,6 +63,7 @@ def get_perplexity_and_OOVs(
     test_dataset,
     dataset_name,
     overwrite_files=False,
+    print_to_console=True,
 ):
     if (
         not os.path.isfile(f"{constants.LMs_DIR}/LMs/{dataset_name}/test_dataset.txt")
@@ -64,7 +76,8 @@ def get_perplexity_and_OOVs(
 
     # calculate and dump to a file
     execute_bash(
-        f"kenlm/build/bin/query {constants.LMs_DIR}/LMs/{dataset_name}/{ngram}/lm.binary < {constants.LMs_DIR}/LMs/{dataset_name}/test_dataset.txt > {constants.LMs_DIR}/LMs/{dataset_name}/results.txt"
+        f"kenlm/build/bin/query {constants.LMs_DIR}/LMs/{dataset_name}/{ngram}/lm.binary < {constants.LMs_DIR}/LMs/{dataset_name}/test_dataset.txt > {constants.LMs_DIR}/LMs/{dataset_name}/results.txt",
+        print_to_console=print_to_console,
     )
 
     with open(f"{constants.LMs_DIR}/LMs/{dataset_name}/results.txt") as f:
@@ -111,7 +124,13 @@ def get_model_results(dataset_name, ngram, test_dataset):
     )
 
 
-def train_collect_for_ngram(ngram, train_dataset, test_dataset, dataset_name):
+def train_collect_for_ngram(
+    ngram,
+    train_dataset,
+    test_dataset,
+    dataset_name,
+    print_to_console=False,
+):
     print("processing ngram:", ngram)
     print("#" * 50)
     print("Training")
@@ -119,6 +138,7 @@ def train_collect_for_ngram(ngram, train_dataset, test_dataset, dataset_name):
         ngram=ngram,
         dataset_name=dataset_name,
         train_dataset=train_dataset,
+        print_to_console=print_to_console,
     )
     print("collecting results")
     results = get_model_results(
@@ -126,7 +146,10 @@ def train_collect_for_ngram(ngram, train_dataset, test_dataset, dataset_name):
         dataset_name=dataset_name,
         test_dataset=test_dataset,
     )
-    execute_bash(f"rm -r {constants.LMs_DIR}/LMs/{dataset_name}")
+    execute_bash(
+        f"rm -r {constants.LMs_DIR}/LMs/{dataset_name}",
+        print_to_console=print_to_console,
+    )
     return results
 
 
@@ -134,7 +157,6 @@ def training_pipeline(
     dataset,
     dataset_name,
     results_file=None,
-    tokenizer_class=constants.DEFAULT_TOKENIZER_CLASS,
 ):
     configure_environment()
     train_dataset, test_dataset = train_test_split(
@@ -144,15 +166,34 @@ def training_pipeline(
         random_state=constants.RANDOM_SEED,
     )
     results = {}
-    print("TRAINING STARTED")
-    print("DOTTED TRAINING STARTED")
-    for ngram in constants.NGRAMS:
+    results[dataset_name] = {}
+    log_content(
+        content="TRAINING STARTED",
+        results_file=results_file,
+    )
+    for index, ngram in enumerate(constants.NGRAMS):
+        print_to_console = False
+        if index == len(constants.NGRAMS) - 1:
+            print_to_console = True
         results[dataset_name][ngram] = train_collect_for_ngram(
             ngram=ngram,
-            train_dataset=train_dataset,
-            test_dataset=test_dataset,
             dataset_name=dataset_name,
+            test_dataset=test_dataset,
+            train_dataset=train_dataset,
+            print_to_console=print_to_console,
         )
-    print("#" * 50)
-    print("UNDOTTED TRAINING STARTED")
+    log_content(
+        # content=pprint.pformat(results, indent=4),
+        content=json.dumps(
+            results,
+            indent=4,
+            # ensure_ascii=False,
+        ),
+        strip_lines=False,
+        results_file=results_file,
+    )
+    log_content(
+        content="TRAINING FINISHED",
+        results_file=results_file,
+    )
     return results

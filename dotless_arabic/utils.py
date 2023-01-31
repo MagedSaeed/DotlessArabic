@@ -18,7 +18,6 @@ def download_file(file_url, file_name, output_dir):
 def execute_bash(command, print_to_console=True):
     for line in command.splitlines():
         if line.strip():
-            command_tokens = line.split()
             try:
                 results = subprocess.check_output(line, shell=True)
                 if print_to_console:
@@ -28,7 +27,12 @@ def execute_bash(command, print_to_console=True):
                 raise e
 
 
-def log_content(content, results_file, print_to_console=True):
+def log_content(
+    content,
+    strip_lines=True,
+    results_file=None,
+    print_to_console=True,
+):
     if not results_file and not print_to_console:
         print(
             "WARNING: log_results is called but with no results file and print_to_console is False"
@@ -39,12 +43,16 @@ def log_content(content, results_file, print_to_console=True):
             file.write("#" * 100)
             file.write("\n")
             for line in content.strip().splitlines():
-                file.write(line.strip())
+                if strip_lines:
+                    line = line.strip()
+                file.write(line)
                 file.write("\n")
             file.write("#" * 100)
             file.write("\n")
     if print_to_console:
         print("#" * 100)
         for line in content.strip().splitlines():
-            print(line.strip())
+            if strip_lines:
+                line = line.strip()
+            print(line)
         print("#" * 100)
