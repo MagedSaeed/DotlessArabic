@@ -66,7 +66,7 @@ def generate_text(
             if predicted_token == "<eos>":
                 prompt = "<bos> "
                 hiddens = None
-                generated_text += f" {predicted_token}\n<bos> "
+                generated_text += f" {predicted_token} <eos>\n<bos> "
             else:
                 prompt += f" {predicted_token}"
                 generated_text += f" {predicted_token}"
@@ -149,7 +149,7 @@ def calculate_perplexity(
     sequence_length,
     use_tqdm=True,
     device=constants.DEVICE,
-    batch_size=constants.BATCH_SIZE,
+    batch_size=constants.DEFAULT_BATCH_SIZE,
     ignore_oovs=False,
 ):
     # https://towardsdatascience.com/the-relationship-between-perplexity-and-entropy-in-nlp-f81888775ccc
@@ -219,7 +219,7 @@ def get_dataloader(
     shuffle=False,
     drop_last=True,
     workers=constants.CPU_COUNT,
-    batch_size=constants.BATCH_SIZE,
+    batch_size=constants.DEFAULT_BATCH_SIZE,
 ):
     lm_dataset = datasets.LanguageModelDataset(
         dataset=dataset,
@@ -330,19 +330,3 @@ def get_oovs_rate(
                 continue
             tokens_sum += 1
     return f"{(oovs / tokens_sum) * 100:.2f}"
-
-
-def log_to_file(text, results_file, print_to_console=True):
-    with open(results_file, "a") as file:
-        file.write("#" * 100)
-        file.write("\n")
-        for line in text.strip().splitlines():
-            file.write(line.strip())
-            file.write("\n")
-        file.write("#" * 100)
-        file.write("\n")
-    if print_to_console:
-        print("#" * 100)
-        for line in text.strip().splitlines():
-            print(line.strip())
-        print("#" * 100)

@@ -1,14 +1,12 @@
 import torch
 
-from dotless_arabic.constants import *
+from dotless_arabic.experiments.constants import *
 
-
-DEFAULT_TOKENIZER_CLASS = "WordTokenizer"
 
 NUM_LAYERS = 4  # for GRU
 
 MAX_EPOCHS = 100
-BATCH_SIZE = 256
+DEFAULT_BATCH_SIZE = 256
 HIDDEN_SIZE = 512
 DROPOUT_PROB = 0.333
 EMBEDDING_SIZE = 512
