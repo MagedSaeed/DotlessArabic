@@ -21,7 +21,7 @@ def generate_text(
     lm_model,
     tokenizer,
     sequence_length,
-    prompt="",
+    prompt="<bos> ",
     num_tokens=10,
     device=constants.DEVICE,
     print_generated_token=True,
