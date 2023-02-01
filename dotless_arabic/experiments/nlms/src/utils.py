@@ -48,9 +48,11 @@ def generate_text(
             while (
                 predicted_token_id
                 in [
-                    tokenizer.token_to_id(tokenizer.pad_token),
+                    # tokenizer.token_to_id(tokenizer.pad_token),
                     tokenizer.token_to_id(tokenizer.unk_token),
-                    tokenizer.token_to_id("<eos>"),
+                    tokenizer.token_to_id(
+                        "<bos>"
+                    ),  # this is in the case where the unk got replaced by bos
                 ]
                 and counter < 100
             ):
@@ -66,12 +68,14 @@ def generate_text(
             if predicted_token == "<eos>":
                 prompt = "<bos> "
                 hiddens = None
-                generated_text += f" {predicted_token} <eos>\n<bos> "
+                generated_text += f" {predicted_token}\n<bos> "
             else:
                 prompt += f" {predicted_token}"
                 generated_text += f" {predicted_token}"
             print("prompt is:", prompt)
-    return tokenizer.detokenize(generated_text.split())
+    return "\n".join(
+        tokenizer.detokenize(line.split()) for line in generated_text.splitlines()
+    )
 
 
 def train_lm(
