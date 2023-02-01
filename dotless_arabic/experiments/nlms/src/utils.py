@@ -330,19 +330,3 @@ def get_oovs_rate(
                 continue
             tokens_sum += 1
     return f"{(oovs / tokens_sum) * 100:.2f}"
-
-
-def log_to_file(text, results_file, print_to_console=True):
-    with open(results_file, "a") as file:
-        file.write("#" * 100)
-        file.write("\n")
-        for line in text.strip().splitlines():
-            file.write(line.strip())
-            file.write("\n")
-        file.write("#" * 100)
-        file.write("\n")
-    if print_to_console:
-        print("#" * 100)
-        for line in text.strip().splitlines():
-            print(line.strip())
-        print("#" * 100)
