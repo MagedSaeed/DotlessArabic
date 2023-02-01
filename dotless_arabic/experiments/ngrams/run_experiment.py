@@ -4,6 +4,7 @@ import tkseem as tk
 from pathlib import Path
 from tqdm.auto import tqdm
 from datetime import datetime
+from farasa.segmenter import FarasaSegmenter
 
 
 if "." not in sys.path:
@@ -11,9 +12,9 @@ if "." not in sys.path:
 
 
 from dotless_arabic.utils import log_content
-from dotless_arabic.experiments.nlms.src import constants
-from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
 from dotless_arabic.processing import process, undot
+from dotless_arabic.experiments.ngrams.src import constants
+from dotless_arabic.experiments.ngrams.src.train import training_pipeline
 
 
 @click.command()
@@ -31,53 +32,14 @@ from dotless_arabic.processing import process, undot
     ),
 )
 @click.option(
-    "--vocab_coverage",
-    default=constants.DEFAULT_VOCAB_COVERAGE,
-    help="Vocab coverage to consider, the tokenizer will consider vocabs that covers this percentage of the running text",
-)
-@click.option(
     "--dataset",
     help="dataset name to train. Note that results files will be saved in '{current_dir_of_this_file}'/{dataset}_dataset/",
     required=True,
     type=click.Choice(list(constants.COLLECT_DATASET.keys())),
 )
-@click.option(
-    "--sequence_length",
-    help="sequence length to consider when tokenizing dataset samples",
-    type=int,
-    default=None,
-)
-@click.option(
-    "--gpu_devices",
-    help="GPU devices indexes to consider if the machine has GPUs. Expected input to be index,index...",
-    type=str,
-    default=str(constants.GPU_DEVICES),
-)
-@click.option(
-    "--cpu_devices",
-    help="CPU devices (processes) to consider if the code will run on CPU",
-    type=int,
-    default=constants.CPU_DEVICES,
-)
-@click.option(
-    "--batch_size",
-    help="Batch size to consider in various data setups",
-    type=int,
-    default=constants.DEFAULT_BATCH_SIZE,
-)
-def run(
-    dataset,
-    vocab_coverage,
-    tokenizer_class,
-    gpu_devices,
-    cpu_devices,
-    batch_size,
-    sequence_length=None,
-):
+def run(dataset, tokenizer_class):
 
     dataset_name = dataset + "_dataset"
-
-    gpu_devices = list(map(int, gpu_devices.split(",")))
 
     current_dir = Path(__file__).resolve().parent
 
@@ -88,7 +50,9 @@ def run(
 
     tokenizer_class = getattr(tk, tokenizer_class)
 
-    dotted_results_file_path = f"{results_dir}/results_dotted_tokenizer_{tokenizer_class.__name__}_vocab_coverage_{vocab_coverage}.txt"
+    dotted_results_file_path = (
+        f"{results_dir}/results_dotted_tokenizer_{tokenizer_class.__name__}.txt"
+    )
 
     dataset = constants.COLLECT_DATASET[dataset](results_file=dotted_results_file_path)
 
@@ -112,6 +76,40 @@ def run(
 
     log_content(
         content=f"""
+        Some of the Dataset Samples before tokenization:
+        {constants.NEW_LINE.join(dataset[:5])}
+        """,
+        results_file=dotted_results_file_path,
+    )
+
+    log_content(
+        "Tokenize the dataset",
+        results_file=dotted_results_file_path,
+    )
+
+    if tokenizer_class == tk.FarasaMorphologicalTokenizer:
+        segmenter = FarasaSegmenter(interactive=True)
+        dataset = list(
+            map(
+                lambda item: " ".join(
+                    tokenizer_class.split_text(
+                        item,
+                        segmenter=segmenter,
+                    )
+                ),
+                tqdm(dataset),
+            ),
+        )
+    else:
+        dataset = list(
+            map(
+                lambda item: " ".join(tokenizer_class.split_text(item)),
+                tqdm(dataset),
+            ),
+        )
+
+    log_content(
+        content=f"""
         Some of the Dataset Samples before training:
         {constants.NEW_LINE.join(dataset[:5])}
         """,
@@ -125,16 +123,8 @@ def run(
     dataset_id = f"dotted-{dataset_name}".upper()
 
     training_pipeline(
-        is_dotted=True,
         dataset=dataset,
-        batch_size=batch_size,
-        dataset_id=dataset_id,
-        gpu_devices=gpu_devices,
-        cpu_devices=cpu_devices,
-        vocab_coverage=vocab_coverage,
         dataset_name=dataset_id.lower(),
-        tokenizer_class=tokenizer_class,
-        sequence_length=sequence_length,
         results_file=dotted_results_file_path,
     )
 
@@ -149,7 +139,9 @@ def run(
     ###### Undotted Dataset Training ###############
     ################################################
 
-    undotted_results_file_path = f"{results_dir}/results_undotted_tokenizer_{tokenizer_class.__name__}_vocab_coverage_{vocab_coverage}.txt"
+    undotted_results_file_path = (
+        f"{results_dir}/results_undotted_tokenizer_{tokenizer_class.__name__}.txt"
+    )
 
     # delete the current logging file, if exists
 
@@ -180,16 +172,8 @@ def run(
     )
 
     training_pipeline(
-        is_dotted=False,
-        dataset_id=dataset_id,
-        batch_size=batch_size,
-        gpu_devices=gpu_devices,
-        cpu_devices=cpu_devices,
         dataset=undotted_dataset,
-        vocab_coverage=vocab_coverage,
         dataset_name=dataset_id.lower(),
-        tokenizer_class=tokenizer_class,
-        sequence_length=sequence_length,
         results_file=undotted_results_file_path,
     )
 
