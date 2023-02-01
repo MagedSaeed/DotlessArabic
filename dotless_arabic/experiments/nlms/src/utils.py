@@ -66,7 +66,7 @@ def generate_text(
             if predicted_token == "<eos>":
                 prompt = "<bos> "
                 hiddens = None
-                generated_text += f" {predicted_token}\n<bos> "
+                generated_text += f" {predicted_token} <eos>\n<bos> "
             else:
                 prompt += f" {predicted_token}"
                 generated_text += f" {predicted_token}"
