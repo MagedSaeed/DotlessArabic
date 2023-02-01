@@ -4,7 +4,7 @@ import sys
 if "." not in sys.path:
     sys.path.append(".")
 
-from dotless_arabic.experiments.nlms.src.utils import log_to_file
+from dotless_arabic.utils import log_content
 
 
 def collect_dataset(results_file=None):
@@ -29,8 +29,8 @@ def collect_dataset(results_file=None):
     quran_dataset = no_basmala_quran_dataset
 
     if results_file is not None:
-        log_to_file(
-            text=f"""
+        log_content(
+            content=f"""
             Number of samples:
             {len(quran_dataset)}
             """,
