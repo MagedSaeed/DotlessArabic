@@ -60,6 +60,7 @@ def undot(text, process_first=False):
     this function does not add a new line.
     make sure to append a newline afterwards
     """
+    # TODO: Should yaa be mapped to baa shape in the beginning and the middle?
     if process_first:
         text = process(text)
     undotted_text = ""
