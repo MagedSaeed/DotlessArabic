@@ -11,7 +11,7 @@ if "." not in sys.path:
 
 
 from dotless_arabic.utils import log_content
-from dotless_arabic.constants import TOKENIZERS_MAP
+from dotless_arabic.tokenizers import TOKENIZERS_MAP
 from dotless_arabic.processing import process, undot
 from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
@@ -62,7 +62,7 @@ from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipel
 @click.option(
     "--seqlen_percentile",
     help="Sequence Length Percentile. That is, you would be sure that this percentile of your samples are completely covered",
-    type=int,
+    type=float,
     default=constants.SEQUENCE_LENGTH_PERCENTILE,
 )
 def run(
@@ -73,10 +73,11 @@ def run(
     cpu_devices,
     batch_size,
     sequence_length=None,
-    sequence_length_percentile=constants.SEQUENCE_LENGTH_PERCENTILE,
+    seqlen_percentile=constants.SEQUENCE_LENGTH_PERCENTILE,
 ):
 
     dataset_name = dataset + "_dataset"
+    sequence_length_percentile = seqlen_percentile
 
     gpu_devices = list(map(int, gpu_devices.split(",")))
 

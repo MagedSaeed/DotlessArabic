@@ -98,3 +98,14 @@ class WordTokenizer(tk.WordTokenizer):
         if undot_text:
             return undot(text).split()
         return text.split()
+
+
+TOKENIZERS_MAP = {
+    tokenizer_class.__name__: tokenizer_class
+    for tokenizer_class in [
+        WordTokenizer,
+        FarasaMorphologicalTokenizer,
+        DisjointLetterTokenizer,
+        CharacterTokenizer,
+    ]
+}

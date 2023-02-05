@@ -12,7 +12,7 @@ if "." not in sys.path:
 
 
 from dotless_arabic.utils import log_content
-from dotless_arabic.constants import TOKENIZERS_MAP
+from dotless_arabic.tokenizers import TOKENIZERS_MAP
 from dotless_arabic.processing import process, undot
 from dotless_arabic.experiments.ngrams.src import constants
 from dotless_arabic.experiments.ngrams.src.train import training_pipeline

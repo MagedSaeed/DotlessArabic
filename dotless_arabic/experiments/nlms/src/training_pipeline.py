@@ -118,7 +118,8 @@ def training_pipeline(
                         ),
                         tqdm(train_dataset),
                     )
-                )
+                ),
+                percentile=sequence_length_percentile,
             )
         else:
             sequence_length = get_sequence_length(
