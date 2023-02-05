@@ -2,6 +2,15 @@ import os
 
 import pyarabic.araby as araby
 
+
+from dotless_arabic.tokenizers import (
+    WordTokenizer,
+    FarasaMorphologicalTokenizer,
+    DisjointLetterTokenizer,
+    CharacterTokenizer,
+)
+
+
 RANDOM_SEED = 42
 
 CPU_COUNT = os.cpu_count()
@@ -70,3 +79,14 @@ LETTERS_MAPPING = {
 
 
 NEW_LINE = "\n"
+
+
+TOKENIZERS_MAP = {
+    tokenizer_class.__name__: tokenizer_class
+    for tokenizer_class in [
+        WordTokenizer,
+        FarasaMorphologicalTokenizer,
+        DisjointLetterTokenizer,
+        CharacterTokenizer,
+    ]
+}

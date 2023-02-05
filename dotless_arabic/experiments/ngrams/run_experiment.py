@@ -12,6 +12,7 @@ if "." not in sys.path:
 
 
 from dotless_arabic.utils import log_content
+from dotless_arabic.constants import TOKENIZERS_MAP
 from dotless_arabic.processing import process, undot
 from dotless_arabic.experiments.ngrams.src import constants
 from dotless_arabic.experiments.ngrams.src.train import training_pipeline
@@ -22,14 +23,7 @@ from dotless_arabic.experiments.ngrams.src.train import training_pipeline
     "--tokenizer_class",
     default=constants.DEFAULT_TOKENIZER_CLASS,
     help="Tokenizer class to tokenize the dataset",
-    type=click.Choice(
-        [
-            "CharacterTokenizer",
-            "DisjointLetterTokenizer",
-            "FarasaMorphologicalTokenizer",
-            "WordTokenizer",
-        ]
-    ),
+    type=click.Choice(list(TOKENIZERS_MAP.keys())),
 )
 @click.option(
     "--dataset",
@@ -48,7 +42,7 @@ def run(dataset, tokenizer_class):
     # create results dir if not exists
     Path(results_dir).mkdir(parents=True, exist_ok=True)
 
-    tokenizer_class = getattr(tk, tokenizer_class)
+    tokenizer_class = TOKENIZERS_MAP[tokenizer_class]
 
     dotted_results_file_path = (
         f"{results_dir}/results_dotted_tokenizer_{tokenizer_class.__name__}.txt"
