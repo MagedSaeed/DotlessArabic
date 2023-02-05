@@ -1,10 +1,12 @@
 import os
 import json
 from tqdm.auto import tqdm
+from farasa.segmenter import FarasaSegmenter
 from sklearn.model_selection import train_test_split
 
 from dotless_arabic.utils import execute_bash, log_content
 from dotless_arabic.experiments.ngrams.src import constants
+from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer
 from dotless_arabic.experiments.ngrams.src.settings import configure_environment
 from dotless_arabic.experiments.ngrams.src.utils import (
     estimate_memory_to_use_by_lm_modeler,
@@ -156,9 +158,57 @@ def train_collect_for_ngram(
 def training_pipeline(
     dataset,
     dataset_name,
+    tokenizer_class,
+    is_dotted=True,
     results_file=None,
 ):
     configure_environment()
+    log_content(
+        content=f"""
+        Some of the Dataset Samples before tokenization:
+        {constants.NEW_LINE.join(dataset[:5])}
+        """,
+        results_file=results_file,
+    )
+
+    log_content(
+        "Tokenize the dataset",
+        results_file=results_file,
+    )
+
+    if tokenizer_class == FarasaMorphologicalTokenizer:
+        segmenter = FarasaSegmenter(interactive=True)
+        dataset = list(
+            map(
+                lambda item: " ".join(
+                    tokenizer_class.split_text(
+                        item,
+                        segmenter=segmenter,
+                        undot_text=not is_dotted,
+                    )
+                ),
+                tqdm(dataset),
+            ),
+        )
+    else:
+        dataset = list(
+            map(
+                lambda item: " ".join(
+                    tokenizer_class.split_text(
+                        item,
+                        undot_text=not is_dotted,
+                    )
+                ),
+                tqdm(dataset),
+            ),
+        )
+    log_content(
+        content=f"""
+        Some of the Dataset Samples after tokenization:
+        {constants.NEW_LINE.join(dataset[:5])}
+        """,
+        results_file=results_file,
+    )
     train_dataset, test_dataset = train_test_split(
         dataset,
         test_size=0.1,

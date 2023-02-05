@@ -70,40 +70,6 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
-        Some of the Dataset Samples before tokenization:
-        {constants.NEW_LINE.join(dataset[:5])}
-        """,
-        results_file=dotted_results_file_path,
-    )
-
-    log_content(
-        "Tokenize the dataset",
-        results_file=dotted_results_file_path,
-    )
-
-    if tokenizer_class == tk.FarasaMorphologicalTokenizer:
-        segmenter = FarasaSegmenter(interactive=True)
-        dataset = list(
-            map(
-                lambda item: " ".join(
-                    tokenizer_class.split_text(
-                        item,
-                        segmenter=segmenter,
-                    )
-                ),
-                tqdm(dataset),
-            ),
-        )
-    else:
-        dataset = list(
-            map(
-                lambda item: " ".join(tokenizer_class.split_text(item)),
-                tqdm(dataset),
-            ),
-        )
-
-    log_content(
-        content=f"""
         Some of the Dataset Samples before training:
         {constants.NEW_LINE.join(dataset[:5])}
         """,
@@ -118,6 +84,8 @@ def run(dataset, tokenizer_class):
 
     training_pipeline(
         dataset=dataset,
+        is_dotted=True,
+        tokenizer_class=tokenizer_class,
         dataset_name=dataset_id.lower(),
         results_file=dotted_results_file_path,
     )
@@ -150,23 +118,10 @@ def run(dataset, tokenizer_class):
 
     dataset_id = f"undotted-{dataset_name}".upper()
 
-    undotted_dataset = list(
-        map(
-            undot,
-            dataset,
-        )
-    )
-
-    log_content(
-        content=f"""
-        Some of the Dataset Samples after undotting:
-        {constants.NEW_LINE.join(undotted_dataset[:5])}
-        """,
-        results_file=undotted_results_file_path,
-    )
-
     training_pipeline(
-        dataset=undotted_dataset,
+        dataset=dataset,
+        is_dotted=False,
+        tokenizer_class=tokenizer_class,
         dataset_name=dataset_id.lower(),
         results_file=undotted_results_file_path,
     )
