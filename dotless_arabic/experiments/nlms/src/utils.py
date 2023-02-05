@@ -296,7 +296,7 @@ def get_vocab_size(
     )
     current_words_count = 0
     vocab = 0
-    from pprint import pprint
+    # from pprint import pprint
 
     # pprint(
     #     sorted_words_frequencies,

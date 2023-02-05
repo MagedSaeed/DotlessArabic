@@ -32,7 +32,6 @@ class LanguageModelDataset(Dataset):
             if undot_text:
                 document = undot(document)
             tokenized_document = tokenizer.tokenize_from_splits(document)
-            # print(tokenized_document)
             if len(tokenized_document) < (sequence_length - 2):
                 tokenized_document += [tokenizer.pad_token] * (
                     sequence_length - 2 - len(tokenized_document)
