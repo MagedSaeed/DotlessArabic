@@ -1,10 +1,18 @@
 import torch
 from tqdm.auto import tqdm
 from torch.utils.data import Dataset
+from dotless_arabic.processing import undot
 
 
 class LanguageModelDataset(Dataset):
-    def __init__(self, dataset, tokenizer, sequence_length, use_tqdm=True):
+    def __init__(
+        self,
+        dataset,
+        tokenizer,
+        sequence_length,
+        use_tqdm=True,
+        undot_text=False,
+    ):
         super().__init__()
         dataset = tqdm(dataset) if use_tqdm else dataset
         self.encoded_dataset = []
@@ -21,18 +29,25 @@ class LanguageModelDataset(Dataset):
             #         )
             #     )
             # )
+            if undot_text:
+                document = undot(document)
             tokenized_document = tokenizer.tokenize(document)
+            # print(tokenized_document)
             if len(tokenized_document) < (sequence_length - 2):
                 tokenized_document += [tokenizer.pad_token] * (
                     sequence_length - 2 - len(tokenized_document)
                 )
-            self.encoded_dataset.append(
-                tokenizer.encode(
-                    "<bos> "
-                    + " ".join(tokenized_document[: sequence_length - 2])
-                    + " <eos>"
-                )
-            )
+            encoded_document = [tokenizer.token_to_id("<bos>")]
+            for token in tokenized_document[: sequence_length - 2]:
+                encoded_document.append(tokenizer.token_to_id(token))
+            encoded_document.append(tokenizer.token_to_id("<eos>"))
+            # print(
+            #     "<bos> "
+            #     + " ".join(tokenized_document[: sequence_length - 2])
+            #     + " <eos>"
+            # )
+            # print(len(encoded_document))
+            self.encoded_dataset.append(encoded_document)
 
     def __getitem__(self, index):
         inputs = self.encoded_dataset[index][:-1]

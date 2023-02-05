@@ -14,6 +14,8 @@ from tqdm.auto import tqdm
 from farasa.segmenter import FarasaSegmenter
 
 import wandb
+from dotless_arabic.processing import undot
+from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer
 from dotless_arabic.experiments.nlms.src import constants, datasets
 
 
@@ -106,8 +108,7 @@ def train_lm(
         auto_insert_metric_name=True,
         save_on_train_epoch_end=False,
         dirpath=f"NLMs/{dataset_id}/{tokenizer_class.__name__}/checkpoints",
-        filename="{epoch}-{val_loss:.3f}-{step}"
-        + f"-{vocab_coverage}",
+        filename="{epoch}-{val_loss:.3f}-{step}" + f"-{vocab_coverage}",
     )
     callbacks.append(checkpoint_callback)
     early_stopping_callback = EarlyStopping(
@@ -152,6 +153,7 @@ def calculate_perplexity(
     tokenizer,
     sequence_length,
     use_tqdm=True,
+    undot_text=False,
     device=constants.DEVICE,
     batch_size=constants.DEFAULT_BATCH_SIZE,
     ignore_oovs=False,
@@ -161,6 +163,7 @@ def calculate_perplexity(
     lm_dataset = datasets.LanguageModelDataset(
         dataset=dataset,
         tokenizer=tokenizer,
+        undot_text=undot_text,
         sequence_length=sequence_length,
     )
     dataloader = DataLoader(
@@ -197,10 +200,15 @@ def calculate_perplexity(
 def get_tokenizer(
     train_dataset,
     vocab_size,
+    undot_text=False,
     tokenizer_class=constants.DEFAULT_TOKENIZER_CLASS,
 ):
-    with open("tmp_dataset.txt", "w") as f:
-        f.write("\n".join(item for item in train_dataset if item.strip()))
+    if undot_text:
+        with open("tmp_dataset.txt", "w") as f:
+            f.write("\n".join(undot(item) for item in train_dataset if item.strip()))
+    else:
+        with open("tmp_dataset.txt", "w") as f:
+            f.write("\n".join(item for item in train_dataset if item.strip()))
 
     # with open("tmp_dataset.txt") as f:
     #     vocab_size = len(set(
@@ -222,12 +230,14 @@ def get_dataloader(
     sequence_length,
     shuffle=False,
     drop_last=True,
+    undot_text=False,
     workers=constants.CPU_COUNT,
     batch_size=constants.DEFAULT_BATCH_SIZE,
 ):
     lm_dataset = datasets.LanguageModelDataset(
         dataset=dataset,
         tokenizer=tokenizer,
+        undot_text=undot_text,
         sequence_length=sequence_length,
     )
     dataloader = DataLoader(
@@ -253,19 +263,28 @@ def get_vocab_size(
     dataset,
     tokenizer_class,
     use_tqdm=True,
+    undot_text=False,
     return_all_vocab=True,
     vocab_coverage=constants.DEFAULT_VOCAB_COVERAGE,
 ):
     tokens_frequencies = defaultdict(int)
-    if tokenizer_class == tk.FarasaMorphologicalTokenizer:
+    if tokenizer_class == FarasaMorphologicalTokenizer:
         segmenter = FarasaSegmenter(interactive=True)
     dataset = tqdm(dataset) if use_tqdm else dataset
     for document in dataset:
-        if tokenizer_class == tk.FarasaMorphologicalTokenizer:
-            for token in tokenizer_class.split_text(document, segmenter=segmenter):
+        if tokenizer_class == FarasaMorphologicalTokenizer:
+            for token in tokenizer_class.split_text(
+                document,
+                segmenter=segmenter,
+                undot_text=undot_text,
+            ):
                 tokens_frequencies[token] += 1
         else:
-            for token in tokenizer_class.split_text(document):
+            for token in tokenizer_class.split_text(
+                document,
+                undot_text=undot_text,
+            ):
+                # print(tokenizer_class.split_text(document))
                 tokens_frequencies[token] += 1
 
     sorted_words_frequencies = dict(
@@ -277,6 +296,12 @@ def get_vocab_size(
     )
     current_words_count = 0
     vocab = 0
+    from pprint import pprint
+
+    # pprint(
+    #     sorted_words_frequencies,
+    #     sort_dicts=False,
+    # )
     all_words_counts = sum(sorted_words_frequencies.values())
     for token, counts in sorted_words_frequencies.items():
         current_words_count += counts
@@ -290,7 +315,9 @@ def get_vocab_size(
 
 
 def get_best_checkpoint(dataset_id, tokenizer_class, checkpoints_base_path="NLMs"):
-    checkpoints_path = f"{checkpoints_base_path}/{dataset_id}/{tokenizer_class.__name__}/checkpoints"
+    checkpoints_path = (
+        f"{checkpoints_base_path}/{dataset_id}/{tokenizer_class.__name__}/checkpoints"
+    )
     for file_name in os.listdir(checkpoints_path):
         if file_name.startswith("epoch"):
             return f"{checkpoints_path}/{file_name}"

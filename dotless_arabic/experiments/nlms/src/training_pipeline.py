@@ -1,4 +1,5 @@
 from tqdm.auto import tqdm
+from farasa.segmenter import FarasaSegmenter
 from pytorch_lightning.callbacks import Timer
 from pytorch_lightning.loggers import WandbLogger
 from sklearn.model_selection import train_test_split
@@ -6,6 +7,7 @@ from pytorch_lightning.utilities.model_summary import ModelSummary
 
 from dotless_arabic.utils import log_content
 from dotless_arabic.experiments.nlms.src import constants
+from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer
 from dotless_arabic.experiments.nlms.src.callbacks import LossMetricsCallback
 from dotless_arabic.experiments.nlms.src.models import LitNeuralLanguageModel
 from dotless_arabic.experiments.nlms.src.settings import configure_environment
@@ -71,6 +73,7 @@ def training_pipeline(
 
     vocab_size, all_vocab = get_vocab_size(
         dataset=train_dataset,
+        undot_text=not is_dotted,
         vocab_coverage=vocab_coverage,
         tokenizer_class=tokenizer_class,
     )
@@ -84,6 +87,7 @@ def training_pipeline(
     )
     tokenizer = get_tokenizer(
         vocab_size=vocab_size,
+        undot_text=not is_dotted,
         train_dataset=train_dataset,
         tokenizer_class=tokenizer_class,
     )
@@ -102,14 +106,28 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
     if sequence_length is None:
-        sequence_length = get_sequence_length(
-            dataset=list(
-                map(
-                    tokenizer.split_text,
-                    tqdm(train_dataset),
+        if tokenizer_class == FarasaMorphologicalTokenizer:
+            segmenter = FarasaSegmenter(interactive=True)
+            sequence_length = get_sequence_length(
+                dataset=list(
+                    map(
+                        lambda document: tokenizer.split_text(
+                            document,
+                            segmenter=segmenter,
+                        ),
+                        tqdm(train_dataset),
+                    )
                 )
             )
-        )
+        else:
+            sequence_length = get_sequence_length(
+                dataset=list(
+                    map(
+                        tokenizer.split_text,
+                        tqdm(train_dataset),
+                    )
+                )
+            )
     log_content(
         content=f"""
         Sequence Length: {sequence_length:,}
@@ -129,12 +147,14 @@ def training_pipeline(
         tokenizer=tokenizer,
         dataset=train_dataset,
         batch_size=batch_size,
+        undot_text=not is_dotted,
         sequence_length=sequence_length,
     )
     val_dataloader = get_dataloader(
         dataset=val_dataset,
         tokenizer=tokenizer,
         batch_size=batch_size,
+        undot_text=not is_dotted,
         sequence_length=sequence_length,
         drop_last=constants.DEFAULT_BATCH_SIZE < len(val_dataset),
     )
@@ -142,6 +162,7 @@ def training_pipeline(
         tokenizer=tokenizer,
         dataset=test_dataset,
         batch_size=batch_size,
+        undot_text=not is_dotted,
         sequence_length=sequence_length,
     )
     log_content(
@@ -189,13 +210,17 @@ def training_pipeline(
         callbacks=[loss_metrics_callback, timer_callback],
     )
     lm_model = LitNeuralLanguageModel.load_from_checkpoint(
-        get_best_checkpoint(dataset_id=dataset_id)
+        get_best_checkpoint(
+            dataset_id=dataset_id,
+            tokenizer_class=tokenizer_class,
+        )
     )
     training_perplexity = calculate_perplexity(
         lm_model=lm_model,
         tokenizer=tokenizer,
         dataset=train_dataset,
         batch_size=batch_size,
+        undot_text=not is_dotted,
         sequence_length=sequence_length,
     )
 
@@ -203,6 +228,7 @@ def training_pipeline(
         lm_model=lm_model,
         tokenizer=tokenizer,
         dataset=test_dataset,
+        undot_text=not is_dotted,
         sequence_length=sequence_length,
     )
 
@@ -210,6 +236,7 @@ def training_pipeline(
         lm_model=lm_model,
         tokenizer=tokenizer,
         dataset=test_dataset,
+        undot_text=not is_dotted,
         sequence_length=sequence_length,
         ignore_oovs=True,
     )

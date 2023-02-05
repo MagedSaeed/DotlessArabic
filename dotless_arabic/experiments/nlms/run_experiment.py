@@ -11,9 +11,10 @@ if "." not in sys.path:
 
 
 from dotless_arabic.utils import log_content
+from dotless_arabic.constants import TOKENIZERS_MAP
+from dotless_arabic.processing import process, undot
 from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
-from dotless_arabic.processing import process, undot
 
 
 @click.command()
@@ -21,14 +22,7 @@ from dotless_arabic.processing import process, undot
     "--tokenizer_class",
     default=constants.DEFAULT_TOKENIZER_CLASS,
     help="Tokenizer class to tokenize the dataset",
-    type=click.Choice(
-        [
-            "CharacterTokenizer",
-            "DisjointLetterTokenizer",
-            "FarasaMorphologicalTokenizer",
-            "WordTokenizer",
-        ]
-    ),
+    type=click.Choice(list(TOKENIZERS_MAP.keys())),
 )
 @click.option(
     "--vocab_coverage",
@@ -86,7 +80,7 @@ def run(
     # create results dir if not exists
     Path(results_dir).mkdir(parents=True, exist_ok=True)
 
-    tokenizer_class = getattr(tk, tokenizer_class)
+    tokenizer_class = TOKENIZERS_MAP[tokenizer_class]
 
     dotted_results_file_path = f"{results_dir}/results_dotted_tokenizer_{tokenizer_class.__name__}_vocab_coverage_{vocab_coverage}.txt"
 
@@ -164,28 +158,21 @@ def run(
 
     dataset_id = f"undotted-{dataset_name}".upper()
 
-    undotted_dataset = list(
-        map(
-            undot,
-            dataset,
-        )
-    )
-
     log_content(
         content=f"""
         Some of the Dataset Samples after undotting:
-        {constants.NEW_LINE.join(undotted_dataset[:5])}
+        {constants.NEW_LINE.join(dataset[:5])}
         """,
         results_file=undotted_results_file_path,
     )
 
     training_pipeline(
         is_dotted=False,
+        dataset=dataset,
         dataset_id=dataset_id,
         batch_size=batch_size,
         gpu_devices=gpu_devices,
         cpu_devices=cpu_devices,
-        dataset=undotted_dataset,
         vocab_coverage=vocab_coverage,
         dataset_name=dataset_id.lower(),
         tokenizer_class=tokenizer_class,
