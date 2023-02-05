@@ -8,16 +8,7 @@ from dotless_arabic.processing import undot
 
 
 class CharacterTokenizer(tk.CharacterTokenizer):
-    def __init__(
-        self,
-        unk_token="<UNK>",
-        pad_token="<PAD>",
-        vocab_size=10000,
-        special_tokens=[],
-    ):
-        special_tokens.append("<##>")  # this is a placeholder for space character
-        super().__init__(unk_token, pad_token, vocab_size, special_tokens)
-
+    
     @classmethod
     @lru_cache(maxsize=10_000)
     def split_text(cls, text, undot_text=False):
@@ -30,17 +21,20 @@ class CharacterTokenizer(tk.CharacterTokenizer):
             )
         )
 
+    def detokenize(self, tokens):
+        """Convert tokens to a string
+
+        Args:
+            tokens (list): list of tokens
+
+        Returns:
+            str: detokenized string
+        """
+        detokenized = "".join(tokens).replace("<##>", " ")
+        return detokenized
+
 
 class DisjointLetterTokenizer(tk.DisjointLetterTokenizer):
-    def __init__(
-        self,
-        unk_token="<UNK>",
-        pad_token="<PAD>",
-        vocab_size=10000,
-        special_tokens=[],
-    ):
-        special_tokens.append("<##>")
-        super().__init__(unk_token, pad_token, vocab_size, special_tokens)
 
     @classmethod
     @lru_cache(maxsize=10_000)
@@ -51,24 +45,20 @@ class DisjointLetterTokenizer(tk.DisjointLetterTokenizer):
             return undot(text).split()
         return text.split()
 
+    def detokenize(self, tokens):
+        """Convert tokens to a string
+
+        Args:
+            tokens (list): list of tokens
+
+        Returns:
+            str: detokenized string
+        """
+        detokenized = "".join(tokens).replace("<##>", " ")
+        return detokenized
+
 
 class FarasaMorphologicalTokenizer(tk.FarasaMorphologicalTokenizer):
-    def __init__(
-        self,
-        unk_token="<UNK>",
-        pad_token="<PAD>",
-        vocab_size=10000,
-        special_tokens=[],
-        interactive_segmentation=True,
-    ):
-        special_tokens.append("<##>")
-        super().__init__(
-            unk_token=unk_token,
-            pad_token=pad_token,
-            vocab_size=vocab_size,
-            special_tokens=special_tokens,
-            interactive_segmentation=interactive_segmentation,
-        )
 
     @classmethod
     @lru_cache(maxsize=10_000)
@@ -89,6 +79,18 @@ class FarasaMorphologicalTokenizer(tk.FarasaMorphologicalTokenizer):
         if undot_text:
             return undot(text).split()
         return text.split()
+
+    def detokenize(self, tokens):
+        """Convert tokens to a string
+
+        Args:
+            tokens (list): list of tokens
+
+        Returns:
+            str: detokenized string
+        """
+        detokenized = "".join(tokens).replace("<##>", " ")
+        return detokenized
 
 
 class WordTokenizer(tk.WordTokenizer):
