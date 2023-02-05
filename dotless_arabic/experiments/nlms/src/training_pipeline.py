@@ -37,6 +37,7 @@ def training_pipeline(
     tokenizer_class,
     sequence_length=None,
     print_to_console=True,
+    sequence_length_percentile=constants.SEQUENCE_LENGTH_PERCENTILE,
 ):
     configure_environment()
     train_dataset, test_dataset = train_test_split(
@@ -126,7 +127,8 @@ def training_pipeline(
                         tokenizer.split_text,
                         tqdm(train_dataset),
                     )
-                )
+                ),
+                percentile=sequence_length_percentile,
             )
     log_content(
         content=f"""

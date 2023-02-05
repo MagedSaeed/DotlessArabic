@@ -59,6 +59,12 @@ from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipel
     type=int,
     default=constants.DEFAULT_BATCH_SIZE,
 )
+@click.option(
+    "--seqlen_percentile",
+    help="Sequence Length Percentile. That is, you would be sure that this percentile of your samples are completely covered",
+    type=int,
+    default=constants.SEQUENCE_LENGTH_PERCENTILE,
+)
 def run(
     dataset,
     vocab_coverage,
@@ -67,6 +73,7 @@ def run(
     cpu_devices,
     batch_size,
     sequence_length=None,
+    sequence_length_percentile=constants.SEQUENCE_LENGTH_PERCENTILE,
 ):
 
     dataset_name = dataset + "_dataset"
@@ -130,6 +137,7 @@ def run(
         tokenizer_class=tokenizer_class,
         sequence_length=sequence_length,
         results_file=dotted_results_file_path,
+        sequence_length_percentile=sequence_length_percentile,
     )
 
     log_content(
@@ -178,6 +186,7 @@ def run(
         tokenizer_class=tokenizer_class,
         sequence_length=sequence_length,
         results_file=undotted_results_file_path,
+        sequence_length_percentile=sequence_length_percentile,
     )
 
     log_content(
