@@ -94,7 +94,7 @@ def train_lm(
     max_epochs=constants.MAX_EPOCHS,
 ):
     # remove any previous checkpoints
-    checkpoints_path = Path(f"NLMs/{dataset_id}")
+    checkpoints_path = Path(f"NLMs/{dataset_id}/{tokenizer_class.__name__}")
     shutil.rmtree(checkpoints_path, ignore_errors=True)
     checkpoint_callback = ModelCheckpoint(
         mode="min",
@@ -105,9 +105,9 @@ def train_lm(
         save_weights_only=False,
         auto_insert_metric_name=True,
         save_on_train_epoch_end=False,
-        dirpath=f"NLMs/{dataset_id}/checkpoints",
-        filename="{epoch}-{val_loss:.2f}-{step}"
-        + f"-{tokenizer_class.__name__}-{vocab_coverage}",
+        dirpath=f"NLMs/{dataset_id}/{tokenizer_class.__name__}/checkpoints",
+        filename="{epoch}-{val_loss:.3f}-{step}"
+        + f"-{vocab_coverage}",
     )
     callbacks.append(checkpoint_callback)
     early_stopping_callback = EarlyStopping(
@@ -289,10 +289,11 @@ def get_vocab_size(
     return vocab
 
 
-def get_best_checkpoint(dataset_id, checkpoints_base_path="NLMs"):
-    for file_name in os.listdir(f"{checkpoints_base_path}/{dataset_id}/checkpoints"):
+def get_best_checkpoint(dataset_id, tokenizer_class, checkpoints_base_path="NLMs"):
+    checkpoints_path = f"{checkpoints_base_path}/{dataset_id}/{tokenizer_class.__name__}/checkpoints"
+    for file_name in os.listdir(checkpoints_path):
         if file_name.startswith("epoch"):
-            return f"{checkpoints_base_path}/{dataset_id}/checkpoints/{file_name}"
+            return f"{checkpoints_path}/{file_name}"
 
 
 def get_sequence_length(
