@@ -1,10 +1,8 @@
 import sys
 import click
-import tkseem as tk
 from pathlib import Path
 from tqdm.auto import tqdm
 from datetime import datetime
-from farasa.segmenter import FarasaSegmenter
 
 
 if "." not in sys.path:
@@ -12,8 +10,8 @@ if "." not in sys.path:
 
 
 from dotless_arabic.utils import log_content
+from dotless_arabic.processing import process
 from dotless_arabic.tokenizers import TOKENIZERS_MAP
-from dotless_arabic.processing import process, undot
 from dotless_arabic.experiments.ngrams.src import constants
 from dotless_arabic.experiments.ngrams.src.train import training_pipeline
 
