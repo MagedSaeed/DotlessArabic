@@ -19,3 +19,12 @@ python dotless_arabic/experiments/nlms/run_experiment.py --dataset=sanadset_hade
 python dotless_arabic/experiments/nlms/run_experiment.py --dataset=wikipedia --tokenizer_class=WordTokenizer --gpu_devices=1;
 python dotless_arabic/experiments/nlms/run_experiment.py --dataset=aggregated --tokenizer_class=WordTokenizer --gpu_devices=1;
 ```
+
+The following are the commands for running DisjointLetterTokenizer
+
+```bash
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=sanadset_hadeeth --tokenizer_class=DisjointLetterTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --tokenizer_class=DisjointLetterTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=wikipedia --tokenizer_class=DisjointLetterTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=news --tokenizer_class=DisjointLetterTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975 --gpu_devices=1;
+```
