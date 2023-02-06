@@ -31,43 +31,40 @@ def collect_dataset(results_file=None):
     )
     sanadset_hadeeth_dataset = sorted(list(set(sanadset_hadeeth_dataset)))
 
-    if results_file is not None:
-        log_content(
-            content=f"""
-            Sample of datasets documents:
-            {constants.NEW_LINE.join(sanadset_hadeeth_dataset[:5])}
-            """,
-            results_file=results_file,
-        )
+    log_content(
+        content=f"""
+        Sample of datasets documents:
+        {constants.NEW_LINE.join(sanadset_hadeeth_dataset[:5])}
+        """,
+        results_file=results_file,
+    )
 
-        log_content(
-            content=f"""
-            Original Number of Samples:
-            {len(sanadset_hadeeth_dataset):,}
-            """,
-            results_file=results_file,
-        )
+    log_content(
+        content=f"""
+        Original Number of Samples:
+        {len(sanadset_hadeeth_dataset):,}
+        """,
+        results_file=results_file,
+    )
 
     dataset = list(set(sanadset_hadeeth_dataset))
 
-    if results_file is not None:
-        log_content(
-            content=f"""
-            Number of Samples after dropping duplicates:
-            {len(dataset):,}
-            """,
-            results_file=results_file,
-        )
+    log_content(
+        content=f"""
+        Number of Samples after dropping duplicates:
+        {len(dataset):,}
+        """,
+        results_file=results_file,
+    )
 
     dataset = dataset_dot_transform(tqdm(sanadset_hadeeth_dataset))
 
-    if results_file is not None:
-        log_content(
-            content=f"""
-            Number of Samples after splitting on dots:
-            {len(dataset):,}
-            """,
-            results_file=results_file,
-        )
+    log_content(
+        content=f"""
+        Number of Samples after splitting on dots:
+        {len(dataset):,}
+        """,
+        results_file=results_file,
+    )
 
     return dataset

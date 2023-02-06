@@ -34,34 +34,32 @@ def collect_dataset(results_file=None):
         + collect_wikipedia_dataset()
     )
 
-    if results_file is not None:
-        log_content(
-            content=f"""
-            Sample of datasets samples:
-            {constants.NEW_LINE.join(dataset[:2])}
-            """,
-            results_file=results_file,
-        )
+    log_content(
+        content=f"""
+        Sample of datasets samples:
+        {constants.NEW_LINE.join(dataset[:2])}
+        """,
+        results_file=results_file,
+    )
 
-        log_content(
-            content=f"""
-            Number of Samples before transformations:
-            {len(dataset):,}
-            """,
-            results_file=results_file,
-        )
+    log_content(
+        content=f"""
+        Number of Samples before transformations:
+        {len(dataset):,}
+        """,
+        results_file=results_file,
+    )
 
     # just to double check
 
     dataset = dataset_dot_transform(dataset_newline_transform(dataset))
 
-    if results_file is not None:
-        log_content(
-            content=f"""
-            Number of Samples after transformations:
-            {len(dataset):,}
-            """,
-            results_file=results_file,
-        )
+    log_content(
+        content=f"""
+        Number of Samples after transformations:
+        {len(dataset):,}
+        """,
+        results_file=results_file,
+    )
 
     return dataset
