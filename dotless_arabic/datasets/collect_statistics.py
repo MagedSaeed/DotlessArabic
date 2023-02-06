@@ -39,11 +39,11 @@ def run(dataset):
 
     statistics_file_path = f"{results_dir}/statistics.txt"
 
-    dataset = constants.COLLECT_DATASET[dataset](results_file=statistics_file_path)
-
     # delete the current logging file, if exists
 
     Path(statistics_file_path).unlink(missing_ok=True)
+
+    dataset = constants.COLLECT_DATASET[dataset](results_file=statistics_file_path)
 
     log_content(
         content=f"""
