@@ -65,6 +65,18 @@ from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipel
     type=float,
     default=constants.SEQUENCE_LENGTH_PERCENTILE,
 )
+@click.option(
+    "--run_dotted",
+    help="Run DOTTED experiment. This is True by default",
+    type=bool,
+    default=True,
+)
+@click.option(
+    "--run_undotted",
+    help="Run UNDOTTED experiment. This is True by default",
+    type=bool,
+    default=True,
+)
 def run(
     dataset,
     vocab_coverage,
@@ -72,12 +84,18 @@ def run(
     gpu_devices,
     cpu_devices,
     batch_size,
+    run_dotted,
+    run_undotted,
     sequence_length=None,
     seqlen_percentile=constants.SEQUENCE_LENGTH_PERCENTILE,
 ):
 
     dataset_name = dataset + "_dataset"
     sequence_length_percentile = seqlen_percentile
+
+    assert (
+        run_dotted or run_undotted
+    ), "run_dotted and run_undotted should not be both False"
 
     gpu_devices = list(map(int, gpu_devices.split(",")))
 
@@ -92,18 +110,40 @@ def run(
 
     dotted_results_file_path = f"{results_dir}/results_dotted_tokenizer_{tokenizer_class.__name__}_vocab_coverage_{vocab_coverage}.txt"
 
-    dataset = constants.COLLECT_DATASET[dataset](results_file=dotted_results_file_path)
+    if run_dotted:
 
-    # delete the current logging file, if exists
+        # delete the current logging file, if exists
 
-    Path(dotted_results_file_path).unlink(missing_ok=True)
+        Path(dotted_results_file_path).unlink(missing_ok=True)
 
-    log_content(
-        content=f"""
-            Dotted Training Started at {datetime.now()} for tokenizer: {tokenizer_class.__name__}
-            """,
-        results_file=dotted_results_file_path,
-    )
+    undotted_results_file_path = f"{results_dir}/results_undotted_tokenizer_{tokenizer_class.__name__}_vocab_coverage_{vocab_coverage}.txt"
+
+    if run_undotted:
+        # delete the current logging file, if exists
+
+        Path(undotted_results_file_path).unlink(missing_ok=True)
+
+    if run_dotted:
+        dataset = constants.COLLECT_DATASET[dataset](
+            results_file=dotted_results_file_path
+        )
+    else:
+        dataset = constants.COLLECT_DATASET[dataset](
+            results_file=undotted_results_file_path
+        )
+
+    if run_dotted:
+
+        # delete the current logging file, if exists
+
+        Path(dotted_results_file_path).unlink(missing_ok=True)
+
+        log_content(
+            content=f"""
+                Dotted Training Started at {datetime.now()} for tokenizer: {tokenizer_class.__name__}
+                """,
+            results_file=dotted_results_file_path,
+        )
 
     dataset = list(
         map(
@@ -112,90 +152,103 @@ def run(
         ),
     )
 
-    log_content(
-        content=f"""
-        Some of the Dataset Samples before training:
-        {constants.NEW_LINE.join(dataset[:5])}
-        """,
-        results_file=dotted_results_file_path,
-    )
-
     ################################################
     ###### Dotted Dataset Training #################
     ################################################
 
-    dataset_id = f"dotted-{dataset_name}".upper()
+    if run_dotted:
+        log_content(
+            content=f"""
+            Some of the Dataset Samples before training:
+            {constants.NEW_LINE.join(dataset[:5])}
+            """,
+            results_file=dotted_results_file_path,
+        )
 
-    training_pipeline(
-        is_dotted=True,
-        dataset=dataset,
-        batch_size=batch_size,
-        dataset_id=dataset_id,
-        gpu_devices=gpu_devices,
-        cpu_devices=cpu_devices,
-        vocab_coverage=vocab_coverage,
-        dataset_name=dataset_id.lower(),
-        tokenizer_class=tokenizer_class,
-        sequence_length=sequence_length,
-        results_file=dotted_results_file_path,
-        sequence_length_percentile=sequence_length_percentile,
-    )
+        dataset_id = f"dotted-{dataset_name}".upper()
 
-    log_content(
-        content=f"""
-        Dotted Training Finished for tokenizer {tokenizer_class.__name__} at {datetime.now()}
-        """,
-        results_file=dotted_results_file_path,
-    )
+        training_pipeline(
+            is_dotted=True,
+            dataset=dataset,
+            batch_size=batch_size,
+            dataset_id=dataset_id,
+            gpu_devices=gpu_devices,
+            cpu_devices=cpu_devices,
+            vocab_coverage=vocab_coverage,
+            dataset_name=dataset_id.lower(),
+            tokenizer_class=tokenizer_class,
+            sequence_length=sequence_length,
+            results_file=dotted_results_file_path,
+            sequence_length_percentile=sequence_length_percentile,
+        )
+
+        log_content(
+            content=f"""
+            Dotted Training Finished for tokenizer {tokenizer_class.__name__} at {datetime.now()}
+            """,
+            results_file=dotted_results_file_path,
+        )
+    else:
+        print(
+            "#" * 100,
+            f"""
+            Dotted Experiment is DISABLED for tokenizer {tokenizer_class.__name__} and dataset {dataset_name}
+            """,
+            "#" * 100,
+        )
 
     ################################################
     ###### Undotted Dataset Training ###############
     ################################################
 
-    undotted_results_file_path = f"{results_dir}/results_undotted_tokenizer_{tokenizer_class.__name__}_vocab_coverage_{vocab_coverage}.txt"
+    if run_undotted:
 
-    # delete the current logging file, if exists
+        log_content(
+            content=f"""
+            Undotted Training Started at {datetime.now()} for tokenizer: {tokenizer_class.__name__}
+            """,
+            results_file=undotted_results_file_path,
+        )
 
-    Path(undotted_results_file_path).unlink(missing_ok=True)
+        dataset_id = f"undotted-{dataset_name}".upper()
 
-    log_content(
-        content=f"""
-        Undotted Training Started at {datetime.now()} for tokenizer: {tokenizer_class.__name__}
-        """,
-        results_file=undotted_results_file_path,
-    )
+        log_content(
+            content=f"""
+            Some of the Dataset Samples after undotting:
+            {constants.NEW_LINE.join(dataset[:5])}
+            """,
+            results_file=undotted_results_file_path,
+        )
 
-    dataset_id = f"undotted-{dataset_name}".upper()
+        training_pipeline(
+            is_dotted=False,
+            dataset=dataset,
+            dataset_id=dataset_id,
+            batch_size=batch_size,
+            gpu_devices=gpu_devices,
+            cpu_devices=cpu_devices,
+            vocab_coverage=vocab_coverage,
+            dataset_name=dataset_id.lower(),
+            tokenizer_class=tokenizer_class,
+            sequence_length=sequence_length,
+            results_file=undotted_results_file_path,
+            sequence_length_percentile=sequence_length_percentile,
+        )
 
-    log_content(
-        content=f"""
-        Some of the Dataset Samples after undotting:
-        {constants.NEW_LINE.join(dataset[:5])}
-        """,
-        results_file=undotted_results_file_path,
-    )
-
-    training_pipeline(
-        is_dotted=False,
-        dataset=dataset,
-        dataset_id=dataset_id,
-        batch_size=batch_size,
-        gpu_devices=gpu_devices,
-        cpu_devices=cpu_devices,
-        vocab_coverage=vocab_coverage,
-        dataset_name=dataset_id.lower(),
-        tokenizer_class=tokenizer_class,
-        sequence_length=sequence_length,
-        results_file=undotted_results_file_path,
-        sequence_length_percentile=sequence_length_percentile,
-    )
-
-    log_content(
-        content=f"""
-        Undotted Training Finished for tokenizer {tokenizer_class.__name__} at {datetime.now()}
-        """,
-        results_file=undotted_results_file_path,
-    )
+        log_content(
+            content=f"""
+            Undotted Training Finished for tokenizer {tokenizer_class.__name__} at {datetime.now()}
+            """,
+            results_file=undotted_results_file_path,
+        )
+    else:
+        print(
+            "#" * 100,
+            f"""
+            Dotted Experiment is DISABLED for tokenizer {tokenizer_class.__name__} and dataset {dataset_name}
+            """,
+            "#" * 100,
+        )
 
 
 if __name__ == "__main__":

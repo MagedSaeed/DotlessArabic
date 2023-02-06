@@ -28,13 +28,12 @@ def collect_dataset(results_file=None):
             no_basmala_quran_dataset.append(ayiah.strip())
     quran_dataset = no_basmala_quran_dataset
 
-    if results_file is not None:
-        log_content(
-            content=f"""
-            Number of samples:
-            {len(quran_dataset)}
-            """,
-            results_file=results_file,
-        )
+    log_content(
+        content=f"""
+        Number of samples:
+        {len(quran_dataset)}
+        """,
+        results_file=results_file,
+    )
 
     return quran_dataset

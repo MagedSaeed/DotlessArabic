@@ -47,27 +47,25 @@ def collect_dataset(results_file=None):
         # None,
     ]
 
-    if results_file is not None:
-        log_content(
-            content=f"""
-            Number datasets samples:
-            {len(ashaar)}
-            """,
-            results_file=results_file,
-        )
+    log_content(
+        content=f"""
+        Number datasets samples:
+        {len(ashaar)}
+        """,
+        results_file=results_file,
+    )
 
     ashaar = ashaar.filter(
         lambda example: example["poem meter"] not in non_accepted_meters
     )
 
-    if results_file is not None:
-        log_content(
-            content=f"""
-            Number datasets samples after filtering non accepted meters:
-            {len(ashaar)}
-            """,
-            results_file=results_file,
-        )
+    log_content(
+        content=f"""
+        Number datasets samples after filtering non accepted meters:
+        {len(ashaar)}
+        """,
+        results_file=results_file,
+    )
 
     baits = list()
 
@@ -80,22 +78,21 @@ def collect_dataset(results_file=None):
                 prev_shatr = shatr
             index += 1
 
-    if results_file is not None:
-        log_content(
-            content=f"""
-            Sample of datasets samples:
-            {constants.NEW_LINE.join(baits[:5])}
-            """,
-            results_file=results_file,
-        )
+    log_content(
+        content=f"""
+        Sample of datasets samples:
+        {constants.NEW_LINE.join(baits[:5])}
+        """,
+        results_file=results_file,
+    )
 
-        log_content(
-            content=f"""
-            Number of Baits:
-            {len(baits):,}
-            """,
-            results_file=results_file,
-        )
+    log_content(
+        content=f"""
+        Number of Baits:
+        {len(baits):,}
+        """,
+        results_file=results_file,
+    )
 
     baits = list(
         filter(
@@ -104,13 +101,12 @@ def collect_dataset(results_file=None):
         )
     )
 
-    if results_file is not None:
-        log_content(
-            content=f"""
-            Number of baits after deleting 60>= len(bait) chars >= 30 chars:
-            {len(baits):,}
-            """,
-            results_file=results_file,
-        )
+    log_content(
+        content=f"""
+        Number of baits after deleting 60>= len(bait) chars >= 30 chars:
+        {len(baits):,}
+        """,
+        results_file=results_file,
+    )
 
     return baits
