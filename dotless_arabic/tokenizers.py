@@ -1,4 +1,3 @@
-from collections import defaultdict
 import re
 import tkseem as tk
 from functools import lru_cache
@@ -8,7 +7,6 @@ from dotless_arabic.processing import undot
 
 
 class CharacterTokenizer(tk.CharacterTokenizer):
-    
     @classmethod
     @lru_cache(maxsize=10_000)
     def split_text(cls, text, undot_text=False):
@@ -35,7 +33,6 @@ class CharacterTokenizer(tk.CharacterTokenizer):
 
 
 class DisjointLetterTokenizer(tk.DisjointLetterTokenizer):
-
     @classmethod
     @lru_cache(maxsize=10_000)
     def split_text(cls, text, undot_text=False):
@@ -59,7 +56,6 @@ class DisjointLetterTokenizer(tk.DisjointLetterTokenizer):
 
 
 class FarasaMorphologicalTokenizer(tk.FarasaMorphologicalTokenizer):
-
     @classmethod
     @lru_cache(maxsize=10_000)
     def split_text(
