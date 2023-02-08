@@ -79,9 +79,10 @@ def training_pipeline(
         tokenizer_class=tokenizer_class,
     )
     if tokenizer_class != WordTokenizer:
-        # add one to account for space char. This is severe for char tokenizer but can be okay for others.
-        vocab_size += 1
-        all_vocab += 1
+        # add 4 to account for space char and other special chars.
+        # This is severe for char tokenizer but can be okay for others.
+        vocab_size += 4
+        all_vocab += 4
 
     log_content(
         content=f"""
@@ -182,6 +183,10 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+
+    training_oov_rate = get_oovs_rate(dataloader=train_dataloader)
+    val_oov_rate = get_oovs_rate(dataloader=train_dataloader)
+    test_oov_rate = get_oovs_rate(dataloader=train_dataloader)
 
     timer_callback = Timer()
 
