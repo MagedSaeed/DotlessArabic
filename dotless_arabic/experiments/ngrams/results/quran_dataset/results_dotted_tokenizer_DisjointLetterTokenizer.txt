@@ -1,5 +1,13 @@
 ####################################################################################################
-Dotted Training Started at 2023-02-01 08:00:58.431083 for tokenizer: DisjointLetterTokenizer
+Dotted Training Started at 2023-02-07 20:41:43.852467 for tokenizer: DisjointLetterTokenizer
+####################################################################################################
+####################################################################################################
+Some of the Dataset Samples before training:
+بسم الله الرحمن الرحيم
+الحمد لله رب العالمين
+الرحمن الرحيم
+مالك يوم الدين
+اياك نعبد واياك نستعين
 ####################################################################################################
 ####################################################################################################
 Some of the Dataset Samples before tokenization:
@@ -13,12 +21,12 @@ Some of the Dataset Samples before tokenization:
 Tokenize the dataset
 ####################################################################################################
 ####################################################################################################
-Some of the Dataset Samples before training:
-بسم ا ##لله ا ##لر ##حمن ا ##لر ##حيم
-ا ##لحمد لله ر ##ب ا ##لعا ##لمين
-ا ##لر ##حمن ا ##لر ##حيم
-ما ##لك يو ##م ا ##لد ##ين
-ا ##يا ##ك نعبد و ##ا ##يا ##ك نستعين
+Some of the Dataset Samples after tokenization:
+بسم <##> ا لله <##> ا لر حمن <##> ا لر حيم
+ا لحمد <##> لله <##> ر ب <##> ا لعا لمين
+ا لر حمن <##> ا لر حيم
+ما لك <##> يو م <##> ا لد ين
+ا يا ك <##> نعبد <##> و ا يا ك <##> نستعين
 ####################################################################################################
 ####################################################################################################
 TRAINING STARTED
@@ -27,34 +35,34 @@ TRAINING STARTED
 {
     "dotted-quran_dataset": {
         "2": {
-            "perplexity_with_OOVs": 49.50942576674539,
-            "perplexity_without_OOVs": 41.48806393670258,
-            "counts_of_OOVs": "359",
-            "ngram_counts": "34,166"
+            "perplexity_with_OOVs": 20.29134437744725,
+            "perplexity_without_OOVs": 18.09915247289703,
+            "counts_of_OOVs": "287",
+            "ngram_counts": "19,397"
         },
         "3": {
-            "perplexity_with_OOVs": 29.480445371293165,
-            "perplexity_without_OOVs": 24.405995145435526,
-            "counts_of_OOVs": "359",
-            "ngram_counts": "67,061"
+            "perplexity_with_OOVs": 13.559528030732992,
+            "perplexity_without_OOVs": 12.025781633812198,
+            "counts_of_OOVs": "287",
+            "ngram_counts": "46,224"
         },
         "4": {
-            "perplexity_with_OOVs": 24.22289451214857,
-            "perplexity_without_OOVs": 19.976674741268607,
-            "counts_of_OOVs": "359",
-            "ngram_counts": "90,054"
+            "perplexity_with_OOVs": 10.816756148464146,
+            "perplexity_without_OOVs": 9.565645086788516,
+            "counts_of_OOVs": "287",
+            "ngram_counts": "78,640"
         },
         "5": {
-            "perplexity_with_OOVs": 22.871653817579354,
-            "perplexity_without_OOVs": 18.847272005927362,
-            "counts_of_OOVs": "359",
-            "ngram_counts": "101,597"
+            "perplexity_with_OOVs": 9.672516811649512,
+            "perplexity_without_OOVs": 8.54402979792689,
+            "counts_of_OOVs": "287",
+            "ngram_counts": "106,413"
         },
         "6": {
-            "perplexity_with_OOVs": 22.573435576993905,
-            "perplexity_without_OOVs": 18.600007309205076,
-            "counts_of_OOVs": "359",
-            "ngram_counts": "106,420"
+            "perplexity_with_OOVs": 9.109045407193081,
+            "perplexity_without_OOVs": 8.042402628006966,
+            "counts_of_OOVs": "287",
+            "ngram_counts": "125,880"
         }
     }
 }
@@ -63,5 +71,5 @@ TRAINING STARTED
 TRAINING FINISHED
 ####################################################################################################
 ####################################################################################################
-Dotted Training Finished for tokenizer DisjointLetterTokenizer at 2023-02-01 08:01:27.247382
+Dotted Training Finished for tokenizer DisjointLetterTokenizer at 2023-02-07 20:42:12.856885
 ####################################################################################################
