@@ -79,7 +79,7 @@ def training_pipeline(
         tokenizer_class=tokenizer_class,
     )
     if tokenizer_class != WordTokenizer:
-        # add 4 to account for space char and other special chars.
+        # add 4 to account for other special chars such as unk and pad.
         # This is severe for char tokenizer but can be okay for others.
         vocab_size += 4
         all_vocab += 4
