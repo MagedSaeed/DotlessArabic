@@ -104,11 +104,6 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
-    from pprint import pprint
-
-    pprint(tokenizer.vocab)
-    print(len(tokenizer.vocab))
-    raise
     log_content(
         content=f"""
         Calculating Sequence Length:
