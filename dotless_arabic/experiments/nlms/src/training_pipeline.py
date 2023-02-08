@@ -7,10 +7,10 @@ from pytorch_lightning.utilities.model_summary import ModelSummary
 
 from dotless_arabic.utils import log_content
 from dotless_arabic.experiments.nlms.src import constants
-from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer
 from dotless_arabic.experiments.nlms.src.callbacks import LossMetricsCallback
 from dotless_arabic.experiments.nlms.src.models import LitNeuralLanguageModel
 from dotless_arabic.experiments.nlms.src.settings import configure_environment
+from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer, WordTokenizer
 from dotless_arabic.experiments.nlms.src.utils import (
     calculate_perplexity,
     generate_text,
@@ -78,6 +78,11 @@ def training_pipeline(
         vocab_coverage=vocab_coverage,
         tokenizer_class=tokenizer_class,
     )
+    if tokenizer_class != WordTokenizer:
+        # add one to account for space char. This is severe for char tokenizer but can be okay for others.
+        vocab_size += 1
+        all_vocab += 1
+
     log_content(
         content=f"""
         Considered Vocab: {vocab_size:,}
@@ -99,6 +104,11 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+    from pprint import pprint
+
+    pprint(tokenizer.vocab)
+    print(len(tokenizer.vocab))
+    raise
     log_content(
         content=f"""
         Calculating Sequence Length:
