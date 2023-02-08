@@ -1,5 +1,13 @@
 ####################################################################################################
-Dotted Training Started at 2023-02-01 16:13:23.628542 for tokenizer: FarasaMorphologicalTokenizer
+Dotted Training Started at 2023-02-07 23:45:19.100101 for tokenizer: FarasaMorphologicalTokenizer
+####################################################################################################
+####################################################################################################
+Some of the Dataset Samples before training:
+بسم الله الرحمن الرحيم
+الحمد لله رب العالمين
+الرحمن الرحيم
+مالك يوم الدين
+اياك نعبد واياك نستعين
 ####################################################################################################
 ####################################################################################################
 Some of the Dataset Samples before tokenization:
@@ -13,12 +21,12 @@ Some of the Dataset Samples before tokenization:
 Tokenize the dataset
 ####################################################################################################
 ####################################################################################################
-Some of the Dataset Samples before training:
-بسم الله ال ##رحمن ال ##رحيم
-ال ##حمد ل ##الله رب ال ##عالم ##ين
-ال ##رحمن ال ##رحيم
-مالك يوم ال ##دين
-اياك نعبد و ##اياك نستعين
+Some of the Dataset Samples after tokenization:
+بسم <##> الله <##> ال رحمن <##> ال رحيم
+ال حمد <##> ل الله <##> رب <##> ال عالم ين
+ال رحمن <##> ال رحيم
+مالك <##> يوم <##> ال دين
+اياك <##> نعبد <##> و اياك <##> نستعين
 ####################################################################################################
 ####################################################################################################
 TRAINING STARTED
@@ -27,34 +35,34 @@ TRAINING STARTED
 {
     "dotted-quran_dataset": {
         "2": {
-            "perplexity_with_OOVs": 75.55197686674558,
-            "perplexity_without_OOVs": 56.12506576381978,
-            "counts_of_OOVs": "517",
-            "ngram_counts": "36,442"
+            "perplexity_with_OOVs": 23.632373460434017,
+            "perplexity_without_OOVs": 19.86051466436801,
+            "counts_of_OOVs": "390",
+            "ngram_counts": "21,576"
         },
         "3": {
-            "perplexity_with_OOVs": 49.63023094759125,
-            "perplexity_without_OOVs": 36.29075939986737,
-            "counts_of_OOVs": "517",
-            "ngram_counts": "67,242"
+            "perplexity_with_OOVs": 16.54914399977179,
+            "perplexity_without_OOVs": 13.800420469961274,
+            "counts_of_OOVs": "390",
+            "ngram_counts": "47,889"
         },
         "4": {
-            "perplexity_with_OOVs": 43.00563463522542,
-            "perplexity_without_OOVs": 31.31877923074982,
-            "counts_of_OOVs": "517",
-            "ngram_counts": "83,226"
+            "perplexity_with_OOVs": 13.413487868483147,
+            "perplexity_without_OOVs": 11.130267177781425,
+            "counts_of_OOVs": "390",
+            "ngram_counts": "78,364"
         },
         "5": {
-            "perplexity_with_OOVs": 41.67748883635471,
-            "perplexity_without_OOVs": 30.32879308761521,
-            "counts_of_OOVs": "517",
-            "ngram_counts": "87,998"
+            "perplexity_with_OOVs": 12.096239277807022,
+            "perplexity_without_OOVs": 10.01905885267815,
+            "counts_of_OOVs": "390",
+            "ngram_counts": "103,209"
         },
         "6": {
-            "perplexity_with_OOVs": 41.51550658252756,
-            "perplexity_without_OOVs": 30.21885909529048,
-            "counts_of_OOVs": "517",
-            "ngram_counts": "88,170"
+            "perplexity_with_OOVs": 11.459981437408949,
+            "perplexity_without_OOVs": 9.4878072794498,
+            "counts_of_OOVs": "390",
+            "ngram_counts": "118,314"
         }
     }
 }
@@ -63,5 +71,5 @@ TRAINING STARTED
 TRAINING FINISHED
 ####################################################################################################
 ####################################################################################################
-Dotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2023-02-01 16:14:55.189851
+Dotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2023-02-07 23:45:52.033807
 ####################################################################################################
