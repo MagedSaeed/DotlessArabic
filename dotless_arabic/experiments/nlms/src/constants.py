@@ -5,7 +5,7 @@ from dotless_arabic.experiments.constants import *
 
 NUM_LAYERS = 4  # for GRU
 
-MAX_EPOCHS = 60
+MAX_EPOCHS = 100
 DEFAULT_BATCH_SIZE = 256
 HIDDEN_SIZE = 512
 DROPOUT_PROB = 0.333

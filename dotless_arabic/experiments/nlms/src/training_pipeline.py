@@ -78,11 +78,11 @@ def training_pipeline(
         vocab_coverage=vocab_coverage,
         tokenizer_class=tokenizer_class,
     )
-    if tokenizer_class != WordTokenizer:
-        # add 4 to account for other special chars such as unk and pad.
-        # This is severe for char tokenizer but can be okay for others.
-        vocab_size += 4
-        all_vocab += 4
+    # if tokenizer_class != WordTokenizer:
+    # add 4 to account for other special chars such as unk and pad.
+    # This is severe for char tokenizer but can be okay for others.
+    vocab_size += 4
+    all_vocab += 4
 
     log_content(
         content=f"""
@@ -203,8 +203,8 @@ def training_pipeline(
 
     wandb_logger = WandbLogger(
         project=f"NLMs",
-        id=dataset_id,
         group=dataset_name,
+        id=dataset_id + f"_{tokenizer_class.__name__}",
         job_type="dotted" if is_dotted else "undotted",
         name=dataset_name + f"_{tokenizer_class.__name__}",
     )
