@@ -101,49 +101,37 @@ def run(
 
     current_dir = Path(__file__).resolve().parent
 
-    results_dir = f"{current_dir}/results/{dataset_name}"
+    results_dir = f"{current_dir}/results/{dataset_name}/{tokenizer_class}"
 
     # create results dir if not exists
     Path(results_dir).mkdir(parents=True, exist_ok=True)
 
     tokenizer_class = TOKENIZERS_MAP[tokenizer_class]
 
-    dotted_results_file_path = f"{results_dir}/results_dotted_tokenizer_{tokenizer_class.__name__}_vocab_coverage_{vocab_coverage}.txt"
-
     if run_dotted:
+
+        dotted_results_file_path = f"{results_dir}/dotted_vocab_coverage_{vocab_coverage}_seqlen_percentile_{seqlen_percentile}.txt"
 
         # delete the current logging file, if exists
 
         Path(dotted_results_file_path).unlink(missing_ok=True)
 
-    undotted_results_file_path = f"{results_dir}/results_undotted_tokenizer_{tokenizer_class.__name__}_vocab_coverage_{vocab_coverage}.txt"
+        dataset = constants.COLLECT_DATASET[dataset](
+            results_file=dotted_results_file_path
+        )
 
     if run_undotted:
+
+        undotted_results_file_path = f"{results_dir}/undotted_vocab_coverage_{vocab_coverage}_seqlen_percentile_{seqlen_percentile}.txt"
+
         # delete the current logging file, if exists
 
         Path(undotted_results_file_path).unlink(missing_ok=True)
 
-    if run_dotted:
-        dataset = constants.COLLECT_DATASET[dataset](
-            results_file=dotted_results_file_path
-        )
-    else:
-        dataset = constants.COLLECT_DATASET[dataset](
-            results_file=undotted_results_file_path
-        )
-
-    if run_dotted:
-
-        # delete the current logging file, if exists
-
-        Path(dotted_results_file_path).unlink(missing_ok=True)
-
-        log_content(
-            content=f"""
-                Dotted Training Started at {datetime.now()} for tokenizer: {tokenizer_class.__name__}
-                """,
-            results_file=dotted_results_file_path,
-        )
+        if not run_dotted:
+            dataset = constants.COLLECT_DATASET[dataset](
+                results_file=undotted_results_file_path
+            )
 
     dataset = list(
         map(
@@ -157,6 +145,14 @@ def run(
     ################################################
 
     if run_dotted:
+
+        log_content(
+            content=f"""
+                Dotted Training Started at {datetime.now()} for tokenizer: {tokenizer_class.__name__}
+                """,
+            results_file=dotted_results_file_path,
+        )
+
         log_content(
             content=f"""
             Some of the Dataset Samples before training:
@@ -245,7 +241,7 @@ def run(
         print(
             "#" * 100,
             f"""
-            Dotted Experiment is DISABLED for tokenizer {tokenizer_class.__name__} and dataset {dataset_name}
+            UNDotted Experiment is DISABLED for tokenizer {tokenizer_class.__name__} and dataset {dataset_name}
             """,
             "#" * 100,
         )
