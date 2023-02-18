@@ -125,7 +125,7 @@ def train_lm(
     if use_rich_progressbar:
         callbacks.append(RichProgressBar())
     lr_monitor = LearningRateMonitor(
-        logging_interval="epoch",
+        logging_interval="step",
         log_momentum=True,
     )
     callbacks.append(lr_monitor)
