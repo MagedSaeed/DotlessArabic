@@ -1,14 +1,18 @@
 import math
 import os
 import shutil
-import tkseem as tk
 from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
 import torch
 from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, RichProgressBar
+from pytorch_lightning.callbacks import (
+    EarlyStopping,
+    ModelCheckpoint,
+    RichProgressBar,
+    LearningRateMonitor,
+)
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from farasa.segmenter import FarasaSegmenter
@@ -120,6 +124,11 @@ def train_lm(
     callbacks.append(early_stopping_callback)
     if use_rich_progressbar:
         callbacks.append(RichProgressBar())
+    lr_monitor = LearningRateMonitor(
+        logging_interval="epoch",
+        log_momentum=True,
+    )
+    callbacks.append(lr_monitor)
     devices = gpu_devices if constants.DEVICE == "cuda" else cpu_devices
     trainer = Trainer(
         devices=devices,
