@@ -204,6 +204,7 @@ def training_pipeline(
         job_type="dotted" if is_dotted else "undotted",
         name=dataset_name + f"_{tokenizer_class.__name__}",
     )
+    wandb_logger.watch(lm_model, log="all")
     trainer = train_lm(
         # one_run=True,
         lm_model=lm_model,
