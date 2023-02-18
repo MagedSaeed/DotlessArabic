@@ -184,10 +184,6 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
 
-    training_oov_rate = get_oovs_rate(dataloader=train_dataloader)
-    val_oov_rate = get_oovs_rate(dataloader=train_dataloader)
-    test_oov_rate = get_oovs_rate(dataloader=train_dataloader)
-
     timer_callback = Timer()
 
     loss_metrics_callback = LossMetricsCallback()
