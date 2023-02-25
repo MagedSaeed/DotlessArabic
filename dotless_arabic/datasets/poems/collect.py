@@ -11,9 +11,13 @@ from dotless_arabic.utils import log_content
 from dotless_arabic.processing import process
 
 
-def collect_dataset(results_file=None):
+def collect_raw_dataset(results_file=None):
+    return datasets.load_dataset("arbml/ashaar", split="train")
 
-    ashaar = datasets.load_dataset("arbml/ashaar", split="train")
+
+def collect_dataset_for_language_modeling(results_file=None):
+
+    ashaar = collect_raw_dataset()
 
     non_accepted_meters = [
         "التفعيله",

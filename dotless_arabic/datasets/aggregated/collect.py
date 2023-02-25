@@ -7,21 +7,50 @@ from dotless_arabic.utils import log_content
 from dotless_arabic.experiments.nlms.src import constants
 
 from dotless_arabic.datasets.news.collect import (
-    collect_dataset as collect_news_dataset,
+    collect_dataset_for_language_modeling as collect_news_dataset,
 )
-from dotless_arabic.datasets.poems.collect import (
-    collect_dataset as collect_poems_dataset,
-)
-from dotless_arabic.datasets.quran.collect import (
-    collect_dataset as collect_quran_dataset,
-)
-from dotless_arabic.datasets.sanadset_hadeeth.collect import (
-    collect_dataset as collect_hadeeth_dataset,
+
+from dotless_arabic.datasets.news.collect import (
+    collect_raw_dataset as collect_raw_news_dataset,
 )
 from dotless_arabic.datasets.wikipedia.collect import (
-    collect_dataset as collect_wikipedia_dataset,
+    collect_raw_dataset as collect_raw_wikipedia_dataset,
+)
+from dotless_arabic.datasets.sanadset_hadeeth.collect import (
+    collect_raw_dataset as collect_raw_sanadset_hadeeth_dataset,
+)
+from dotless_arabic.datasets.poems.collect import (
+    collect_raw_dataset as collect_raw_poems_dataset,
+)
+from dotless_arabic.datasets.quran.collect import (
+    collect_raw_dataset as collect_raw_quran_dataset,
+)
+
+
+from dotless_arabic.datasets.poems.collect import (
+    collect_dataset_for_language_modeling as collect_poems_dataset,
+)
+from dotless_arabic.datasets.quran.collect import (
+    collect_dataset_for_language_modeling as collect_quran_dataset,
+)
+from dotless_arabic.datasets.sanadset_hadeeth.collect import (
+    collect_dataset_for_language_modeling as collect_hadeeth_dataset,
+)
+from dotless_arabic.datasets.wikipedia.collect import (
+    collect_dataset_for_language_modeling as collect_wikipedia_dataset,
 )
 from dotless_arabic.processing import dataset_dot_transform, dataset_newline_transform
+
+
+def collect_raw_dataset(results_file=None):
+    dataset = (
+        collect_raw_quran_dataset()
+        + collect_raw_sanadset_hadeeth_dataset()
+        + collect_raw_poems_dataset()
+        + collect_raw_wikipedia_dataset()
+        + collect_raw_news_dataset()
+    )
+    return dataset
 
 
 def collect_dataset(results_file=None):
