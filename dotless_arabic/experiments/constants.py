@@ -15,9 +15,9 @@ from dotless_arabic.datasets.news.collect import (
 from dotless_arabic.datasets.wikipedia.collect import (
     collect_dataset_for_language_modeling as collect_wikipedia_dataset,
 )
-from dotless_arabic.datasets.aggregated.collect import (
-    collect_dataset as collect_aggregated_dataset,
-)
+# from dotless_arabic.datasets.aggregated.collect import (
+#     collect_dataset as collect_aggregated_dataset,
+# )
 
 
 COLLECT_DATASET = {
@@ -26,7 +26,7 @@ COLLECT_DATASET = {
     "poems": collect_poems_dataset,
     "news": collect_news_dataset,
     "wikipedia": collect_wikipedia_dataset,
-    "aggregated": collect_aggregated_dataset,
+    # "aggregated": collect_aggregated_dataset,
 }
 
 DEFAULT_TOKENIZER_CLASS = "WordTokenizer"
