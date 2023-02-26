@@ -1,5 +1,5 @@
-import sys
-
+import sys, os
+from pathlib import Path
 
 if "." not in sys.path:
     sys.path.append(".")
@@ -8,6 +8,9 @@ from dotless_arabic.utils import log_content
 
 
 def collect_raw_dataset():
+    current_dir = Path(__file__).resolve().parent
+    if "Arabic-Original.csv" not in os.listdir(current_dir):
+        raise FileNotFoundError("Dataset file 'Arabic-Original.csv' does not exist!!")
     quran_dataset_path = (
         # f"{PROJECT_ROOT_DIR}/DatasetsAndTokenizers/Quran/Arabic-Original.csv"
         f"dotless_arabic/datasets/quran/Arabic-Original.csv"
