@@ -6,7 +6,8 @@ if "." not in sys.path:
 from tqdm.auto import tqdm
 
 from dotless_arabic.utils import log_content
-from dotless_arabic.experiments.nlms.src import constants
+
+from dotless_arabic import constants
 
 from dotless_arabic.datasets.news.collect import (
     collect_dataset_for_language_modeling as collect_news_dataset,
@@ -46,7 +47,7 @@ from dotless_arabic.processing import dataset_dot_transform, dataset_newline_tra
 
 def collect_raw_dataset(results_file=None):
     poems = list()
-    for poem in tqdm(collect_raw_poems_dataset()['poem verses']):
+    for poem in tqdm(collect_raw_poems_dataset()["poem verses"]):
         poems.extend(poem)
     dataset = (
         collect_raw_quran_dataset()

@@ -10,12 +10,13 @@ if "." not in sys.path:
 
 
 from dotless_arabic.utils import log_content
+from dotless_arabic.experiments import constants
+from dotless_arabic.tokenizers import TOKENIZERS_MAP
 from dotless_arabic.processing import process, undot
-from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.datasets.utils import (
-    get_unique_samples_count,
-    get_unique_vocab_count,
-    get_all_tokens_count,
+    tokens_frequency,
+    calculate_entropy,
+    tokenize_dataset_for_statistics,
 )
 
 
@@ -24,9 +25,15 @@ from dotless_arabic.datasets.utils import (
     "--dataset",
     help="dataset name to collect statistics for. Note that statistics files will be saved in '{current_dir_of_this_file}'/{dataset}_dataset/",
     required=True,
-    type=click.Choice(list(constants.COLLECT_DATASET.keys())),
+    type=click.Choice(list(constants.COLLECT_RAW_DATASET.keys())),
 )
-def run(dataset):
+@click.option(
+    "--tokenizer_class",
+    default=constants.DEFAULT_TOKENIZER_CLASS,
+    help="Tokenizer class to tokenize the dataset",
+    type=click.Choice(list(TOKENIZERS_MAP.keys())),
+)
+def run(dataset, tokenizer_class):
 
     dataset_name = dataset + "_dataset"
 
@@ -34,27 +41,34 @@ def run(dataset):
 
     results_dir = f"{current_dir}/{dataset}"
 
+    tokenizer_class = TOKENIZERS_MAP[tokenizer_class]
+
     # create results dir if not exists
     Path(results_dir).mkdir(parents=True, exist_ok=True)
 
-    statistics_file_path = f"{results_dir}/statistics.txt"
+    statistics_file_path = f"{results_dir}/statistics_{tokenizer_class.__name__}.txt"
 
     # delete the current logging file, if exists
 
     Path(statistics_file_path).unlink(missing_ok=True)
 
-    dataset = constants.COLLECT_DATASET[dataset](results_file=statistics_file_path)
+    dataset = constants.COLLECT_RAW_DATASET[dataset](results_file=statistics_file_path)
 
     log_content(
         content=f"""
-            Dotted Statistics Analysis Started at {datetime.now()} for dataset {dataset_name}
+            Tokenize the Dataset with {tokenizer_class.__name__}
             """,
         results_file=statistics_file_path,
     )
 
+    dataset = tokenize_dataset_for_statistics(
+        dataset=tuple(dataset),
+        tokenizer_class=tokenizer_class,
+    )
+
     log_content(
         content=f"""
-            Processing Dataset
+            Process the Dataset
             """,
         results_file=statistics_file_path,
     )
@@ -80,35 +94,53 @@ def run(dataset):
 
     log_content(
         content=f"""
+            Dotted Statistics Analysis Started at {datetime.now()} for dataset {dataset_name}
+            """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
+        Samples Count: {len(dataset):,}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    counter = tokens_frequency(dataset=tuple(dataset))
+
+    log_content(
+        content=f"""
+        Unique Vocabulary Count: {len(counter.keys()):,}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
+        All Tokens Count: {sum(counter.values()):,}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
+        vocab/tokens: {len(counter.keys())/sum(counter.values()):.3f}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    entropy = calculate_entropy(tokens_frequency=counter)
+
+    log_content(
+        content=f"""
+        Tokens Entropy: {entropy:.3f}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
         Dotted Statistics Analysis Finished for dataset {dataset_name} at {datetime.now()}
-        """,
-        results_file=statistics_file_path,
-    )
-
-    log_content(
-        content=f"""
-        Samples Count: {get_unique_samples_count(dataset):,}
-        """,
-        results_file=statistics_file_path,
-    )
-
-    log_content(
-        content=f"""
-        Unique Vocabulary Count: {get_unique_vocab_count(dataset):,}
-        """,
-        results_file=statistics_file_path,
-    )
-
-    log_content(
-        content=f"""
-        All Tokens Count: {get_all_tokens_count(dataset):,}
-        """,
-        results_file=statistics_file_path,
-    )
-
-    log_content(
-        content=f"""
-        vocab/tokens: {get_unique_vocab_count(dataset)/get_all_tokens_count(dataset):.3f}
         """,
         results_file=statistics_file_path,
     )
@@ -148,35 +180,46 @@ def run(dataset):
 
     log_content(
         content=f"""
-        Samples Count: {get_unique_samples_count(undotted_dataset):,}
+        Undotted Samples Count: {len(undotted_dataset):,}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    undotted_counter = tokens_frequency(dataset=tuple(undotted_dataset))
+
+    log_content(
+        content=f"""
+        Unique Vocabulary Count: {len(undotted_counter.keys()):,}
         """,
         results_file=statistics_file_path,
     )
 
     log_content(
         content=f"""
-        Unique Vocabulary Count: {get_unique_vocab_count(undotted_dataset):,}
+        All Undotted Tokens Count: {sum(undotted_counter.values()):,}
         """,
         results_file=statistics_file_path,
     )
 
     log_content(
         content=f"""
-        All Tokens Count: {get_all_tokens_count(undotted_dataset):,}
+        undotted vocab/undotted tokens: {len(undotted_counter.keys())/sum(undotted_counter.values()):.3f}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    undotted_entropy = calculate_entropy(tokens_frequency=undotted_counter)
+
+    log_content(
+        content=f"""
+        Undotted Tokens Entropy: {undotted_entropy:.3f}
         """,
         results_file=statistics_file_path,
     )
 
     log_content(
         content=f"""
-        vocab/tokens: {get_unique_vocab_count(undotted_dataset)/get_all_tokens_count(undotted_dataset):.3f}
-        """,
-        results_file=statistics_file_path,
-    )
-
-    log_content(
-        content=f"""
-        dotted voacb - undotted vocab: {get_unique_vocab_count(dataset)-get_unique_vocab_count(undotted_dataset):,}
+        dotted voacb - undotted vocab: {len(counter.keys())-len(undotted_counter.keys()):,}
         """,
         results_file=statistics_file_path,
     )
