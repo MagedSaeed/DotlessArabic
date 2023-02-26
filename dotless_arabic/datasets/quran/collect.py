@@ -7,7 +7,7 @@ if "." not in sys.path:
 from dotless_arabic.utils import log_content
 
 
-def collect_raw_dataset():
+def collect_raw_dataset(results_file=None):
     current_dir = Path(__file__).resolve().parent
     if "Arabic-Original.csv" not in os.listdir(current_dir):
         raise FileNotFoundError("Dataset file 'Arabic-Original.csv' does not exist!!")

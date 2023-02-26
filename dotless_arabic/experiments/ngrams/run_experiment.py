@@ -27,7 +27,7 @@ from dotless_arabic.experiments.ngrams.src.train import training_pipeline
     "--dataset",
     help="dataset name to train. Note that results files will be saved in '{current_dir_of_this_file}'/{dataset}_dataset/",
     required=True,
-    type=click.Choice(list(constants.COLLECT_DATASET.keys())),
+    type=click.Choice(list(constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING.keys())),
 )
 def run(dataset, tokenizer_class):
 
@@ -46,7 +46,9 @@ def run(dataset, tokenizer_class):
         f"{results_dir}/results_dotted_tokenizer_{tokenizer_class.__name__}.txt"
     )
 
-    dataset = constants.COLLECT_DATASET[dataset](results_file=dotted_results_file_path)
+    dataset = constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING[dataset](
+        results_file=dotted_results_file_path
+    )
 
     # delete the current logging file, if exists
 
