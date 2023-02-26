@@ -6,9 +6,9 @@ from tqdm.auto import tqdm
 if "." not in sys.path:
     sys.path.append(".")
 
+from dotless_arabic import constants
 from dotless_arabic.utils import log_content
 from dotless_arabic.processing import process
-from dotless_arabic.experiments.nlms.src import constants
 
 
 def collect_dataset(results_file=None):

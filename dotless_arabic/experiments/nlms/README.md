@@ -8,7 +8,7 @@ Note that this will run the dotted and undotted experiments for the selected dat
 
 ### Sample run with different GPUs Devices:
 
-```
+```bash
 # on one tmux session:
 python dotless_arabic/experiments/nlms/run_experiment.py --dataset=quran --tokenizer_class=WordTokenizer --gpu_devices=0;
 python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --tokenizer_class=WordTokenizer --gpu_devices=0 --sequence_length=20;
@@ -29,14 +29,23 @@ python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --token
 python dotless_arabic/experiments/nlms/run_experiment.py --dataset=wikipedia --tokenizer_class=DisjointLetterTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975 --gpu_devices=1;
 python dotless_arabic/experiments/nlms/run_experiment.py --dataset=news --tokenizer_class=DisjointLetterTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975 --gpu_devices=1;
 ```
+The following are the  commands for running FarasaMorphologicalTokenizer
+
+```bash
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=quran --tokenizer_class=FarasaMorphologicalTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=sanadset_hadeeth --tokenizer_class=FarasaMorphologicalTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --tokenizer_class=FarasaMorphologicalTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=wikipedia --tokenizer_class=FarasaMorphologicalTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=news --tokenizer_class=FarasaMorphologicalTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975;
+```
 
 
 The following are the commands for running CharacterTokenizer
 
 ```bash
-python dotless_arabic/experiments/nlms/run_experiment.py --dataset=quran --tokenizer_class=DisjointLetterTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975 --gpu_devices=1;
-python dotless_arabic/experiments/nlms/run_experiment.py --dataset=sanadset_hadeeth --tokenizer_class=DisjointLetterTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975 --gpu_devices=1;
-python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --tokenizer_class=DisjointLetterTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975 --gpu_devices=1;
-python dotless_arabic/experiments/nlms/run_experiment.py --dataset=wikipedia --tokenizer_class=DisjointLetterTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975 --gpu_devices=1;
-python dotless_arabic/experiments/nlms/run_experiment.py --dataset=news --tokenizer_class=DisjointLetterTokenizer --vocab_coverage=0.975 --seqlen_percentile=0.975 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=quran --tokenizer_class=CharacterTokenizer --vocab_coverage=1 --seqlen_percentile=0.95 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=sanadset_hadeeth --tokenizer_class=CharacterTokenizer --vocab_coverage=1 --seqlen_percentile=0.95 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --tokenizer_class=CharacterTokenizer --vocab_coverage=1 --seqlen_percentile=0.95 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=wikipedia --tokenizer_class=CharacterTokenizer --vocab_coverage=1 --seqlen_percentile=0.95 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=news --tokenizer_class=CharacterTokenizer --vocab_coverage=1 --seqlen_percentile=0.95 --gpu_devices=1;
 ```

@@ -9,9 +9,9 @@ if "." not in sys.path:
     sys.path.append(".")
 
 
+from dotless_arabic import constants
 from dotless_arabic.utils import log_content
 from dotless_arabic.utils import download_file
-from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.processing import dataset_dot_transform
 
 
