@@ -13,7 +13,7 @@ def collect_raw_dataset():
         raise FileNotFoundError("Dataset file 'Arabic-Original.csv' does not exist!!")
     quran_dataset_path = (
         # f"{PROJECT_ROOT_DIR}/DatasetsAndTokenizers/Quran/Arabic-Original.csv"
-        f"dotless_arabic/datasets/quran/Arabic-Original.csv"
+        f"{current_dir}/Arabic-Original.csv"
     )
     quran_dataset = [
         line.split("|")[-1] for line in open(quran_dataset_path).read().splitlines()
