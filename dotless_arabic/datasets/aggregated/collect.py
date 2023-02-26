@@ -3,6 +3,8 @@ import sys
 if "." not in sys.path:
     sys.path.append(".")
 
+from tqdm.auto import tqdm
+
 from dotless_arabic.utils import log_content
 from dotless_arabic.experiments.nlms.src import constants
 
@@ -43,10 +45,13 @@ from dotless_arabic.processing import dataset_dot_transform, dataset_newline_tra
 
 
 def collect_raw_dataset(results_file=None):
+    poems = list()
+    for poem in tqdm(collect_raw_poems_dataset()['poem verses']):
+        poems.extend(poem)
     dataset = (
         collect_raw_quran_dataset()
         + collect_raw_sanadset_hadeeth_dataset()
-        + collect_raw_poems_dataset()
+        + poems
         + collect_raw_wikipedia_dataset()
         + collect_raw_news_dataset()
     )
