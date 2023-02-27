@@ -38,7 +38,8 @@ def calculate_entropy(tokens_frequency):
 @lru_cache()
 def tokenize_dataset_for_statistics(dataset, tokenizer_class):
     tokenized_dataset = list()
-    segmenter = FarasaSegmenter(interactive=True)
+    if tokenizer_class == FarasaMorphologicalTokenizer:
+        segmenter = FarasaSegmenter(interactive=True)
     for document in tqdm(dataset):
         if tokenizer_class == FarasaMorphologicalTokenizer:
             tokenized_document = " ".join(

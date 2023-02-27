@@ -4,6 +4,8 @@ import subprocess
 import requests
 
 
+# use this instead: https://gist.github.com/yanqd0/c13ed29e29432e3cf3e7c38467f42f51
+# https://stackoverflow.com/questions/37573483/progress-bar-while-download-file-over-http-with-requests
 def download_file(file_url, file_name, output_dir):
     outfile = os.path.join(output_dir, file_name)
     response = requests.get(
