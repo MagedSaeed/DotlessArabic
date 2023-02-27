@@ -126,7 +126,7 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
-        vocab/tokens: {len(counter.keys())/sum(counter.values()):.3f}
+        vocab/tokens: {len(counter.keys())/sum(counter.values()):.4f}
         """,
         results_file=statistics_file_path,
     )
@@ -135,7 +135,7 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
-        Tokens Entropy: {entropy:.3f}
+        Tokens Entropy: {entropy:.4f}
         """,
         results_file=statistics_file_path,
     )
@@ -205,7 +205,7 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
-        undotted vocab/undotted tokens: {len(undotted_counter.keys())/sum(undotted_counter.values()):.3f}
+        undotted vocab/undotted tokens: {len(undotted_counter.keys())/sum(undotted_counter.values()):.4f}
         """,
         results_file=statistics_file_path,
     )
@@ -214,7 +214,7 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
-        Undotted Tokens Entropy: {undotted_entropy:.3f}
+        Undotted Tokens Entropy: {undotted_entropy:.4f}
         """,
         results_file=statistics_file_path,
     )
