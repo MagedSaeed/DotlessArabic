@@ -25,7 +25,7 @@ from dotless_arabic.datasets.utils import (
     "--dataset",
     help="dataset name to collect statistics for. Note that statistics files will be saved in '{current_dir_of_this_file}'/{dataset}_dataset/",
     required=True,
-    type=click.Choice(list(constants.COLLECT_RAW_DATASET.keys())),
+    type=click.Choice(list(constants.COLLECT_DATASET_FOR_ANALYSIS.keys())),
 )
 @click.option(
     "--tokenizer_class",
@@ -52,7 +52,9 @@ def run(dataset, tokenizer_class):
 
     Path(statistics_file_path).unlink(missing_ok=True)
 
-    dataset = constants.COLLECT_RAW_DATASET[dataset](results_file=statistics_file_path)
+    dataset = constants.COLLECT_DATASET_FOR_ANALYSIS[dataset](
+        results_file=statistics_file_path
+    )
 
     log_content(
         content=f"""

@@ -14,19 +14,19 @@ from dotless_arabic.datasets.news.collect import (
 )
 
 from dotless_arabic.datasets.news.collect import (
-    collect_raw_dataset as collect_raw_news_dataset,
+    collect_dataset_for_analysis as collect_news_dataset_for_analysis,
 )
 from dotless_arabic.datasets.wikipedia.collect import (
-    collect_raw_dataset as collect_raw_wikipedia_dataset,
+    collect_dataset_for_analysis as collect_wikipedia_dataset_for_analysis,
 )
 from dotless_arabic.datasets.sanadset_hadeeth.collect import (
-    collect_raw_dataset as collect_raw_sanadset_hadeeth_dataset,
+    collect_dataset_for_analysis as collect_sanadset_hadeeth_dataset_for_analysis,
 )
 from dotless_arabic.datasets.poems.collect import (
-    collect_raw_dataset as collect_raw_poems_dataset,
+    collect_dataset_for_analysis as collect_poems_dataset_for_analysis,
 )
 from dotless_arabic.datasets.quran.collect import (
-    collect_raw_dataset as collect_raw_quran_dataset,
+    collect_dataset_for_analysis as collect_quran_dataset_for_analysis,
 )
 
 
@@ -45,16 +45,13 @@ from dotless_arabic.datasets.wikipedia.collect import (
 from dotless_arabic.processing import dataset_dot_transform, dataset_newline_transform
 
 
-def collect_raw_dataset(results_file=None):
-    poems = list()
-    for poem in tqdm(collect_raw_poems_dataset()["poem verses"]):
-        poems.extend(poem)
+def collect_dataset_for_analysis(results_file=None):
     dataset = (
-        collect_raw_quran_dataset()
-        + collect_raw_sanadset_hadeeth_dataset()
-        + poems
-        + collect_raw_wikipedia_dataset()
-        + collect_raw_news_dataset()
+        collect_quran_dataset_for_analysis()
+        + collect_sanadset_hadeeth_dataset_for_analysis()
+        + collect_poems_dataset_for_analysis()
+        + collect_wikipedia_dataset_for_analysis()
+        + collect_news_dataset_for_analysis()
     )
     return dataset
 

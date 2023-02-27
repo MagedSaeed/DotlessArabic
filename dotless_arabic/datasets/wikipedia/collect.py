@@ -13,7 +13,7 @@ from dotless_arabic.processing import (
 )
 
 
-def collect_raw_dataset(results_file=None):
+def collect_dataset_for_analysis(results_file=None):
 
     with open("../wikipedia_dataset.txt", "r") as news_dataset_file:
         wikipedia_dataset = news_dataset_file.read().splitlines()
@@ -23,7 +23,7 @@ def collect_raw_dataset(results_file=None):
 
 
 def collect_dataset_for_language_modeling(results_file=None):
-    dataset = collect_raw_dataset(results_file=results_file)
+    dataset = collect_dataset_for_analysis(results_file=results_file)
 
     log_content(
         content=f"""
