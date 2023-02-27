@@ -7,7 +7,7 @@ if "." not in sys.path:
 from dotless_arabic.utils import log_content
 
 
-def collect_raw_dataset(results_file=None):
+def collect_dataset_for_analysis(results_file=None):
     current_dir = Path(__file__).resolve().parent
     if "Arabic-Original.csv" not in os.listdir(current_dir):
         raise FileNotFoundError("Dataset file 'Arabic-Original.csv' does not exist!!")
@@ -33,7 +33,7 @@ def collect_raw_dataset(results_file=None):
 
 
 def collect_dataset_for_language_modeling(results_file=None):
-    quran_dataset = collect_raw_dataset()
+    quran_dataset = collect_dataset_for_analysis()
     log_content(
         content=f"""
         Number of samples:

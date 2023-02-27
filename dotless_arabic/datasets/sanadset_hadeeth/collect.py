@@ -15,7 +15,7 @@ from dotless_arabic.utils import download_file
 from dotless_arabic.processing import dataset_dot_transform
 
 
-def collect_raw_dataset(results_file=None):
+def collect_dataset_for_analysis(results_file=None):
     current_dir = Path(__file__).resolve().parent
 
     if "sanadset.csv" not in os.listdir(current_dir):
@@ -48,7 +48,7 @@ def collect_raw_dataset(results_file=None):
 
 def collect_dataset_for_language_modeling(results_file=None):
 
-    sanadset_hadeeth_dataset = collect_raw_dataset(results_file=results_file)
+    sanadset_hadeeth_dataset = collect_dataset_for_analysis(results_file=results_file)
 
     log_content(
         content=f"""
