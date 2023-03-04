@@ -204,35 +204,6 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
-            Undotting Dataset
-            """,
-        results_file=statistics_file_path,
-    )
-
-    undotted_dataset = list(
-        map(
-            undot,
-            tqdm(dataset),
-        )
-    )
-
-    log_content(
-        content=f"""
-        Some of the Dataset Samples after undotting:
-        {constants.NEW_LINE.join(undotted_dataset[:5])}
-        """,
-        results_file=statistics_file_path,
-    )
-
-    log_content(
-        content=f"""
-        Undotted Samples Count: {len(undotted_dataset):,}
-        """,
-        results_file=statistics_file_path,
-    )
-
-    log_content(
-        content=f"""
         Checking if undotted tokens count file for {tokenizer_class.__name__} exists
         """,
     )
@@ -250,6 +221,34 @@ def run(dataset, tokenizer_class):
         )
 
     else:
+        log_content(
+            content=f"""
+                Undotting Dataset
+                """,
+            results_file=statistics_file_path,
+        )
+
+        undotted_dataset = list(
+            map(
+                undot,
+                tqdm(dataset),
+            )
+        )
+
+        log_content(
+            content=f"""
+            Some of the Dataset Samples after undotting:
+            {constants.NEW_LINE.join(undotted_dataset[:5])}
+            """,
+            results_file=statistics_file_path,
+        )
+
+        log_content(
+            content=f"""
+            Undotted Samples Count: {len(undotted_dataset):,}
+            """,
+            results_file=statistics_file_path,
+        )
         log_content(
             content=f"""
             Tokens count file does not exist, creating one and saving it..
