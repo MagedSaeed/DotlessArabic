@@ -1,3 +1,5 @@
+import json
+import os
 import sys
 import click
 from pathlib import Path
@@ -44,9 +46,12 @@ def run(dataset, tokenizer_class):
     tokenizer_class = TOKENIZERS_MAP[tokenizer_class]
 
     # create results dir if not exists
-    Path(results_dir).mkdir(parents=True, exist_ok=True)
+    Path(f"{results_dir}/statistics").mkdir(parents=True, exist_ok=True)
 
-    statistics_file_path = f"{results_dir}/statistics_{tokenizer_class.__name__}.txt"
+    # create tokens count dir if not exists
+    Path(f"{results_dir}/tokens_count").mkdir(parents=True, exist_ok=True)
+
+    statistics_file_path = f"{results_dir}/statistics/{tokenizer_class.__name__}.txt"
 
     # delete the current logging file, if exists
 
@@ -108,7 +113,46 @@ def run(dataset, tokenizer_class):
         results_file=statistics_file_path,
     )
 
-    counter = tokens_frequency(dataset=tuple(dataset))
+    log_content(
+        content=f"""
+        Checking if tokens count file for {tokenizer_class.__name__} exists
+        """,
+    )
+
+    if os.path.isfile(
+        f"{results_dir}/tokens_count/dotted_{tokenizer_class.__name__}.json"
+    ):
+        log_content(
+            content=f"""
+            Tokens count file exists, loading it..
+            """,
+        )
+        counter = json.load(
+            open(f"{results_dir}/tokens_count/dotted_{tokenizer_class.__name__}.json")
+        )
+
+    else:
+        log_content(
+            content=f"""
+            Tokens count file does not exist, creating one and saving it..
+            """,
+        )
+        counter = tokens_frequency(dataset=tuple(dataset))
+        json.dump(
+            dict(
+                sorted(
+                    counter.items(),
+                    key=lambda item: item[1],
+                    reverse=True,
+                )
+            ),
+            open(
+                f"{results_dir}/tokens_count/dotted_{tokenizer_class.__name__}.json",
+                "w",
+            ),
+            ensure_ascii=False,
+            indent=4,
+        )
 
     log_content(
         content=f"""
@@ -187,7 +231,46 @@ def run(dataset, tokenizer_class):
         results_file=statistics_file_path,
     )
 
-    undotted_counter = tokens_frequency(dataset=tuple(undotted_dataset))
+    log_content(
+        content=f"""
+        Checking if undotted tokens count file for {tokenizer_class.__name__} exists
+        """,
+    )
+
+    if os.path.isfile(
+        f"{results_dir}/tokens_count/undotted_{tokenizer_class.__name__}.json"
+    ):
+        log_content(
+            content=f"""
+            Tokens count file exists, loading it..
+            """,
+        )
+        undotted_counter = json.load(
+            open(f"{results_dir}/tokens_count/undotted_{tokenizer_class.__name__}.json")
+        )
+
+    else:
+        log_content(
+            content=f"""
+            Tokens count file does not exist, creating one and saving it..
+            """,
+        )
+        undotted_counter = tokens_frequency(dataset=tuple(undotted_dataset))
+        json.dump(
+            dict(
+                sorted(
+                    undotted_counter.items(),
+                    key=lambda item: item[1],
+                    reverse=True,
+                )
+            ),
+            open(
+                f"{results_dir}/tokens_count/undotted_{tokenizer_class.__name__}.json",
+                "w",
+            ),
+            ensure_ascii=False,
+            indent=4,
+        )
 
     log_content(
         content=f"""
