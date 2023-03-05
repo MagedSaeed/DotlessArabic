@@ -11,6 +11,8 @@ python dotless_arabic/datasets/collect_statistics.py --dataset aggregated;
 
 The above commands will collect statistics for word tokenizer as it is the default when the tokenizer_class option is not passed.
 
+You can use the flag `--redo_counts` to redo the calculations of tokens frequencies. Usually, these frequencies are calculated then saved as json files in `tokens_count` folder in the same level of the dataset's `collect.py` file. However, with this flag, they are recalculated again. Useful if one of the functionalities changed in the pipeline, i.e. `process` function changed or `tokenization split_text` method changed.
+
 To collect statistics for other tokenizers, starting by farasa tokenizer:
 
 ```bash

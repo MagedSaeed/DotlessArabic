@@ -17,7 +17,9 @@ def tokens_frequency(dataset, use_tqdm=True):
     frequencies = defaultdict(int)
     dataset = tqdm(dataset) if use_tqdm else dataset
     for document in dataset:
-        for token in document.split():
+        for token in list(document):
+            if token.isspace():
+                continue
             frequencies[token] += 1
     frequencies = dict(frequencies)
     return frequencies

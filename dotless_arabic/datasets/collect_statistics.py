@@ -1,6 +1,6 @@
-import json
 import os
 import sys
+import json
 import click
 from pathlib import Path
 from tqdm.auto import tqdm
@@ -35,7 +35,13 @@ from dotless_arabic.datasets.utils import (
     help="Tokenizer class to tokenize the dataset",
     type=click.Choice(list(TOKENIZERS_MAP.keys())),
 )
-def run(dataset, tokenizer_class):
+@click.option(
+    "--redo_counts",
+    default=False,
+    type=bool,
+    help="Redo all tokens frequencies counts calculations from scratch i.e. do not use the cached frequencies in the json files",
+)
+def run(dataset, tokenizer_class, redo_counts):
 
     dataset_name = dataset + "_dataset"
 
@@ -44,6 +50,19 @@ def run(dataset, tokenizer_class):
     results_dir = f"{current_dir}/{dataset}"
 
     tokenizer_class = TOKENIZERS_MAP[tokenizer_class]
+
+    if redo_counts is True:
+        log_content(
+            content=f"""
+            Redo_count is True, removing previous counts files, if they exists
+            """,
+        )
+        Path(
+            f"{results_dir}/tokens_count/dotted_{tokenizer_class.__name__}.json"
+        ).unlink(missing_ok=True)
+        Path(
+            f"{results_dir}/tokens_count/undotted_{tokenizer_class.__name__}.json"
+        ).unlink(missing_ok=True)
 
     # create results dir if not exists
     Path(f"{results_dir}/statistics").mkdir(parents=True, exist_ok=True)
@@ -101,7 +120,7 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
-            Dotted Statistics Analysis Started at {datetime.now()} for dataset {dataset_name}
+            Dotted Statistics Analysis Started at {datetime.now()} for dataset {dataset_name} tokenized by {tokenizer_class.__name__}
             """,
         results_file=statistics_file_path,
     )
@@ -170,7 +189,7 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
-        vocab/tokens: {len(counter.keys())/sum(counter.values()):.4f}
+        vocab/tokens: {len(counter.keys())/sum(counter.values()):,.4f}
         """,
         results_file=statistics_file_path,
     )
@@ -179,14 +198,21 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
-        Tokens Entropy: {entropy:.4f}
+        Tokens Entropy: {entropy:,.4f}
         """,
         results_file=statistics_file_path,
     )
 
     log_content(
         content=f"""
-        Dotted Statistics Analysis Finished for dataset {dataset_name} at {datetime.now()}
+        Average tokens length: {sum(map(len,counter.keys()))/len(counter.keys()):,.4f}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
+        Dotted Statistics Analysis Finished for dataset {dataset_name} tokenized by {tokenizer_class.__name__} at {datetime.now()}
         """,
         results_file=statistics_file_path,
     )
@@ -197,7 +223,7 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
-        Undotted Statistics Analysis Started at {datetime.now()} for dataset {dataset_name}
+        Undotted Statistics Analysis Started at {datetime.now()} for dataset {dataset_name} tokenized by {tokenizer_class.__name__}
         """,
         results_file=statistics_file_path,
     )
@@ -223,6 +249,11 @@ def run(dataset, tokenizer_class):
     else:
         log_content(
             content=f"""
+            undotted tokens count file does not exists, undotting the dataset, building one, and saving it,,
+        """,
+        )
+        log_content(
+            content=f"""
                 Undotting Dataset
                 """,
             results_file=statistics_file_path,
@@ -235,25 +266,6 @@ def run(dataset, tokenizer_class):
             )
         )
 
-        log_content(
-            content=f"""
-            Some of the Dataset Samples after undotting:
-            {constants.NEW_LINE.join(undotted_dataset[:5])}
-            """,
-            results_file=statistics_file_path,
-        )
-
-        log_content(
-            content=f"""
-            Undotted Samples Count: {len(undotted_dataset):,}
-            """,
-            results_file=statistics_file_path,
-        )
-        log_content(
-            content=f"""
-            Tokens count file does not exist, creating one and saving it..
-            """,
-        )
         undotted_counter = tokens_frequency(dataset=tuple(undotted_dataset))
         json.dump(
             dict(
@@ -273,6 +285,14 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
+        Some of the Dataset Samples after undotting:
+        {constants.NEW_LINE.join(map(undot,dataset[:5]))}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
         Unique Vocabulary Count: {len(undotted_counter.keys()):,}
         """,
         results_file=statistics_file_path,
@@ -287,7 +307,7 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
-        undotted vocab/undotted tokens: {len(undotted_counter.keys())/sum(undotted_counter.values()):.4f}
+        undotted vocab/undotted tokens: {len(undotted_counter.keys())/sum(undotted_counter.values()):,.4f}
         """,
         results_file=statistics_file_path,
     )
@@ -303,6 +323,13 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
+        Average tokens length: {sum(map(len,undotted_counter.keys()))/len(undotted_counter.keys()):,.4f}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
         dotted voacb - undotted vocab: {len(counter.keys())-len(undotted_counter.keys()):,}
         """,
         results_file=statistics_file_path,
@@ -310,7 +337,7 @@ def run(dataset, tokenizer_class):
 
     log_content(
         content=f"""
-        Undotted Statistics Analysis Finished for dataset {dataset_name} at {datetime.now()}
+        Undotted Statistics Analysis Finished for dataset {dataset_name} tokenized by {tokenizer_class.__name__} at {datetime.now()}
         """,
         results_file=statistics_file_path,
     )
