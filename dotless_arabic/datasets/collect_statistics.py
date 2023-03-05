@@ -210,9 +210,12 @@ def run(dataset, tokenizer_class, redo_counts):
         results_file=statistics_file_path,
     )
 
+    threshold = 0.25
+    truncated_counter = dict(list(counter.items())[: int(threshold * len(counter))])
+
     log_content(
         content=f"""
-        Average top 25% tokens length: {sum(map(len,list(counter.keys())[:0.25*len(counter.keys())]))/len(list(counter.keys())[:.25*len(counter.keys())]):,.4f}
+        Top {threshold}% average tokens length: {sum(map(len,truncated_counter.keys()))/len(truncated_counter.keys()):,.4f}
         """,
         results_file=statistics_file_path,
     )
@@ -341,9 +344,14 @@ def run(dataset, tokenizer_class, redo_counts):
         results_file=statistics_file_path,
     )
 
+    threshold = 0.25
+    truncated_undotted_counter = dict(
+        list(undotted_counter.items())[: int(threshold * len(undotted_counter))]
+    )
+
     log_content(
         content=f"""
-        Average top 25% tokens length: {sum(map(len,list(undotted_counter.keys())[:0.25*len(undotted_counter.keys())]))/len(list(undotted_counter.keys())[:.25*len(undotted_counter.keys())]):,.4f}
+        Top {threshold}% average tokens length: {sum(map(len,truncated_undotted_counter.keys()))/len(truncated_undotted_counter.keys()):,.4f}
         """,
         results_file=statistics_file_path,
     )
