@@ -212,6 +212,13 @@ def run(dataset, tokenizer_class, redo_counts):
 
     log_content(
         content=f"""
+        Average top 25% tokens length: {sum(map(len,list(counter.keys())[:0.25*len(counter.keys())]))/len(list(counter.keys())[:.25*len(counter.keys())]):,.4f}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
         Dotted Statistics Analysis Finished for dataset {dataset_name} tokenized by {tokenizer_class.__name__} at {datetime.now()}
         """,
         results_file=statistics_file_path,
@@ -264,6 +271,12 @@ def run(dataset, tokenizer_class, redo_counts):
                 undot,
                 tqdm(dataset),
             )
+        )
+        log_content(
+            content=f"""
+                Create an undotted tokens frequency mapping and save it to a json file
+                """,
+            results_file=statistics_file_path,
         )
 
         undotted_counter = tokens_frequency(dataset=tuple(undotted_dataset))
@@ -324,6 +337,13 @@ def run(dataset, tokenizer_class, redo_counts):
     log_content(
         content=f"""
         Average tokens length: {sum(map(len,undotted_counter.keys()))/len(undotted_counter.keys()):,.4f}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
+        Average top 25% tokens length: {sum(map(len,list(undotted_counter.keys())[:0.25*len(undotted_counter.keys())]))/len(list(undotted_counter.keys())[:.25*len(undotted_counter.keys())]):,.4f}
         """,
         results_file=statistics_file_path,
     )
