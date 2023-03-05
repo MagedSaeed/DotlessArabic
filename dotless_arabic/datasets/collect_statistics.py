@@ -54,7 +54,7 @@ def run(dataset, tokenizer_class, redo_counts):
     if redo_counts is True:
         log_content(
             content=f"""
-            Redo_count is True, removing previous counts files, if they exists
+            redo_count is True, removing previous counts files, if they exists
             """,
         )
         Path(
@@ -82,18 +82,6 @@ def run(dataset, tokenizer_class, redo_counts):
 
     log_content(
         content=f"""
-            Tokenize the Dataset with {tokenizer_class.__name__}
-            """,
-        results_file=statistics_file_path,
-    )
-
-    dataset = tokenize_dataset_for_statistics(
-        dataset=tuple(dataset),
-        tokenizer_class=tokenizer_class,
-    )
-
-    log_content(
-        content=f"""
             Process the Dataset
             """,
         results_file=statistics_file_path,
@@ -104,6 +92,18 @@ def run(dataset, tokenizer_class, redo_counts):
             process,
             tqdm(dataset),
         ),
+    )
+
+    log_content(
+        content=f"""
+            Tokenize the Dataset with {tokenizer_class.__name__}
+            """,
+        results_file=statistics_file_path,
+    )
+
+    dataset = tokenize_dataset_for_statistics(
+        dataset=tuple(dataset),
+        tokenizer_class=tokenizer_class,
     )
 
     log_content(

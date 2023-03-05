@@ -17,9 +17,7 @@ def tokens_frequency(dataset, use_tqdm=True):
     frequencies = defaultdict(int)
     dataset = tqdm(dataset) if use_tqdm else dataset
     for document in dataset:
-        for token in list(document):
-            if token.isspace():
-                continue
+        for token in document.split():
             frequencies[token] += 1
     frequencies = dict(frequencies)
     return frequencies
@@ -55,4 +53,5 @@ def tokenize_dataset_for_statistics(dataset, tokenizer_class):
         tokenized_document = tokenized_document.replace("<##>", "")
         tokenized_document = re.sub("\s+", " ", tokenized_document)
         tokenized_dataset.append(tokenized_document)
+
     return tokenized_dataset

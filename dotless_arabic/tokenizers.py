@@ -12,12 +12,13 @@ class CharacterTokenizer(tk.CharacterTokenizer):
     def split_text(cls, text, undot_text=False):
         if undot_text:
             text = undot(text)
-        return list(
-            map(
-                lambda c: "<##>" if c.isspace() else c,
-                list(text),
-            )
-        )
+        splitted_text = []
+        for character in list(text):
+            if character.isspace():
+                splitted_text.append("<##>")
+            else:
+                splitted_text.append(character)
+        return splitted_text
 
     def detokenize(self, tokens):
         """Convert tokens to a string
