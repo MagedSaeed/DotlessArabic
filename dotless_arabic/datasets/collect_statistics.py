@@ -210,7 +210,7 @@ def run(dataset, tokenizer_class, redo_counts):
         results_file=statistics_file_path,
     )
 
-    threshold = 0.25
+    threshold = 0.1
     truncated_counter = dict(list(counter.items())[: int(threshold * len(counter))])
 
     log_content(
@@ -344,7 +344,7 @@ def run(dataset, tokenizer_class, redo_counts):
         results_file=statistics_file_path,
     )
 
-    threshold = 0.25
+    threshold = 0.1
     truncated_undotted_counter = dict(
         list(undotted_counter.items())[: int(threshold * len(undotted_counter))]
     )
