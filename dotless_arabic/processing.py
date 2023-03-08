@@ -6,6 +6,9 @@ from dotless_arabic import constants
 
 
 def process(text, separators=[".", ":", "،", ",", "؛", "؟", "!"]):
+    # replace less known arabic unicode characters with their mapping from the well known arabic characters
+    text = text.translate(str.maketrans(constants.UNICODE_LETTERS_MAPPING))
+
     # add spaces between punctuations, if there is not
     text = re.sub(
         r"""([.,!?()\/\\،"'\{\}\(\)\[\]؟<>«»`؛=+\-\*\&\^\%\$\#\@\!:|…123456789a-zA-Z;؟–−])""",
@@ -24,6 +27,7 @@ def process(text, separators=[".", ":", "،", ",", "؛", "؟", "!"]):
     """ remove specific characters found in the un dataset """
     text = text.replace("\xa0", "")
     text = text.replace("\x85", "")
+    text = text.replace("\x96", "")
     text = text.replace("\u200a", " ")
     text = text.replace("\u2009", " ")
     text = text.replace("\u3000", " ")

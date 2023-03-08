@@ -5,20 +5,25 @@ if "." not in sys.path:
     sys.path.append(".")
 
 
+from dotless_arabic import constants
 from dotless_arabic.utils import log_content
-from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.processing import (
     dataset_dot_transform,
     dataset_newline_transform,
 )
 
 
-def collect_dataset(results_file=None):
+def collect_dataset_for_analysis(results_file=None):
 
     with open("../wikipedia_dataset.txt", "r") as news_dataset_file:
         wikipedia_dataset = news_dataset_file.read().splitlines()
 
-    dataset = wikipedia_dataset
+    dataset = list(set(wikipedia_dataset))
+    return dataset
+
+
+def collect_dataset_for_language_modeling(results_file=None):
+    dataset = collect_dataset_for_analysis(results_file=results_file)
 
     log_content(
         content=f"""
