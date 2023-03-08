@@ -33,7 +33,7 @@ from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipel
     "--dataset",
     help="dataset name to train. Note that results files will be saved in '{current_dir_of_this_file}'/{dataset}_dataset/",
     required=True,
-    type=click.Choice(list(constants.COLLECT_DATASET.keys())),
+    type=click.Choice(list(constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING.keys())),
 )
 @click.option(
     "--sequence_length",
@@ -116,7 +116,7 @@ def run(
 
         Path(dotted_results_file_path).unlink(missing_ok=True)
 
-        dataset = constants.COLLECT_DATASET[dataset](
+        dataset = constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING[dataset](
             results_file=dotted_results_file_path
         )
 
@@ -129,7 +129,7 @@ def run(
         Path(undotted_results_file_path).unlink(missing_ok=True)
 
         if not run_dotted:
-            dataset = constants.COLLECT_DATASET[dataset](
+            dataset = constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING[dataset](
                 results_file=undotted_results_file_path
             )
 

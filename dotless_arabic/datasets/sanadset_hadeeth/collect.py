@@ -15,8 +15,7 @@ from dotless_arabic.utils import download_file
 from dotless_arabic.processing import dataset_dot_transform
 
 
-def collect_dataset(results_file=None):
-
+def collect_dataset_for_analysis(results_file=None):
     current_dir = Path(__file__).resolve().parent
 
     if "sanadset.csv" not in os.listdir(current_dir):
@@ -29,16 +28,6 @@ def collect_dataset(results_file=None):
     sanadset_hadeeth_dataset = list(
         pd.read_csv(f"{current_dir}/sanadset.csv")["Matn"].dropna()
     )
-    sanadset_hadeeth_dataset = sorted(list(set(sanadset_hadeeth_dataset)))
-
-    log_content(
-        content=f"""
-        Sample of datasets documents:
-        {constants.NEW_LINE.join(sanadset_hadeeth_dataset[:5])}
-        """,
-        results_file=results_file,
-    )
-
     log_content(
         content=f"""
         Original Number of Samples:
@@ -46,13 +35,25 @@ def collect_dataset(results_file=None):
         """,
         results_file=results_file,
     )
-
-    dataset = list(set(sanadset_hadeeth_dataset))
-
+    sanadset_hadeeth_dataset = sorted(list(set(sanadset_hadeeth_dataset)))
     log_content(
         content=f"""
         Number of Samples after dropping duplicates:
-        {len(dataset):,}
+        {len(sanadset_hadeeth_dataset):,}
+        """,
+        results_file=results_file,
+    )
+    return sanadset_hadeeth_dataset
+
+
+def collect_dataset_for_language_modeling(results_file=None):
+
+    sanadset_hadeeth_dataset = collect_dataset_for_analysis(results_file=results_file)
+
+    log_content(
+        content=f"""
+        Sample of datasets documents:
+        {constants.NEW_LINE.join(sanadset_hadeeth_dataset[:5])}
         """,
         results_file=results_file,
     )
