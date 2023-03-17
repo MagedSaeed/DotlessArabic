@@ -1,5 +1,5 @@
 ####################################################################################################
-Dotted Training Started at 2023-02-07 20:55:23.919821 for tokenizer: DisjointLetterTokenizer
+Dotted Training Started at 2023-03-16 07:40:01.552691 for tokenizer: DisjointLetterTokenizer
 ####################################################################################################
 ####################################################################################################
 Some of the Dataset Samples before training:
@@ -35,34 +35,34 @@ TRAINING STARTED
 {
     "dotted-poems_dataset": {
         "2": {
-            "perplexity_with_OOVs": 36.76392280858416,
-            "perplexity_without_OOVs": 36.37654624270475,
-            "counts_of_OOVs": "6,695",
-            "ngram_counts": "782,093"
+            "perplexity_with_OOVs": 36.76089664190351,
+            "perplexity_without_OOVs": 36.384144892266846,
+            "counts_of_OOVs": "6,520",
+            "ngram_counts": "783,166"
         },
         "3": {
-            "perplexity_with_OOVs": 26.132647443027526,
-            "perplexity_without_OOVs": 25.84762042514572,
-            "counts_of_OOVs": "6,695",
-            "ngram_counts": "4,571,268"
+            "perplexity_with_OOVs": 26.127803332929076,
+            "perplexity_without_OOVs": 25.850527756070864,
+            "counts_of_OOVs": "6,520",
+            "ngram_counts": "4,573,451"
         },
         "4": {
-            "perplexity_with_OOVs": 21.29139081506089,
-            "perplexity_without_OOVs": 21.054012982741117,
-            "counts_of_OOVs": "6,695",
-            "ngram_counts": "13,507,431"
+            "perplexity_with_OOVs": 21.28837377359952,
+            "perplexity_without_OOVs": 21.05762854127538,
+            "counts_of_OOVs": "6,520",
+            "ngram_counts": "13,512,311"
         },
         "5": {
-            "perplexity_with_OOVs": 17.951436595365216,
-            "perplexity_without_OOVs": 17.74818686994254,
-            "counts_of_OOVs": "6,695",
-            "ngram_counts": "26,036,389"
+            "perplexity_with_OOVs": 17.94945383443388,
+            "perplexity_without_OOVs": 17.751836505464844,
+            "counts_of_OOVs": "6,520",
+            "ngram_counts": "26,045,192"
         },
         "6": {
-            "perplexity_with_OOVs": 15.504962517881754,
-            "perplexity_without_OOVs": 15.327542076085575,
-            "counts_of_OOVs": "6,695",
-            "ngram_counts": "38,047,008"
+            "perplexity_with_OOVs": 15.495834090231373,
+            "perplexity_without_OOVs": 15.32340188021978,
+            "counts_of_OOVs": "6,520",
+            "ngram_counts": "38,060,588"
         }
     }
 }
@@ -71,5 +71,5 @@ TRAINING STARTED
 TRAINING FINISHED
 ####################################################################################################
 ####################################################################################################
-Dotted Training Finished for tokenizer DisjointLetterTokenizer at 2023-02-07 21:01:32.992045
+Dotted Training Finished for tokenizer DisjointLetterTokenizer at 2023-03-16 07:46:20.642789
 ####################################################################################################

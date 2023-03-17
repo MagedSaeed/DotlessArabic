@@ -1,13 +1,24 @@
 ####################################################################################################
-Undotted Training Started at 2023-02-01 23:53:36.739772 for tokenizer: FarasaMorphologicalTokenizer
+Undotted Training Started at 2023-03-16 22:11:24.347021 for tokenizer: FarasaMorphologicalTokenizer
 ####################################################################################################
 ####################################################################################################
-Some of the Dataset Samples after undotting:
-ٮسم الله ال ##رحمں ال ##رحىم
-ال ##حمد ل ##الله رٮ ال ##عالم ##ىں
-ال ##رحمں ال ##رحىم
-مالك ىوم ال ##دىں
-اىاك ٮعٮد و ##اىاك ٮسٮعىں
+Some of the Dataset Samples before tokenization:
+بسم الله الرحمن الرحيم
+الحمد لله رب العالمين
+الرحمن الرحيم
+مالك يوم الدين
+اياك نعبد واياك نستعين
+####################################################################################################
+####################################################################################################
+Tokenize the dataset
+####################################################################################################
+####################################################################################################
+Some of the Dataset Samples after tokenization:
+ٮسم <##> الله <##> ال رحمں <##> ال رحىم
+ال حمد <##> ل الله <##> رٮ <##> ال عالم ىں
+ال رحمں <##> ال رحىم
+مالك <##> ىوم <##> ال دىں
+اىاك <##> ٮعٮد <##> و اىاك <##> ٮسٮعىں
 ####################################################################################################
 ####################################################################################################
 TRAINING STARTED
@@ -16,34 +27,34 @@ TRAINING STARTED
 {
     "undotted-aggregated_dataset": {
         "2": {
-            "perplexity_with_OOVs": 128.31348814560414,
-            "perplexity_without_OOVs": 126.2686692645584,
-            "counts_of_OOVs": "47,728",
-            "ngram_counts": "15,580,821"
+            "perplexity_with_OOVs": 33.84732303787557,
+            "perplexity_without_OOVs": 33.485755531666236,
+            "counts_of_OOVs": "44,363",
+            "ngram_counts": "2,066,624"
         },
         "3": {
-            "perplexity_with_OOVs": 63.59304107672588,
-            "perplexity_without_OOVs": 62.528827823408584,
-            "counts_of_OOVs": "47,728",
-            "ngram_counts": "67,057,286"
+            "perplexity_with_OOVs": 22.918518802468867,
+            "perplexity_without_OOVs": 22.666545447549655,
+            "counts_of_OOVs": "44,363",
+            "ngram_counts": "15,320,760"
         },
         "4": {
-            "perplexity_with_OOVs": 41.54018037154653,
-            "perplexity_without_OOVs": 40.82639811068155,
-            "counts_of_OOVs": "47,728",
-            "ngram_counts": "145,138,641"
+            "perplexity_with_OOVs": 16.36417052585517,
+            "perplexity_without_OOVs": 16.1798587241822,
+            "counts_of_OOVs": "44,363",
+            "ngram_counts": "50,962,493"
         },
         "5": {
-            "perplexity_with_OOVs": 34.558003264749985,
-            "perplexity_without_OOVs": 33.95809754534492,
-            "counts_of_OOVs": "47,728",
-            "ngram_counts": "214,307,530"
+            "perplexity_with_OOVs": 12.838303902734255,
+            "perplexity_without_OOVs": 12.691481958776887,
+            "counts_of_OOVs": "44,363",
+            "ngram_counts": "112,494,560"
         },
         "6": {
-            "perplexity_with_OOVs": 31.92840575138947,
-            "perplexity_without_OOVs": 31.371979463510232,
-            "counts_of_OOVs": "47,728",
-            "ngram_counts": "259,372,013"
+            "perplexity_with_OOVs": 11.119785875153832,
+            "perplexity_without_OOVs": 10.99142137575377,
+            "counts_of_OOVs": "44,363",
+            "ngram_counts": "191,043,736"
         }
     }
 }
@@ -52,5 +63,5 @@ TRAINING STARTED
 TRAINING FINISHED
 ####################################################################################################
 ####################################################################################################
-Undotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2023-02-02 00:56:17.577495
+Undotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2023-03-17 02:12:54.846657
 ####################################################################################################
