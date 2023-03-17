@@ -1,8 +1,19 @@
 ####################################################################################################
-Undotted Training Started at 2023-02-01 07:05:33.277888 for tokenizer: WordTokenizer
+Undotted Training Started at 2023-03-16 06:32:07.308907 for tokenizer: WordTokenizer
 ####################################################################################################
 ####################################################################################################
-Some of the Dataset Samples after undotting:
+Some of the Dataset Samples before tokenization:
+بسم الله الرحمن الرحيم
+الحمد لله رب العالمين
+الرحمن الرحيم
+مالك يوم الدين
+اياك نعبد واياك نستعين
+####################################################################################################
+####################################################################################################
+Tokenize the dataset
+####################################################################################################
+####################################################################################################
+Some of the Dataset Samples after tokenization:
 ٮسم الله الرحمں الرحىم
 الحمد لله رٮ العالمىں
 الرحمں الرحىم
@@ -16,34 +27,34 @@ TRAINING STARTED
 {
     "undotted-aggregated_dataset": {
         "2": {
-            "perplexity_with_OOVs": 982.4906369725805,
-            "perplexity_without_OOVs": 951.3732441969507,
-            "counts_of_OOVs": "69,685",
-            "ngram_counts": "52,953,766"
+            "perplexity_with_OOVs": 994.4681394471663,
+            "perplexity_without_OOVs": 962.1566548116305,
+            "counts_of_OOVs": "71,085",
+            "ngram_counts": "52,921,951"
         },
         "3": {
-            "perplexity_with_OOVs": 435.6376407140078,
-            "perplexity_without_OOVs": 420.9803231122493,
-            "counts_of_OOVs": "69,685",
-            "ngram_counts": "132,670,368"
+            "perplexity_with_OOVs": 449.98746030677836,
+            "perplexity_without_OOVs": 434.4759839913532,
+            "counts_of_OOVs": "71,085",
+            "ngram_counts": "132,584,306"
         },
         "4": {
-            "perplexity_with_OOVs": 346.2520801101287,
-            "perplexity_without_OOVs": 334.43403232347674,
-            "counts_of_OOVs": "69,685",
-            "ngram_counts": "171,142,448"
+            "perplexity_with_OOVs": 363.1904764654303,
+            "perplexity_without_OOVs": 350.50130912025435,
+            "counts_of_OOVs": "71,085",
+            "ngram_counts": "171,023,887"
         },
         "5": {
-            "perplexity_with_OOVs": 327.9818613909399,
-            "perplexity_without_OOVs": 316.7531135227974,
-            "counts_of_OOVs": "69,685",
-            "ngram_counts": "181,307,009"
+            "perplexity_with_OOVs": 346.02581767158597,
+            "perplexity_without_OOVs": 333.9038903724656,
+            "counts_of_OOVs": "71,085",
+            "ngram_counts": "181,172,899"
         },
         "6": {
-            "perplexity_with_OOVs": 323.55371932972366,
-            "perplexity_without_OOVs": 312.4686875075933,
-            "counts_of_OOVs": "69,685",
-            "ngram_counts": "180,878,763"
+            "perplexity_with_OOVs": 341.91188448794594,
+            "perplexity_without_OOVs": 329.92650526722224,
+            "counts_of_OOVs": "71,085",
+            "ngram_counts": "180,741,502"
         }
     }
 }
@@ -52,5 +63,5 @@ TRAINING STARTED
 TRAINING FINISHED
 ####################################################################################################
 ####################################################################################################
-Undotted Training Finished for tokenizer WordTokenizer at 2023-02-01 08:00:54.678858
+Undotted Training Finished for tokenizer WordTokenizer at 2023-03-16 07:25:38.885572
 ####################################################################################################
