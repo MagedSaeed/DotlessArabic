@@ -13,7 +13,7 @@ def collect_dataset_for_analysis(results_file=None):
 
     with open("../news_dataset.txt", "r") as news_dataset_file:
         news_dataset = news_dataset_file.read().splitlines()
-    news_dataset = list(set(news_dataset))
+    news_dataset = list(dict.fromkeys(news_dataset))
     return news_dataset
 
 
