@@ -22,7 +22,7 @@ from dotless_arabic.datasets.wikipedia.collect import (
 )
 
 from dotless_arabic.datasets.aggregated.collect import (
-    collect_dataset as collect_aggregated_dataset,
+    collect_dataset_for_language_modeling as collect_aggregated_dataset,
     collect_dataset_for_analysis as collect_aggregated_dataset_for_analysis,
 )
 

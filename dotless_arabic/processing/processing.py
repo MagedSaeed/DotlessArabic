@@ -74,6 +74,8 @@ def undot(text, process_first=False):
             word = word[:-1] + constants.NOON_SHAPE
         if word.endswith("ق"):
             word = word[:-1] + constants.QAF_SHAPE
+        if word.startswith("ي") and len(word) > 1:
+            word = constants.BAA_SHAPE + word[1:]
         word = word.translate(
             word.maketrans(
                 "".join(constants.LETTERS_MAPPING.keys()),

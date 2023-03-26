@@ -56,7 +56,7 @@ def collect_dataset_for_analysis(results_file=None):
     return dataset
 
 
-def collect_dataset(results_file=None):
+def collect_dataset_for_language_modeling(results_file=None):
 
     dataset = (
         collect_quran_dataset()
