@@ -18,7 +18,7 @@ def collect_dataset_for_analysis(results_file=None):
     with open("../wikipedia_dataset.txt", "r") as news_dataset_file:
         wikipedia_dataset = news_dataset_file.read().splitlines()
 
-    dataset = list(set(wikipedia_dataset))
+    dataset = list(dict.fromkeys(wikipedia_dataset))
     return dataset
 
 

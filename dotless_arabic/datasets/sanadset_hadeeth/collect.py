@@ -35,7 +35,7 @@ def collect_dataset_for_analysis(results_file=None):
         """,
         results_file=results_file,
     )
-    sanadset_hadeeth_dataset = sorted(list(set(sanadset_hadeeth_dataset)))
+    sanadset_hadeeth_dataset = sorted(list(dict.fromkeys(sanadset_hadeeth_dataset)))
     log_content(
         content=f"""
         Number of Samples after dropping duplicates:
