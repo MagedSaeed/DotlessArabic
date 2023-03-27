@@ -21,7 +21,7 @@ Some of the Dataset Samples before collecting statistics:
 ا ن ا ن ا ص د ق ت ف ص د ق ن ي و ا ن ا ن ا ك ذ ب ت ف ك ذ ب ن ي ق ا ل ف ا ف ع ل ق ا ل ف ا ن ش د ك ب ا ل ل ه ه ل س م ع ت ر س و ل ا ل ل ه ص ل ى ا ل ل ه ع ل ي ه و س ل م ي ن ه ى ع ن ل ب س ا ل ذ ه ب ق ا ل ن ع م ق ا ل ف ا ن ش د ك ب ا ل ل ه ه ل ت ع ل م ا ن ر س و ل ا ل ل ه ص ل ى ا ل ل ه ع ل ي ه و س ل م ن ه ى ع ن ل ب س ا ل ح ر ي ر ق ا ل ن ع م ق ا ل ف ا ن ش د ك ب ا ل ل ه ه ل ت ع ل م ا ن ر س و ل ا ل ل ه ص ل ى ا ل ل ه ع ل ي ه و س ل م ن ه ى ع ن ل ب س ج ل و د ا ل س ب ا ع و ا ل ر ك و ب ع ل ي ه ا ق ا ل ن ع م
 ####################################################################################################
 ####################################################################################################
-Dotted Statistics Analysis Started at 2023-03-06 03:02:50.005591 for dataset sanadset_hadeeth_dataset tokenized by CharacterTokenizer
+Dotted Statistics Analysis Started at 2023-03-27 04:20:18.051150 for dataset sanadset_hadeeth_dataset tokenized by CharacterTokenizer
 ####################################################################################################
 ####################################################################################################
 Samples Count: 637,565
@@ -45,10 +45,10 @@ Average tokens length: 1.0000
 Top 0.1% average tokens length: 1.0000
 ####################################################################################################
 ####################################################################################################
-Dotted Statistics Analysis Finished for dataset sanadset_hadeeth_dataset tokenized by CharacterTokenizer at 2023-03-06 03:03:01.678037
+Dotted Statistics Analysis Finished for dataset sanadset_hadeeth_dataset tokenized by CharacterTokenizer at 2023-03-27 04:20:31.451310
 ####################################################################################################
 ####################################################################################################
-Undotted Statistics Analysis Started at 2023-03-06 03:03:01.678066 for dataset sanadset_hadeeth_dataset tokenized by CharacterTokenizer
+Undotted Statistics Analysis Started at 2023-03-27 04:20:31.451342 for dataset sanadset_hadeeth_dataset tokenized by CharacterTokenizer
 ####################################################################################################
 ####################################################################################################
 Undotting Dataset
@@ -86,5 +86,5 @@ Top 0.1% average tokens length: 1.0000
 dotted voacb - undotted vocab: 12
 ####################################################################################################
 ####################################################################################################
-Undotted Statistics Analysis Finished for dataset sanadset_hadeeth_dataset tokenized by CharacterTokenizer at 2023-03-06 03:09:29.915024
+Undotted Statistics Analysis Finished for dataset sanadset_hadeeth_dataset tokenized by CharacterTokenizer at 2023-03-27 04:26:58.537979
 ####################################################################################################

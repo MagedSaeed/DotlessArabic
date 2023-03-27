@@ -13,7 +13,7 @@ Some of the Dataset Samples before collecting statistics:
 ا ي ا ك ن ع ب د و ا ي ا ك ن س ت ع ي ن
 ####################################################################################################
 ####################################################################################################
-Dotted Statistics Analysis Started at 2023-03-06 03:01:01.075848 for dataset quran_dataset tokenized by CharacterTokenizer
+Dotted Statistics Analysis Started at 2023-03-27 04:18:29.409775 for dataset quran_dataset tokenized by CharacterTokenizer
 ####################################################################################################
 ####################################################################################################
 Samples Count: 6,236
@@ -37,10 +37,10 @@ Average tokens length: 1.0000
 Top 0.1% average tokens length: 1.0000
 ####################################################################################################
 ####################################################################################################
-Dotted Statistics Analysis Finished for dataset quran_dataset tokenized by CharacterTokenizer at 2023-03-06 03:01:01.110440
+Dotted Statistics Analysis Finished for dataset quran_dataset tokenized by CharacterTokenizer at 2023-03-27 04:18:29.450632
 ####################################################################################################
 ####################################################################################################
-Undotted Statistics Analysis Started at 2023-03-06 03:01:01.110463 for dataset quran_dataset tokenized by CharacterTokenizer
+Undotted Statistics Analysis Started at 2023-03-27 04:18:29.450653 for dataset quran_dataset tokenized by CharacterTokenizer
 ####################################################################################################
 ####################################################################################################
 Undotting Dataset
@@ -78,5 +78,5 @@ Top 0.1% average tokens length: 1.0000
 dotted voacb - undotted vocab: 12
 ####################################################################################################
 ####################################################################################################
-Undotted Statistics Analysis Finished for dataset quran_dataset tokenized by CharacterTokenizer at 2023-03-06 03:01:02.228857
+Undotted Statistics Analysis Finished for dataset quran_dataset tokenized by CharacterTokenizer at 2023-03-27 04:18:30.615317
 ####################################################################################################

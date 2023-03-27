@@ -13,7 +13,7 @@ Some of the Dataset Samples before collecting statistics:
 م ر س ل ا ل م ص ط ف ى ا ل ب ش ي ر ا ل ي ن ا
 ####################################################################################################
 ####################################################################################################
-Dotted Statistics Analysis Started at 2023-03-06 03:12:26.828620 for dataset poems_dataset tokenized by CharacterTokenizer
+Dotted Statistics Analysis Started at 2023-03-27 04:29:56.226290 for dataset poems_dataset tokenized by CharacterTokenizer
 ####################################################################################################
 ####################################################################################################
 Samples Count: 7,714,858
@@ -37,10 +37,10 @@ Average tokens length: 1.0000
 Top 0.1% average tokens length: 1.0000
 ####################################################################################################
 ####################################################################################################
-Dotted Statistics Analysis Finished for dataset poems_dataset tokenized by CharacterTokenizer at 2023-03-06 03:12:42.297665
+Dotted Statistics Analysis Finished for dataset poems_dataset tokenized by CharacterTokenizer at 2023-03-27 04:30:15.541077
 ####################################################################################################
 ####################################################################################################
-Undotted Statistics Analysis Started at 2023-03-06 03:12:42.297692 for dataset poems_dataset tokenized by CharacterTokenizer
+Undotted Statistics Analysis Started at 2023-03-27 04:30:15.541107 for dataset poems_dataset tokenized by CharacterTokenizer
 ####################################################################################################
 ####################################################################################################
 Undotting Dataset
@@ -78,5 +78,5 @@ Top 0.1% average tokens length: 1.0000
 dotted voacb - undotted vocab: 12
 ####################################################################################################
 ####################################################################################################
-Undotted Statistics Analysis Finished for dataset poems_dataset tokenized by CharacterTokenizer at 2023-03-06 03:21:04.033311
+Undotted Statistics Analysis Finished for dataset poems_dataset tokenized by CharacterTokenizer at 2023-03-27 04:38:48.376861
 ####################################################################################################

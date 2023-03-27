@@ -13,7 +13,7 @@ Some of the Dataset Samples before collecting statistics:
 ا ي ا ك ن ع ب د و ا ي ا ك ن س ت ع ي ن
 ####################################################################################################
 ####################################################################################################
-Dotted Statistics Analysis Started at 2023-03-06 05:24:21.025139 for dataset aggregated_dataset tokenized by CharacterTokenizer
+Dotted Statistics Analysis Started at 2023-03-27 06:44:50.574418 for dataset aggregated_dataset tokenized by CharacterTokenizer
 ####################################################################################################
 ####################################################################################################
 Samples Count: 15,779,363
@@ -37,10 +37,10 @@ Average tokens length: 1.0000
 Top 0.1% average tokens length: 1.0000
 ####################################################################################################
 ####################################################################################################
-Dotted Statistics Analysis Finished for dataset aggregated_dataset tokenized by CharacterTokenizer at 2023-03-06 05:27:20.899522
+Dotted Statistics Analysis Finished for dataset aggregated_dataset tokenized by CharacterTokenizer at 2023-03-27 06:48:22.223984
 ####################################################################################################
 ####################################################################################################
-Undotted Statistics Analysis Started at 2023-03-06 05:27:20.899549 for dataset aggregated_dataset tokenized by CharacterTokenizer
+Undotted Statistics Analysis Started at 2023-03-27 06:48:22.224012 for dataset aggregated_dataset tokenized by CharacterTokenizer
 ####################################################################################################
 ####################################################################################################
 Undotting Dataset
@@ -78,5 +78,5 @@ Top 0.1% average tokens length: 1.0000
 dotted voacb - undotted vocab: 12
 ####################################################################################################
 ####################################################################################################
-Undotted Statistics Analysis Finished for dataset aggregated_dataset tokenized by CharacterTokenizer at 2023-03-06 07:05:23.039603
+Undotted Statistics Analysis Finished for dataset aggregated_dataset tokenized by CharacterTokenizer at 2023-03-27 08:30:05.887346
 ####################################################################################################
