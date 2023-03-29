@@ -120,7 +120,35 @@ def collect_dataset_for_language_modeling(results_file=None):
     return baits
 
 
-METER_CLASSES = []
+METER_NAMES = [
+    "طويل",
+    "مديد",
+    "بسيط",
+    "وافر",
+    "كامل",
+    "هزج",
+    "رجز",
+    "رمل",
+    "سريع",
+    "منسرح",
+    "خفيف",
+    "مجتث",
+    "مضارع",
+    "مقتضب",
+    "متقارب",
+    "متدارك",
+]
+
+
+def map_meter_names_to_classes(baits_dict):
+    for bait in tqdm(baits_dict.keys()):
+        bait_meter_name = baits_dict[bait]
+        for index, meter_name in enumerate(METER_NAMES):
+            if meter_name in bait_meter_name:
+                baits_dict[bait] = index
+                continue
+            raise ValueError(f"Meter {bait_meter_name} cannot be found")
+    return baits_dict
 
 
 def collect_dataset_for_meter_classification(results_file=None):
@@ -136,7 +164,15 @@ def collect_dataset_for_meter_classification(results_file=None):
     )
 
     ashaar = ashaar.filter(
-        lambda example: example["poem meter"] not in NON_CLASSICAL_METERS + [None]
+        lambda example: example["poem meter"]
+        not in NON_CLASSICAL_METERS
+        + [
+            None,
+            "عمودية",
+            "نثريه",
+            "بحر موشح",
+            "بحر مجزوء موشح",
+        ]
     )
 
     log_content(
@@ -147,13 +183,13 @@ def collect_dataset_for_meter_classification(results_file=None):
         results_file=results_file,
     )
 
-    baits_with_classes = dict()
+    baits_with_meter_names = dict()
 
     for poem, meter in tqdm(zip(ashaar["poem verses"], ashaar["poem meter"])):
         index = 1
         for shatr in poem:
             if index % 2 == 0:
-                baits_with_classes[f"{prev_shatr} {shatr}"] = meter
+                baits_with_meter_names[f"{prev_shatr} {shatr}"] = meter
             else:
                 prev_shatr = shatr
             index += 1
@@ -161,7 +197,7 @@ def collect_dataset_for_meter_classification(results_file=None):
     log_content(
         content=f"""
         Sample of datasets samples:
-        {constants.NEW_LINE.join(list(baits_with_classes.keys())[:5])}
+        {constants.NEW_LINE.join(list(baits_with_meter_names.keys())[:5])}
         """,
         results_file=results_file,
     )
@@ -169,23 +205,34 @@ def collect_dataset_for_meter_classification(results_file=None):
     log_content(
         content=f"""
         Number of Baits:
-        {len(baits_with_classes.keys()):,}
+        {len(baits_with_meter_names.keys()):,}
         """,
         results_file=results_file,
     )
 
-    baits_with_classes = {
+    baits_with_meter_names = {
         bait: meter
-        for bait, meter in tqdm(baits_with_classes.items())
+        for bait, meter in tqdm(baits_with_meter_names.items())
         if 60 >= len(process(bait).replace(" ", "")) >= 30
     }
 
     log_content(
         content=f"""
         Number of baits after deleting 60>= len(bait) chars >= 30 chars:
-        {len(baits_with_classes.keys()):,}
+        {len(baits_with_meter_names.keys()):,}
         """,
         results_file=results_file,
     )
 
-    return baits_with_classes
+    log_content(
+        content=f"""
+        Map meter names to classes:
+        """,
+        results_file=results_file,
+    )
+
+    baits_with_meter_classes = map_meter_names_to_classes(
+        baits_dict=baits_with_meter_names
+    )
+
+    return baits_with_meter_classes
