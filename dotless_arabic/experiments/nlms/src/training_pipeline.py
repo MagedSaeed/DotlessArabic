@@ -66,7 +66,7 @@ def training_pipeline(
 
     log_content(
         content=f"""
-        Calculating vocab size:
+        Calculating vocab size using WordTokenizer:
         """,
         results_file=results_file,
         print_to_console=print_to_console,
@@ -76,7 +76,6 @@ def training_pipeline(
         dataset=train_dataset,
         undot_text=not is_dotted,
         vocab_coverage=vocab_coverage,
-        tokenizer_class=tokenizer_class,
     )
     # if tokenizer_class != WordTokenizer:
     # add 4 to account for other special chars such as unk and pad.
@@ -86,8 +85,8 @@ def training_pipeline(
 
     log_content(
         content=f"""
-        Considered Vocab: {vocab_size:,}
-        All Vocab: {all_vocab:,}
+        Considered Vocab (from WordTokenizer): {vocab_size:,}
+        All Vocab (WordTokenizer): {all_vocab:,}
         """,
         results_file=results_file,
         print_to_console=print_to_console,
@@ -100,7 +99,7 @@ def training_pipeline(
     )
     log_content(
         content=f"""
-        Tokenizer Vocab Size (to make sure): {tokenizer.vocab_size:,}
+        Tokenizer Vocab Size: {tokenizer.vocab_size:,}
         """,
         results_file=results_file,
         print_to_console=print_to_console,
