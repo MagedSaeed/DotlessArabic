@@ -123,7 +123,7 @@ def collect_dataset_for_language_modeling(results_file=None):
 METER_CLASSES = []
 
 
-def collect_dataset_for_language_modeling(results_file=None):
+def collect_dataset_for_meter_classification(results_file=None):
 
     ashaar = datasets.load_dataset("arbml/ashaar", split="train")
 
