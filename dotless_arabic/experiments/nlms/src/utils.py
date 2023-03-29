@@ -13,14 +13,17 @@ from pytorch_lightning.callbacks import (
     RichProgressBar,
     LearningRateMonitor,
 )
+
+
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from farasa.segmenter import FarasaSegmenter
 
 import wandb
+
 from dotless_arabic.processing import undot
-from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer
 from dotless_arabic.experiments.nlms.src import constants, datasets
+from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer, WordTokenizer
 
 
 def generate_text(
@@ -117,8 +120,8 @@ def train_lm(
     callbacks.append(checkpoint_callback)
     early_stopping_callback = EarlyStopping(
         monitor="val_loss",
-        min_delta=0.0025,
-        patience=25,
+        min_delta=0.05,
+        patience=10,
         check_finite=True,
     )
     callbacks.append(early_stopping_callback)
@@ -219,12 +222,6 @@ def get_tokenizer(
         with open("tmp_dataset.txt", "w") as f:
             f.write("\n".join(item for item in train_dataset if item.strip()))
 
-    # with open("tmp_dataset.txt") as f:
-    #     vocab_size = len(set(
-    #         word.strip()
-    #         for word in f.read().split()
-    #         if word.strip()
-    #     ))
     tokenizer = tokenizer_class(
         vocab_size=vocab_size,
         special_tokens=["<bos>", "<eos>"],
@@ -270,10 +267,10 @@ def get_dataloader(
 
 def get_vocab_size(
     dataset,
-    tokenizer_class,
     use_tqdm=True,
     undot_text=False,
     return_all_vocab=True,
+    tokenizer_class=WordTokenizer,
     vocab_coverage=constants.DEFAULT_VOCAB_COVERAGE,
 ):
     tokens_frequencies = defaultdict(int)
