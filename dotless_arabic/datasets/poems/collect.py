@@ -146,7 +146,8 @@ def map_meter_names_to_classes(baits_dict):
         for index, meter_name in enumerate(METER_NAMES):
             if meter_name in bait_meter_name:
                 baits_dict[bait] = index
-                continue
+                break
+        else:
             raise ValueError(f"Meter {bait_meter_name} cannot be found")
     return baits_dict
 
