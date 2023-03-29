@@ -176,7 +176,7 @@ def collect_dataset_for_meter_classification(results_file=None):
 
     baits_with_classes = {
         bait: meter
-        for bait, meter in baits_with_classes.items()
+        for bait, meter in tqdm(baits_with_classes.items())
         if 60 >= len(process(bait).replace(" ", "")) >= 30
     }
 
