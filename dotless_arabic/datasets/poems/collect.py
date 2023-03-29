@@ -169,6 +169,7 @@ def collect_dataset_for_meter_classification(results_file=None):
         not in NON_CLASSICAL_METERS
         + [
             None,
+            "عموديه",
             "عمودية",
             "نثريه",
             "بحر موشح",
