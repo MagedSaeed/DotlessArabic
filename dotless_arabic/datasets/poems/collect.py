@@ -218,12 +218,12 @@ def collect_dataset_for_meter_classification(results_file=None):
     baits_with_meter_names = {
         bait: meter
         for bait, meter in tqdm(baits_with_meter_names.items())
-        if 60 >= len(process(bait).replace(" ", "")) >= 30
+        if 60 >= len(process(bait).replace(" ", "")) >= 20
     }
 
     log_content(
         content=f"""
-        Number of baits after deleting 60>= len(bait) chars >= 30 chars:
+        Number of baits after deleting 60>= len(bait) chars >= 20 chars:
         {len(baits_with_meter_names.keys()):,}
         """,
         results_file=results_file,
