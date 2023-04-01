@@ -1,5 +1,5 @@
 ####################################################################################################
-Dotted Training Started at 2023-03-16 13:24:14.256199 for tokenizer: FarasaMorphologicalTokenizer
+Dotted Training Started at 2023-03-29 13:03:27.951360 for tokenizer: FarasaMorphologicalTokenizer
 ####################################################################################################
 ####################################################################################################
 Some of the Dataset Samples before training:
@@ -71,5 +71,5 @@ TRAINING STARTED
 TRAINING FINISHED
 ####################################################################################################
 ####################################################################################################
-Dotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2023-03-16 13:24:41.495131
+Dotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2023-03-29 13:04:06.738058
 ####################################################################################################

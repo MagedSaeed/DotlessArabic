@@ -1,5 +1,5 @@
 ####################################################################################################
-Undotted Training Started at 2023-03-16 10:08:24.154492 for tokenizer: DisjointLetterTokenizer
+Undotted Training Started at 2023-03-29 09:43:22.812744 for tokenizer: DisjointLetterTokenizer
 ####################################################################################################
 ####################################################################################################
 Some of the Dataset Samples before tokenization:
@@ -14,11 +14,11 @@ Tokenize the dataset
 ####################################################################################################
 ####################################################################################################
 Some of the Dataset Samples after tokenization:
-ٮسم <##> ا لله <##> ا لر حمں <##> ا لر حىم
-ا لحمد <##> لله <##> ر ٮ <##> ا لعا لمىں
-ا لر حمں <##> ا لر حىم
-ما لك <##> ىو م <##> ا لد ىں
-ا ىا ك <##> ٮعٮد <##> و ا ىا ك <##> ٮسٮعىں
+ٮسم <##> ا لله <##> ا لر حمں <##> ا لر حٮم
+ا لحمد <##> لله <##> ر ٮ <##> ا لعا لمٮں
+ا لر حمں <##> ا لر حٮم
+ما لك <##> ٮو م <##> ا لد ٮں
+ا ٮا ك <##> ٮعٮد <##> و ا ٮا ك <##> ٮسٮعٮں
 ####################################################################################################
 ####################################################################################################
 TRAINING STARTED
@@ -27,34 +27,34 @@ TRAINING STARTED
 {
     "undotted-aggregated_dataset": {
         "2": {
-            "perplexity_with_OOVs": 23.866116475707702,
-            "perplexity_without_OOVs": 23.833861065951172,
-            "counts_of_OOVs": "6,510",
-            "ngram_counts": "902,753"
+            "perplexity_with_OOVs": 23.143852683709728,
+            "perplexity_without_OOVs": 23.121504856988768,
+            "counts_of_OOVs": "4,641",
+            "ngram_counts": "714,426"
         },
         "3": {
-            "perplexity_with_OOVs": 16.207278008513498,
-            "perplexity_without_OOVs": 16.184546365869448,
-            "counts_of_OOVs": "6,510",
-            "ngram_counts": "8,506,870"
+            "perplexity_with_OOVs": 15.963125320348324,
+            "perplexity_without_OOVs": 15.947100336084599,
+            "counts_of_OOVs": "4,641",
+            "ngram_counts": "7,282,445"
         },
         "4": {
-            "perplexity_with_OOVs": 12.316500540247942,
-            "perplexity_without_OOVs": 12.29880507933414,
-            "counts_of_OOVs": "6,510",
-            "ngram_counts": "33,535,236"
+            "perplexity_with_OOVs": 12.232919769547976,
+            "perplexity_without_OOVs": 12.220346444320546,
+            "counts_of_OOVs": "4,641",
+            "ngram_counts": "30,277,339"
         },
         "5": {
-            "perplexity_with_OOVs": 9.817485916190357,
-            "perplexity_without_OOVs": 9.803152602015917,
-            "counts_of_OOVs": "6,510",
-            "ngram_counts": "83,328,271"
+            "perplexity_with_OOVs": 9.777314552528798,
+            "perplexity_without_OOVs": 9.767107609582403,
+            "counts_of_OOVs": "4,641",
+            "ngram_counts": "78,265,257"
         },
         "6": {
-            "perplexity_with_OOVs": 8.313449087210914,
-            "perplexity_without_OOVs": 8.30116750437508,
-            "counts_of_OOVs": "6,510",
-            "ngram_counts": "155,502,886"
+            "perplexity_with_OOVs": 8.269062125471105,
+            "perplexity_without_OOVs": 8.260327563581491,
+            "counts_of_OOVs": "4,641",
+            "ngram_counts": "149,963,288"
         }
     }
 }
@@ -63,5 +63,5 @@ TRAINING STARTED
 TRAINING FINISHED
 ####################################################################################################
 ####################################################################################################
-Undotted Training Finished for tokenizer DisjointLetterTokenizer at 2023-03-16 11:25:22.907392
+Undotted Training Finished for tokenizer DisjointLetterTokenizer at 2023-03-29 11:04:09.619896
 ####################################################################################################
