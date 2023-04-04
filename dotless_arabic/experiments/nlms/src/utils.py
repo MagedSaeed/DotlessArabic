@@ -120,7 +120,7 @@ def train_lm(
     callbacks.append(checkpoint_callback)
     early_stopping_callback = EarlyStopping(
         monitor="val_loss",
-        min_delta=0.05,
+        min_delta=0.025,
         patience=10,
         check_finite=True,
     )
