@@ -12,6 +12,7 @@ class LitNeuralLanguageModel(LightningModule):
         vocab_size,
         unk_token_id=0,
         pad_token_id=1,
+        tie_weights=True,
         num_layers=constants.NUM_LAYERS,
         hidden_size=constants.HIDDEN_SIZE,
         dropout_prob=constants.DROPOUT_PROB,
@@ -52,6 +53,13 @@ class LitNeuralLanguageModel(LightningModule):
             in_features=self.hidden_size,
             out_features=self.vocab_size,
         )
+
+        # weights tieing
+        if tie_weights:
+            assert (
+                self.embedding_size == self.hidden_size
+            ), "in weights tieing, embedding size should be the same as hidden size"
+            self.second_dense_layer.weight = self.embedding_layer.weight
 
     def forward(self, x, hiddens=None):
         outputs = self.embedding_layer(x)
