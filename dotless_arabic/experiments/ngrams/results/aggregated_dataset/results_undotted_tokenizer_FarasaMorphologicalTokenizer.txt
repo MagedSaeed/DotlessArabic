@@ -1,5 +1,5 @@
 ####################################################################################################
-Undotted Training Started at 2023-03-16 22:11:24.347021 for tokenizer: FarasaMorphologicalTokenizer
+Undotted Training Started at 2023-03-29 23:26:47.711292 for tokenizer: FarasaMorphologicalTokenizer
 ####################################################################################################
 ####################################################################################################
 Some of the Dataset Samples before tokenization:
@@ -14,11 +14,11 @@ Tokenize the dataset
 ####################################################################################################
 ####################################################################################################
 Some of the Dataset Samples after tokenization:
-ٮسم <##> الله <##> ال رحمں <##> ال رحىم
-ال حمد <##> ل الله <##> رٮ <##> ال عالم ىں
-ال رحمں <##> ال رحىم
-مالك <##> ىوم <##> ال دىں
-اىاك <##> ٮعٮد <##> و اىاك <##> ٮسٮعىں
+ٮسم <##> الله <##> ال رحمں <##> ال رحٮم
+ال حمد <##> ل الله <##> رٮ <##> ال عالم ٮں
+ال رحمں <##> ال رحٮم
+مالك <##> ٮوم <##> ال دٮں
+اٮاك <##> ٮعٮد <##> و اٮاك <##> ٮسٮعٮں
 ####################################################################################################
 ####################################################################################################
 TRAINING STARTED
@@ -27,34 +27,34 @@ TRAINING STARTED
 {
     "undotted-aggregated_dataset": {
         "2": {
-            "perplexity_with_OOVs": 33.84732303787557,
-            "perplexity_without_OOVs": 33.485755531666236,
-            "counts_of_OOVs": "44,363",
-            "ngram_counts": "2,066,624"
+            "perplexity_with_OOVs": 33.0831607543815,
+            "perplexity_without_OOVs": 32.76653182473352,
+            "counts_of_OOVs": "39,653",
+            "ngram_counts": "1,884,506"
         },
         "3": {
-            "perplexity_with_OOVs": 22.918518802468867,
-            "perplexity_without_OOVs": 22.666545447549655,
-            "counts_of_OOVs": "44,363",
-            "ngram_counts": "15,320,760"
+            "perplexity_with_OOVs": 22.673850088302892,
+            "perplexity_without_OOVs": 22.450546768355913,
+            "counts_of_OOVs": "39,653",
+            "ngram_counts": "14,423,775"
         },
         "4": {
-            "perplexity_with_OOVs": 16.36417052585517,
-            "perplexity_without_OOVs": 16.1798587241822,
-            "counts_of_OOVs": "44,363",
-            "ngram_counts": "50,962,493"
+            "perplexity_with_OOVs": 16.214169035552217,
+            "perplexity_without_OOVs": 16.050540851768783,
+            "counts_of_OOVs": "39,653",
+            "ngram_counts": "49,017,388"
         },
         "5": {
-            "perplexity_with_OOVs": 12.838303902734255,
-            "perplexity_without_OOVs": 12.691481958776887,
-            "counts_of_OOVs": "44,363",
-            "ngram_counts": "112,494,560"
+            "perplexity_with_OOVs": 12.721018141351353,
+            "perplexity_without_OOVs": 12.590613449811356,
+            "counts_of_OOVs": "39,653",
+            "ngram_counts": "109,847,729"
         },
         "6": {
-            "perplexity_with_OOVs": 11.119785875153832,
-            "perplexity_without_OOVs": 10.99142137575377,
-            "counts_of_OOVs": "44,363",
-            "ngram_counts": "191,043,736"
+            "perplexity_with_OOVs": 11.007591858839957,
+            "perplexity_without_OOVs": 10.893672580540631,
+            "counts_of_OOVs": "39,653",
+            "ngram_counts": "188,464,531"
         }
     }
 }
@@ -63,5 +63,5 @@ TRAINING STARTED
 TRAINING FINISHED
 ####################################################################################################
 ####################################################################################################
-Undotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2023-03-17 02:12:54.846657
+Undotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2023-03-30 03:36:11.835640
 ####################################################################################################

@@ -1,5 +1,5 @@
 ####################################################################################################
-Undotted Training Started at 2023-03-16 07:26:14.666737 for tokenizer: DisjointLetterTokenizer
+Undotted Training Started at 2023-03-29 06:57:11.462238 for tokenizer: DisjointLetterTokenizer
 ####################################################################################################
 ####################################################################################################
 Some of the Dataset Samples before tokenization:
@@ -14,11 +14,11 @@ Tokenize the dataset
 ####################################################################################################
 ####################################################################################################
 Some of the Dataset Samples after tokenization:
-ٮسم <##> ا لله <##> ا لر حمں <##> ا لر حىم
-ا لحمد <##> لله <##> ر ٮ <##> ا لعا لمىں
-ا لر حمں <##> ا لر حىم
-ما لك <##> ىو م <##> ا لد ىں
-ا ىا ك <##> ٮعٮد <##> و ا ىا ك <##> ٮسٮعىں
+ٮسم <##> ا لله <##> ا لر حمں <##> ا لر حٮم
+ا لحمد <##> لله <##> ر ٮ <##> ا لعا لمٮں
+ا لر حمں <##> ا لر حٮم
+ما لك <##> ٮو م <##> ا لد ٮں
+ا ٮا ك <##> ٮعٮد <##> و ا ٮا ك <##> ٮسٮعٮں
 ####################################################################################################
 ####################################################################################################
 TRAINING STARTED
@@ -27,34 +27,34 @@ TRAINING STARTED
 {
     "undotted-quran_dataset": {
         "2": {
-            "perplexity_with_OOVs": 19.080150797574827,
-            "perplexity_without_OOVs": 17.400972354846424,
-            "counts_of_OOVs": "229",
-            "ngram_counts": "16,426"
+            "perplexity_with_OOVs": 18.436152406400222,
+            "perplexity_without_OOVs": 17.115913130992574,
+            "counts_of_OOVs": "185",
+            "ngram_counts": "14,934"
         },
         "3": {
-            "perplexity_with_OOVs": 13.08479044518107,
-            "perplexity_without_OOVs": 11.881159568552354,
-            "counts_of_OOVs": "229",
-            "ngram_counts": "42,299"
+            "perplexity_with_OOVs": 12.744737593624645,
+            "perplexity_without_OOVs": 11.788511189860053,
+            "counts_of_OOVs": "185",
+            "ngram_counts": "40,146"
         },
         "4": {
-            "perplexity_with_OOVs": 10.492284895862348,
-            "perplexity_without_OOVs": 9.50261169396328,
-            "counts_of_OOVs": "229",
-            "ngram_counts": "75,550"
+            "perplexity_with_OOVs": 10.215246738877955,
+            "perplexity_without_OOVs": 9.43024476965535,
+            "counts_of_OOVs": "185",
+            "ngram_counts": "73,494"
         },
         "5": {
-            "perplexity_with_OOVs": 9.312745876688538,
-            "perplexity_without_OOVs": 8.426799419681663,
-            "counts_of_OOVs": "229",
-            "ngram_counts": "104,641"
+            "perplexity_with_OOVs": 9.022117296361161,
+            "perplexity_without_OOVs": 8.321120944415938,
+            "counts_of_OOVs": "185",
+            "ngram_counts": "103,124"
         },
         "6": {
-            "perplexity_with_OOVs": 8.734530551203676,
-            "perplexity_without_OOVs": 7.899440830543027,
-            "counts_of_OOVs": "229",
-            "ngram_counts": "125,098"
+            "perplexity_with_OOVs": 8.465166873148254,
+            "perplexity_without_OOVs": 7.80416514737571,
+            "counts_of_OOVs": "185",
+            "ngram_counts": "124,146"
         }
     }
 }
@@ -63,5 +63,5 @@ TRAINING STARTED
 TRAINING FINISHED
 ####################################################################################################
 ####################################################################################################
-Undotted Training Finished for tokenizer DisjointLetterTokenizer at 2023-03-16 07:26:49.109856
+Undotted Training Finished for tokenizer DisjointLetterTokenizer at 2023-03-29 06:57:46.338603
 ####################################################################################################

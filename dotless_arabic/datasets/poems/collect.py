@@ -194,7 +194,7 @@ def collect_dataset_for_meter_classification(results_file=None):
         index = 1
         for shatr in poem:
             if index % 2 == 0:
-                baits_with_meter_names[f"{prev_shatr} {shatr}"] = meter
+                baits_with_meter_names[tuple([prev_shatr,shatr])] = meter
             else:
                 prev_shatr = shatr
             index += 1
@@ -202,7 +202,7 @@ def collect_dataset_for_meter_classification(results_file=None):
     log_content(
         content=f"""
         Sample of datasets samples:
-        {constants.NEW_LINE.join(list(baits_with_meter_names.keys())[:5])}
+        {constants.NEW_LINE.join(shatr for bait in list(baits_with_meter_names.keys())[:5] for shatr in bait)}
         """,
         results_file=results_file,
     )
@@ -215,19 +215,19 @@ def collect_dataset_for_meter_classification(results_file=None):
         results_file=results_file,
     )
 
-    baits_with_meter_names = {
-        bait: meter
-        for bait, meter in tqdm(baits_with_meter_names.items())
-        if 60 >= len(process(bait).replace(" ", "")) >= 30
-    }
+#     baits_with_meter_names = {
+#         bait: meter
+#         for bait, meter in tqdm(baits_with_meter_names.items())
+#         if 60 >= len(process(bait).replace(" ", "")) >= 20
+#     }
 
-    log_content(
-        content=f"""
-        Number of baits after deleting 60>= len(bait) chars >= 30 chars:
-        {len(baits_with_meter_names.keys()):,}
-        """,
-        results_file=results_file,
-    )
+#     log_content(
+#         content=f"""
+#         Number of baits after deleting 60>= len(bait) chars >= 20 chars:
+#         {len(baits_with_meter_names.keys()):,}
+#         """,
+#         results_file=results_file,
+#     )
 
     log_content(
         content=f"""
