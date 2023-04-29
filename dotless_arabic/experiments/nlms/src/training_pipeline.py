@@ -35,24 +35,27 @@ def training_pipeline(
     results_file,
     vocab_coverage,
     tokenizer_class,
+    val_dataset=None,
+    test_dataset=None,
     sequence_length=None,
     print_to_console=True,
     sequence_length_percentile=constants.SEQUENCE_LENGTH_PERCENTILE,
 ):
     configure_environment()
-    train_dataset, test_dataset = train_test_split(
-        dataset,
-        shuffle=True,
-        test_size=constants.TEST_SIZE,
-        random_state=constants.RANDOM_SEED,
-    )
-
-    train_dataset, val_dataset = train_test_split(
-        train_dataset,
-        shuffle=True,
-        test_size=constants.VAL_SIZE,
-        random_state=constants.RANDOM_SEED,
-    )
+    if not test_dataset:
+        train_dataset, test_dataset = train_test_split(
+            dataset,
+            shuffle=True,
+            test_size=constants.TEST_SIZE,
+            random_state=constants.RANDOM_SEED,
+        )
+    if not val_dataset:
+        train_dataset, val_dataset = train_test_split(
+            train_dataset,
+            shuffle=True,
+            test_size=constants.VAL_SIZE,
+            random_state=constants.RANDOM_SEED,
+        )
 
     log_content(
         content=f"""
