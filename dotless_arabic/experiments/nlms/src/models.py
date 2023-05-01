@@ -148,7 +148,7 @@ class LitNeuralLanguageModel(LightningModule):
     def validation_step(self, batch, batch_idx):
         loss = self._get_loss(batch)
         self.log("val_loss", loss, prog_bar=True)
-        return {"val_loss": self._get_loss(batch)}
+        return {'val_loss':loss}
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(

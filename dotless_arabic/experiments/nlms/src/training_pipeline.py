@@ -188,7 +188,7 @@ def training_pipeline(
 
     timer_callback = Timer()
 
-    loss_metrics_callback = LossMetricsCallback()
+    # loss_metrics_callback = LossMetricsCallback()
     lm_model = LitNeuralLanguageModel(vocab_size=tokenizer.vocab_size)
 
     log_content(
@@ -219,7 +219,8 @@ def training_pipeline(
         max_epochs=constants.MAX_EPOCHS,
         tokenizer_class=tokenizer_class,
         train_dataloader=train_dataloader,
-        callbacks=[loss_metrics_callback, timer_callback],
+        # callbacks=[loss_metrics_callback, timer_callback],
+        callbacks=[timer_callback],
     )
     lm_model = LitNeuralLanguageModel.load_from_checkpoint(
         get_best_checkpoint(
