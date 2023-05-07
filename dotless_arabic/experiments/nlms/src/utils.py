@@ -303,12 +303,6 @@ def get_vocab_size(
     )
     current_words_count = 0
     vocab = 0
-    # from pprint import pprint
-
-    # pprint(
-    #     sorted_words_frequencies,
-    #     sort_dicts=False,
-    # )
     all_words_counts = sum(sorted_words_frequencies.values())
     for token, counts in sorted_words_frequencies.items():
         current_words_count += counts
