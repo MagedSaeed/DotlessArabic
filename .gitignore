@@ -133,3 +133,6 @@ wandb
 NLMs
 .vscode/*
 kenlm
+MC
+MeterClassification
+.jupyter_ystore.db
