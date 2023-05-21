@@ -49,3 +49,31 @@ python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --token
 python dotless_arabic/experiments/nlms/run_experiment.py --dataset=wikipedia --tokenizer_class=CharacterTokenizer --vocab_coverage=1 --seqlen_percentile=0.95 --gpu_devices=1;
 python dotless_arabic/experiments/nlms/run_experiment.py --dataset=news --tokenizer_class=CharacterTokenizer --vocab_coverage=1 --seqlen_percentile=0.95 --gpu_devices=1;
 ```
+
+## Commands used to run the final experiments:
+
+```bash
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=quran --tokenizer_class=WordTokenizer --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=sanadset_hadeeth --tokenizer_class=WordTokenizer --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --tokenizer_class=WordTokenizer --gpu_devices=1 --sequence_length=20;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=wikipedia --tokenizer_class=WordTokenizer --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=news --tokenizer_class=WordTokenizer --gpu_devices=1;
+
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=quran --tokenizer_class=DisjointLetterTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=sanadset_hadeeth --tokenizer_class=DisjointLetterTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --tokenizer_class=DisjointLetterTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=wikipedia --tokenizer_class=DisjointLetterTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=news --tokenizer_class=DisjointLetterTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=quran --tokenizer_class=FarasaMorphologicalTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=sanadset_hadeeth --tokenizer_class=FarasaMorphologicalTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --tokenizer_class=FarasaMorphologicalTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=wikipedia --tokenizer_class=FarasaMorphologicalTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=news --tokenizer_class=FarasaMorphologicalTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=quran --tokenizer_class=CharacterTokenizer --seqlen_percentile=0.95 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=sanadset_hadeeth --tokenizer_class=CharacterTokenizer --seqlen_percentile=0.95 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --tokenizer_class=CharacterTokenizer --seqlen_percentile=0.95 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=wikipedia --tokenizer_class=CharacterTokenizer --seqlen_percentile=0.95 --gpu_devices=1;
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=news --tokenizer_class=CharacterTokenizer --seqlen_percentile=0.95 --gpu_devices=1;
+```
