@@ -4,13 +4,13 @@ from pytorch_lightning.callbacks import Timer
 from pytorch_lightning.loggers import WandbLogger
 from sklearn.model_selection import train_test_split
 from pytorch_lightning.utilities.model_summary import ModelSummary
+from dotless_arabic.datasets.utils import tokens_frequency
 
 from dotless_arabic.utils import log_content
 from dotless_arabic.experiments.nlms.src import constants
-from dotless_arabic.experiments.nlms.src.callbacks import LossMetricsCallback
 from dotless_arabic.experiments.nlms.src.models import LitNeuralLanguageModel
 from dotless_arabic.experiments.nlms.src.settings import configure_environment
-from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer, WordTokenizer
+from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer
 from dotless_arabic.experiments.nlms.src.utils import (
     calculate_perplexity,
     generate_text,
@@ -153,6 +153,33 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+
+    def get_vocab_tokens_count(_dataset):
+        dataset_frequencies = tokens_frequency(tuple(_dataset))
+        vocab_count = len(dataset_frequencies.keys())
+        tokens_count = sum(dataset_frequencies.values())
+        return vocab_count, tokens_count
+
+    train_vocab_count, train_tokens_count = get_vocab_tokens_count(train_dataset)
+    val_vocab_count, val_tokens_count = get_vocab_tokens_count(val_dataset)
+    test_vocab_count, test_tokens_count = get_vocab_tokens_count(test_dataset)
+
+    log_content(
+        content=f"""
+        train vocab count: {train_vocab_count:,}
+        train tokens count: {train_tokens_count:,}
+        {'-'*40}
+        val vocab count: {val_vocab_count:,}
+        val tokens count: {val_tokens_count:,}
+        {'-'*40}
+        test vocab count: {test_vocab_count:,}
+        test tokens count: {test_tokens_count:,}
+        {'-'*40}
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
     train_dataloader = get_dataloader(
         shuffle=True,
         tokenizer=tokenizer,
