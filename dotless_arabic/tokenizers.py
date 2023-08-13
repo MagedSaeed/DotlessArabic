@@ -33,6 +33,19 @@ class WordTokenizer(tk.WordTokenizer):
             return undot(text).split()
         return text.split()
 
+    def train(self, text=None, file_path=None):
+        """Train using words' frequency
+
+        Args:
+            file_path (str): file to train
+        """
+
+        print("Training WordTokenizer ...")
+        self.vocab = self._truncate_dict(
+            self._get_tokens_frequency(text=text, file_path=file_path)
+        )
+        self.vocab_size = len(self.vocab)
+
 
 class CharacterTokenizer(tk.CharacterTokenizer):
     @classmethod
@@ -60,10 +73,15 @@ class CharacterTokenizer(tk.CharacterTokenizer):
         detokenized = "".join(tokens).replace("<##>", " ")
         return detokenized
 
-    def train(self, file_path):
+    def train(self, text=None, file_path=None):
         print("Training CharacterTokenizer ...")
 
-        text = open(file_path, "r").read()
+        assert (
+            file_path is not None or text is not None
+        ), "either file_path or text should be provided."
+
+        if not text:
+            text = open(file_path, "r").read()
 
         tokens_frequency = defaultdict(int)
         for word in WordTokenizer.split_text(text):
@@ -96,14 +114,15 @@ class DisjointLetterTokenizer(tk.DisjointLetterTokenizer):
         detokenized = "".join(tokens).replace("<##>", " ")
         return detokenized
 
-    def train(self, file_path):
+    def train(self, text=None, file_path=None):
         """Train data using disjoint letters
         Args:
             file_path (str): file to train
         """
         print("Training DisjointLetterTokenizer ...")
 
-        text = open(file_path, "r").read()
+        if not text:
+            text = open(file_path, "r").read()
 
         tokens_frequency = defaultdict(int)
 
@@ -148,7 +167,7 @@ class FarasaMorphologicalTokenizer(tk.FarasaMorphologicalTokenizer):
         detokenized = "".join(tokens).replace("<##>", " ")
         return detokenized
 
-    def train(self, file_path):
+    def train(self, text=None, file_path=None):
         """Train data using farasa
         Args:
             file_path (str): file to train
@@ -156,8 +175,9 @@ class FarasaMorphologicalTokenizer(tk.FarasaMorphologicalTokenizer):
 
         print("Training FarasaMorphologicalTokenizer...")
 
-        with open(file_path, "r") as f:
-            text = f.read()
+        if not text:
+            with open(file_path, "r") as f:
+                text = f.read()
 
         tokens_frequency = defaultdict(int)
         for word in WordTokenizer.split_text(text):
@@ -177,3 +197,21 @@ TOKENIZERS_MAP = {
         CharacterTokenizer,
     ]
 }
+
+
+def get_tokenizer(
+    train_dataset,
+    undot_text=False,
+    vocab_size=10_000,
+    tokenizer_class=CharacterTokenizer,
+):
+    if undot_text:
+        text = "\n".join(undot(item) for item in train_dataset if item.strip())
+    else:
+        text = "\n".join(item for item in train_dataset if item.strip())
+    tokenizer = tokenizer_class(
+        vocab_size=vocab_size,
+        special_tokens=["#", "<##>"],
+    )
+    tokenizer.train(text=text)
+    return tokenizer
