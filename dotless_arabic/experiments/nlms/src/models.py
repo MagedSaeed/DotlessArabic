@@ -19,7 +19,6 @@ class LitNeuralLanguageModel(LightningModule):
         learning_rate=constants.LEARNING_RATE,
         embedding_size=constants.EMBEDDING_SIZE,
     ):
-
         super().__init__()
         self.save_hyperparameters()
 
@@ -63,6 +62,7 @@ class LitNeuralLanguageModel(LightningModule):
 
     def forward(self, x, hiddens=None):
         outputs = self.embedding_layer(x)
+        outputs = self.dropout_layer(outputs)
         if hiddens is None:
             outputs, hiddens = self.gru_layer(outputs)
         else:
@@ -148,7 +148,7 @@ class LitNeuralLanguageModel(LightningModule):
     def validation_step(self, batch, batch_idx):
         loss = self._get_loss(batch)
         self.log("val_loss", loss, prog_bar=True)
-        return {'val_loss':loss}
+        return {"val_loss": loss}
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(
@@ -157,7 +157,7 @@ class LitNeuralLanguageModel(LightningModule):
         )
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer=optimizer,
-            factor=0.1,
+            factor=0.75,
             patience=3,
         )
         return {
