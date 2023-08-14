@@ -35,27 +35,26 @@ def training_pipeline(
     results_file,
     vocab_coverage,
     tokenizer_class,
-    val_dataset=None,
-    test_dataset=None,
     sequence_length=None,
     print_to_console=True,
+    dataloader_workers=constants.CPU_COUNT,
     sequence_length_percentile=constants.SEQUENCE_LENGTH_PERCENTILE,
 ):
     configure_environment()
-    if not test_dataset:
-        train_dataset, test_dataset = train_test_split(
-            dataset,
-            shuffle=True,
-            test_size=constants.TEST_SIZE,
-            random_state=constants.RANDOM_SEED,
-        )
-    if not val_dataset:
-        train_dataset, val_dataset = train_test_split(
-            train_dataset,
-            shuffle=True,
-            test_size=constants.VAL_SIZE,
-            random_state=constants.RANDOM_SEED,
-        )
+
+    train_dataset, test_dataset = train_test_split(
+        dataset,
+        shuffle=True,
+        test_size=constants.TEST_SIZE,
+        random_state=constants.RANDOM_SEED,
+    )
+
+    train_dataset, val_dataset = train_test_split(
+        train_dataset,
+        shuffle=True,
+        test_size=constants.VAL_SIZE,
+        random_state=constants.RANDOM_SEED,
+    )
 
     log_content(
         content=f"""
@@ -186,6 +185,7 @@ def training_pipeline(
         dataset=train_dataset,
         batch_size=batch_size,
         undot_text=not is_dotted,
+        workers=dataloader_workers,
         sequence_length=sequence_length,
     )
     val_dataloader = get_dataloader(
@@ -193,6 +193,7 @@ def training_pipeline(
         tokenizer=tokenizer,
         batch_size=batch_size,
         undot_text=not is_dotted,
+        workers=dataloader_workers,
         sequence_length=sequence_length,
         drop_last=constants.DEFAULT_BATCH_SIZE < len(val_dataset),
     )
@@ -201,6 +202,7 @@ def training_pipeline(
         dataset=test_dataset,
         batch_size=batch_size,
         undot_text=not is_dotted,
+        workers=dataloader_workers,
         sequence_length=sequence_length,
     )
     log_content(
