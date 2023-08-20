@@ -42,10 +42,10 @@ class LitNeuralLanguageModel(LightningModule):
             num_layers=self.num_layers,
             batch_first=True,
         )
-        self.first_dense_layer = nn.Linear(
-            in_features=self.hidden_size,
-            out_features=self.hidden_size,
-        )
+        # self.first_dense_layer = nn.Linear(
+        #     in_features=self.hidden_size,
+        #     out_features=self.hidden_size,
+        # )
         self.dropout_layer = nn.Dropout(p=self.dropout_prob)
         self.relu = nn.ReLU()
         self.second_dense_layer = nn.Linear(
@@ -62,12 +62,12 @@ class LitNeuralLanguageModel(LightningModule):
 
     def forward(self, x, hiddens=None):
         outputs = self.embedding_layer(x)
-        # outputs = self.dropout_layer(outputs)
+        outputs = self.dropout_layer(outputs)
         if hiddens is None:
             outputs, hiddens = self.gru_layer(outputs)
         else:
             outputs, hiddens = self.gru_layer(outputs, hiddens)
-        outputs = self.first_dense_layer(outputs)
+        # outputs = self.first_dense_layer(outputs)
         outputs = self.dropout_layer(outputs)
         outputs = self.relu(outputs)
         outputs = self.second_dense_layer(outputs)
@@ -154,11 +154,14 @@ class LitNeuralLanguageModel(LightningModule):
         optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.learning_rate,
+            # weight_decay=0.1,
+            # https://stackoverflow.com/a/42420014/4412324
+            eps=0.0001,
         )
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer=optimizer,
             factor=0.75,
-            patience=3,
+            patience=2,
             verbose=True,
         )
         return {
