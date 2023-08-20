@@ -1,18 +1,18 @@
 # NLMs
-nltk
-tqdm
-rich
-torch
-wandb
-click
-pandas
-rarfile
-datasets
-pyarabic
-requests
-scikit-learn
-transformers
-pytorch-lightning
+nltk==3.*
+tqdm==4.*
+rich==13.*
+torch==2.*
+wandb==0.*
+click==8.*
+pandas==2.*
+rarfile==4.*
+datasets==2.*
+pyarabic==0.*
+requests==2.*
+scikit-learn==1.*
+transformers==4.*
+pytorch-lightning==2.*
 git+https://github.com/MagedSaeed/tkseem.git
 https://github.com/kpu/kenlm/archive/master.zip
 

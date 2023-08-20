@@ -62,7 +62,7 @@ class LitNeuralLanguageModel(LightningModule):
 
     def forward(self, x, hiddens=None):
         outputs = self.embedding_layer(x)
-        outputs = self.dropout_layer(outputs)
+        # outputs = self.dropout_layer(outputs)
         if hiddens is None:
             outputs, hiddens = self.gru_layer(outputs)
         else:
@@ -159,6 +159,7 @@ class LitNeuralLanguageModel(LightningModule):
             optimizer=optimizer,
             factor=0.75,
             patience=3,
+            verbose=True,
         )
         return {
             "optimizer": optimizer,

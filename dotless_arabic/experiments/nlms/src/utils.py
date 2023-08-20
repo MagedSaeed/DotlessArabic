@@ -216,18 +216,15 @@ def get_tokenizer(
     undot_text=False,
     tokenizer_class=constants.DEFAULT_TOKENIZER_CLASS,
 ):
+    dataset = train_dataset
     if undot_text:
-        with open("tmp_dataset.txt", "w") as f:
-            f.write("\n".join(undot(item) for item in train_dataset if item.strip()))
-    else:
-        with open("tmp_dataset.txt", "w") as f:
-            f.write("\n".join(item for item in train_dataset if item.strip()))
-
+        dataset = [undot(item) for item in dataset if item.strip()]
+    dataset = "\n".join(item for item in dataset if item.strip())
     tokenizer = tokenizer_class(
         vocab_size=vocab_size,
         special_tokens=["<bos>", "<eos>"],
     )
-    tokenizer.train("tmp_dataset.txt")
+    tokenizer.train(text=dataset)
     return tokenizer
 
 
