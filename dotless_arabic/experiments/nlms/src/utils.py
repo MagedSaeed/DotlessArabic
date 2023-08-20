@@ -120,7 +120,7 @@ def train_lm(
     callbacks.append(checkpoint_callback)
     early_stopping_callback = EarlyStopping(
         monitor="val_loss",
-        min_delta=0.025,
+        min_delta=0.005,
         patience=10,
         check_finite=True,
     )
@@ -138,7 +138,7 @@ def train_lm(
         deterministic=True,
         callbacks=callbacks,
         logger=wandb_logger,
-        gradient_clip_val=1,
+        gradient_clip_val=5,
         fast_dev_run=one_run,
         max_epochs=max_epochs,
         val_check_interval=0.5,
