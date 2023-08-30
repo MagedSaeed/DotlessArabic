@@ -130,7 +130,7 @@ dmypy.json
 
 # Custom
 wandb
-NLMs
+NLMs*
 .vscode/*
 kenlm
 MC

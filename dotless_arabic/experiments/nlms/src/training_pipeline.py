@@ -1,21 +1,21 @@
+import json
 from tqdm.auto import tqdm
 from farasa.segmenter import FarasaSegmenter
 from pytorch_lightning.callbacks import Timer
 from pytorch_lightning.loggers import WandbLogger
 from sklearn.model_selection import train_test_split
 from pytorch_lightning.utilities.model_summary import ModelSummary
+import wandb
 from dotless_arabic.datasets.utils import tokens_frequency
 
 from dotless_arabic.utils import log_content
 from dotless_arabic.experiments.nlms.src import constants
-from dotless_arabic.experiments.nlms.src.models import LitNeuralLanguageModel
+from dotless_arabic.experiments.nlms.src.models import LitRNNLM, LitTransformerLM
 from dotless_arabic.experiments.nlms.src.settings import configure_environment
 from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer
 from dotless_arabic.experiments.nlms.src.utils import (
-    calculate_perplexity,
     generate_text,
     get_sequence_length,
-    get_best_checkpoint,
     get_dataloader,
     get_tokenizer,
     get_vocab_size,
@@ -29,6 +29,7 @@ def training_pipeline(
     is_dotted,
     dataset_id,
     batch_size,
+    model_type,
     gpu_devices,
     cpu_devices,
     dataset_name,
@@ -217,8 +218,16 @@ def training_pipeline(
 
     timer_callback = Timer()
 
-    # loss_metrics_callback = LossMetricsCallback()
-    lm_model = LitNeuralLanguageModel(vocab_size=tokenizer.vocab_size)
+    if model_type.lower() == "rnn":
+        model_class = LitRNNLM
+    elif model_type.lower() == "transformer":
+        model_class = LitTransformerLM
+    else:
+        raise ValueError(
+            f"Model Type {model_type} is not supported. Put either 'RNN' or 'Transformer'"
+        )
+
+    lm_model = model_class(vocab_size=vocab_size)
 
     log_content(
         content=f"""
@@ -231,14 +240,15 @@ def training_pipeline(
     wandb_logger = WandbLogger(
         project=f"NLMs",
         group=dataset_name,
-        id=dataset_id + f"_{tokenizer_class.__name__}",
+        # id=dataset_id + f"_{tokenizer_class.__name__}",
         job_type="dotted" if is_dotted else "undotted",
-        name=dataset_name + f"_{tokenizer_class.__name__}",
+        name=dataset_name + f"_{tokenizer_class.__name__}" + f"_{model_type}",
     )
-    wandb_logger.watch(lm_model, log="all")
+    wandb_logger.watch(lm_model)
     trainer = train_lm(
         # one_run=True,
         lm_model=lm_model,
+        model_type=model_type,
         dataset_id=dataset_id,
         cpu_devices=cpu_devices,
         gpu_devices=gpu_devices,
@@ -251,43 +261,21 @@ def training_pipeline(
         # callbacks=[loss_metrics_callback, timer_callback],
         callbacks=[timer_callback],
     )
-    lm_model = LitNeuralLanguageModel.load_from_checkpoint(
-        get_best_checkpoint(
-            dataset_id=dataset_id,
-            tokenizer_class=tokenizer_class,
-        )
-    )
-    training_perplexity = calculate_perplexity(
-        lm_model=lm_model,
-        tokenizer=tokenizer,
-        dataset=train_dataset,
-        batch_size=batch_size,
-        undot_text=not is_dotted,
-        sequence_length=sequence_length,
+    results = trainer.test(
+        ckpt_path="best",
+        dataloaders=(
+            train_dataloader,
+            val_dataloader,
+            test_dataloader,
+        ),
     )
 
-    perplexity_with_oovs = calculate_perplexity(
-        lm_model=lm_model,
-        tokenizer=tokenizer,
-        dataset=test_dataset,
-        undot_text=not is_dotted,
-        sequence_length=sequence_length,
-    )
-
-    perplexity_without_oovs = calculate_perplexity(
-        lm_model=lm_model,
-        tokenizer=tokenizer,
-        dataset=test_dataset,
-        undot_text=not is_dotted,
-        sequence_length=sequence_length,
-        ignore_oovs=True,
-    )
+    wandb.finish()
 
     log_content(
         content=f"""
-        Training Perplexity: {training_perplexity}
-        Perplexity with OOVs: {perplexity_with_oovs}
-        Perplexity without OOVs: {perplexity_without_oovs:,}
+        Perplexity Results for Train,Validation, and Test Dataloaders:
+        {json.dumps(results,indent=4)}
         """,
         results_file=results_file,
         print_to_console=print_to_console,
@@ -329,3 +317,39 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+
+    # training_perplexity = calculate_perplexity(
+    #     lm_model=lm_model,
+    #     tokenizer=tokenizer,
+    #     dataset=train_dataset,
+    #     batch_size=batch_size,
+    #     undot_text=not is_dotted,
+    #     sequence_length=sequence_length,
+    # )
+
+    # perplexity_with_oovs = calculate_perplexity(
+    #     lm_model=lm_model,
+    #     tokenizer=tokenizer,
+    #     dataset=test_dataset,
+    #     undot_text=not is_dotted,
+    #     sequence_length=sequence_length,
+    # )
+
+    # perplexity_without_oovs = calculate_perplexity(
+    #     lm_model=lm_model,
+    #     tokenizer=tokenizer,
+    #     dataset=test_dataset,
+    #     undot_text=not is_dotted,
+    #     sequence_length=sequence_length,
+    #     ignore_oovs=True,
+    # )
+
+    # log_content(
+    #     content=f"""
+    #     Training Perplexity: {training_perplexity}
+    #     Perplexity with OOVs: {perplexity_with_oovs}
+    #     Perplexity without OOVs: {perplexity_without_oovs:,}
+    #     """,
+    #     results_file=results_file,
+    #     print_to_console=print_to_console,
+    # )
