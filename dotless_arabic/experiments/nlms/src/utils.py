@@ -1,5 +1,4 @@
 import math
-import os
 import shutil
 from collections import defaultdict
 from pathlib import Path
@@ -12,6 +11,7 @@ from pytorch_lightning.callbacks import (
     ModelCheckpoint,
     RichProgressBar,
     LearningRateMonitor,
+    StochasticWeightAveraging,
 )
 
 
@@ -19,11 +19,10 @@ from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from farasa.segmenter import FarasaSegmenter
 
-import wandb
-
 from dotless_arabic.processing import undot
 from dotless_arabic.experiments.nlms.src import constants, datasets
 from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer, WordTokenizer
+from dotless_arabic.experiments.nlms.src.models import LitRNNLM, LitTransformerLM
 
 
 def generate_text(
@@ -31,7 +30,7 @@ def generate_text(
     tokenizer,
     sequence_length,
     prompt="<bos> ",
-    num_tokens=10,
+    num_tokens=25,
     device=constants.DEVICE,
     print_generated_token=True,
     temperature=0.5,
@@ -46,11 +45,14 @@ def generate_text(
         for index in range(num_tokens):
             prompt = " ".join(prompt.split()[-sequence_length:])
             encoded = tokenizer.encode(prompt)
-            encoded = torch.LongTensor(encoded).to(device)
-            output, hiddens = lm_model(encoded, hiddens)
-            output = output.squeeze(0)
-            if len(output.size()) > 1:
-                output = output[-1]
+            encoded = torch.LongTensor([encoded]).to(device)
+            if lm_model.__class__ == LitRNNLM:
+                output, hiddens = lm_model(encoded, hiddens)
+            elif lm_model.__class__ == LitTransformerLM:
+                model_class = lm_model.__class__
+                mask = model_class.generate_square_subsequent_mask(size=input.size(0))
+                output = lm_model(input, mask=mask, device=device)
+            output = output[-1, -1, :]
             output = torch.softmax(output / temperature, dim=-1)
             predicted_token_id = torch.multinomial(output, num_samples=1).item()
             counter = 0
@@ -89,6 +91,7 @@ def generate_text(
 
 def train_lm(
     lm_model,
+    model_type,
     dataset_id,
     wandb_logger,
     vocab_coverage,
@@ -103,7 +106,9 @@ def train_lm(
     max_epochs=constants.MAX_EPOCHS,
 ):
     # remove any previous checkpoints
-    checkpoints_path = Path(f"NLMs/{dataset_id}/{tokenizer_class.__name__}")
+    checkpoints_path = Path(
+        f"NLMs/{dataset_id}/{tokenizer_class.__name__}/{model_type}"
+    )
     shutil.rmtree(checkpoints_path, ignore_errors=True)
     checkpoint_callback = ModelCheckpoint(
         mode="min",
@@ -111,17 +116,17 @@ def train_lm(
         verbose=False,
         save_last=True,
         monitor="val_loss",
-        save_weights_only=False,
         auto_insert_metric_name=True,
         save_on_train_epoch_end=False,
         dirpath=f"NLMs/{dataset_id}/{tokenizer_class.__name__}/checkpoints",
         filename="{epoch}-{val_loss:.3f}-{step}" + f"-{vocab_coverage}",
     )
     callbacks.append(checkpoint_callback)
+    # callbacks.append(StochasticWeightAveraging(0.1 * constants.LEARNING_RATE))
     early_stopping_callback = EarlyStopping(
         monitor="val_loss",
         min_delta=0.005,
-        patience=10,
+        patience=20,
         check_finite=True,
     )
     callbacks.append(early_stopping_callback)
@@ -138,10 +143,10 @@ def train_lm(
         deterministic=True,
         callbacks=callbacks,
         logger=wandb_logger,
-        gradient_clip_val=5,
+        gradient_clip_val=3,
         fast_dev_run=one_run,
         max_epochs=max_epochs,
-        val_check_interval=0.5,
+        val_check_interval=0.25,
         accelerator=constants.LIGHTING_ACCELERATOR,
         log_every_n_steps=max(len(train_dataloader) // 25, 1),
         # default_root_dir=f"LMsModels/{previous_hiddens}",
@@ -150,64 +155,65 @@ def train_lm(
         model=lm_model,
         dataloaders=val_dataloader,
     )
+
     trainer.fit(
         lm_model,
         train_dataloader,
         val_dataloader,
     )
-    wandb.finish()
+
     # trainer.lm_model = LitNeurlaLanguageModel.load_from_checkpoint(f'Neural-Language-Models-Metrics/{dataset_id}/checkpoints/last.ckpt')
     return trainer
 
 
-def calculate_perplexity(
-    lm_model,
-    dataset,
-    tokenizer,
-    sequence_length,
-    use_tqdm=True,
-    undot_text=False,
-    device=constants.DEVICE,
-    batch_size=constants.DEFAULT_BATCH_SIZE,
-    ignore_oovs=False,
-):
-    # https://towardsdatascience.com/the-relationship-between-perplexity-and-entropy-in-nlp-f81888775ccc
-    # https://stackoverflow.com/a/59219379/4412324
-    lm_dataset = datasets.LanguageModelDataset(
-        dataset=dataset,
-        tokenizer=tokenizer,
-        undot_text=undot_text,
-        sequence_length=sequence_length,
-    )
-    dataloader = DataLoader(
-        shuffle=False,
-        dataset=lm_dataset,
-        batch_size=batch_size,
-        num_workers=constants.CPU_COUNT,
-        collate_fn=datasets.dataset_collate_fn,
-        drop_last=True if len(lm_dataset) > batch_size else False,
-    )
-    lm_model.to(device)
-    lm_model.eval()
-    with torch.no_grad():
-        loader = tqdm(dataloader) if use_tqdm else dataloader
-        losses = list()
-        for batch in loader:
-            inputs, outputs = batch
-            inputs = inputs.to(device)
-            outputs = outputs.to(device)
-            batch_loss = lm_model._get_loss(
-                (inputs, outputs),
-                ignore_oovs=ignore_oovs,
-                loss_reduction="none",
-            )
-            batch_loss = batch_loss.view(-1)
-            batch_loss = batch_loss[batch_loss != 0]
-            losses.extend(batch_loss.detach().cpu().tolist())
+# def calculate_perplexity(
+#     lm_model,
+#     dataset,
+#     tokenizer,
+#     sequence_length,
+#     use_tqdm=True,
+#     undot_text=False,
+#     device=constants.DEVICE,
+#     batch_size=constants.DEFAULT_BATCH_SIZE,
+#     ignore_oovs=False,
+# ):
+#     # https://towardsdatascience.com/the-relationship-between-perplexity-and-entropy-in-nlp-f81888775ccc
+#     # https://stackoverflow.com/a/59219379/4412324
+#     lm_dataset = datasets.LanguageModelDataset(
+#         dataset=dataset,
+#         tokenizer=tokenizer,
+#         undot_text=undot_text,
+#         sequence_length=sequence_length,
+#     )
+#     dataloader = DataLoader(
+#         shuffle=False,
+#         dataset=lm_dataset,
+#         batch_size=batch_size,
+#         num_workers=constants.CPU_COUNT,
+#         collate_fn=datasets.dataset_collate_fn,
+#         drop_last=True if len(lm_dataset) > batch_size else False,
+#     )
+#     lm_model.to(device)
+#     lm_model.eval()
+#     with torch.no_grad():
+#         loader = tqdm(dataloader) if use_tqdm else dataloader
+#         losses = list()
+#         for batch in loader:
+#             inputs, outputs = batch
+#             inputs = inputs.to(device)
+#             outputs = outputs.to(device)
+#             batch_loss = lm_model._get_loss(
+#                 (inputs, outputs),
+#                 ignore_oovs=ignore_oovs,
+#                 loss_reduction="none",
+#             )
+#             batch_loss = batch_loss.view(-1)
+#             batch_loss = batch_loss[batch_loss != 0]
+#             losses.extend(batch_loss.detach().cpu().tolist())
 
-    average_loss = np.mean(losses)
-    perplexity = np.exp(average_loss)
-    return perplexity
+#     average_loss = np.mean(losses)
+#     perplexity = np.exp(average_loss)
+#     return perplexity
 
 
 def get_tokenizer(
@@ -312,13 +318,15 @@ def get_vocab_size(
     return vocab
 
 
-def get_best_checkpoint(dataset_id, tokenizer_class, checkpoints_base_path="NLMs"):
-    checkpoints_path = (
-        f"{checkpoints_base_path}/{dataset_id}/{tokenizer_class.__name__}/checkpoints"
-    )
-    for file_name in os.listdir(checkpoints_path):
-        if file_name.startswith("epoch"):
-            return f"{checkpoints_path}/{file_name}"
+# def get_best_checkpoint(dataset_id, tokenizer_class, checkpoints_base_path="NLMs"):
+#     checkpoints_path = (
+#         f"{checkpoints_base_path}/{dataset_id}/{tokenizer_class.__name__}/checkpoints"
+#     )
+#     for file_name in os.listdir(checkpoints_path):
+#         if file_name.startswith("epoch"):
+#             print(f"checkpiont {file_name} found.")
+#             return f"{checkpoints_path}/{file_name}"
+#     print("Could NOT find a checkpoint!!")
 
 
 def get_sequence_length(

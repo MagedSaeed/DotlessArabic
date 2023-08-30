@@ -11,8 +11,8 @@ if "." not in sys.path:
 
 
 from dotless_arabic.utils import log_content
+from dotless_arabic.processing import process
 from dotless_arabic.tokenizers import TOKENIZERS_MAP
-from dotless_arabic.processing import process, undot
 from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
 
@@ -77,6 +77,18 @@ from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipel
     type=bool,
     default=True,
 )
+@click.option(
+    "--model_type",
+    default="RNN",
+    help="Model architecture",
+    type=click.Choice(
+        [
+            "RNN",
+            "Transformer",
+        ],
+        case_sensitive=False,
+    ),
+)
 def run(
     dataset,
     vocab_coverage,
@@ -86,10 +98,10 @@ def run(
     batch_size,
     run_dotted,
     run_undotted,
+    model_type,
     sequence_length=None,
     seqlen_percentile=constants.SEQUENCE_LENGTH_PERCENTILE,
 ):
-
     dataset_name = dataset + "_dataset"
     sequence_length_percentile = seqlen_percentile
 
@@ -109,7 +121,6 @@ def run(
     tokenizer_class = TOKENIZERS_MAP[tokenizer_class]
 
     if run_dotted:
-
         dotted_results_file_path = f"{results_dir}/dotted_vocab_coverage_{vocab_coverage}_seqlen_percentile_{seqlen_percentile}.txt"
 
         # delete the current logging file, if exists
@@ -121,7 +132,6 @@ def run(
         )
 
     if run_undotted:
-
         undotted_results_file_path = f"{results_dir}/undotted_vocab_coverage_{vocab_coverage}_seqlen_percentile_{seqlen_percentile}.txt"
 
         # delete the current logging file, if exists
@@ -145,7 +155,6 @@ def run(
     ################################################
 
     if run_dotted:
-
         log_content(
             content=f"""
                 Dotted Training Started at {datetime.now()} for tokenizer: {tokenizer_class.__name__}
@@ -166,6 +175,7 @@ def run(
         training_pipeline(
             is_dotted=True,
             dataset=dataset,
+            model_type=model_type,
             batch_size=batch_size,
             dataset_id=dataset_id,
             gpu_devices=gpu_devices,
@@ -198,7 +208,6 @@ def run(
     ################################################
 
     if run_undotted:
-
         log_content(
             content=f"""
             Undotted Training Started at {datetime.now()} for tokenizer: {tokenizer_class.__name__}
@@ -219,6 +228,7 @@ def run(
         training_pipeline(
             is_dotted=False,
             dataset=dataset,
+            model_type=model_type,
             dataset_id=dataset_id,
             batch_size=batch_size,
             gpu_devices=gpu_devices,
