@@ -118,7 +118,7 @@ def train_lm(
         monitor="val_loss",
         auto_insert_metric_name=True,
         save_on_train_epoch_end=False,
-        dirpath=f"NLMs/{dataset_id}/{tokenizer_class.__name__}/checkpoints",
+        dirpath=f"NLMs/{dataset_id}/{tokenizer_class.__name__}/{model_type}/checkpoints",
         filename="{epoch}-{val_loss:.3f}-{step}" + f"-{vocab_coverage}",
     )
     callbacks.append(checkpoint_callback)
