@@ -151,7 +151,7 @@ class LitRNNLM(LightningModule):
         )
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer=optimizer,
-            factor=0.5,
+            factor=0.75,
             patience=1,
             verbose=True,
         )
