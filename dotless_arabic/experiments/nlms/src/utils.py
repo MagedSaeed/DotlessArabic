@@ -143,7 +143,7 @@ def train_lm(
         deterministic=True,
         callbacks=callbacks,
         logger=wandb_logger,
-        gradient_clip_val=3,
+        gradient_clip_val=10,  # for transformer model, this value might be very small, say 0.25
         fast_dev_run=one_run,
         max_epochs=max_epochs,
         val_check_interval=0.25,
