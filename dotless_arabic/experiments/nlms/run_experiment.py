@@ -172,7 +172,7 @@ def run(
 
         dataset_id = f"dotted-{dataset_name}".upper()
 
-        training_pipeline(
+        best_params = training_pipeline(
             is_dotted=True,
             dataset=dataset,
             model_type=model_type,
@@ -201,6 +201,15 @@ def run(
             Dotted Experiment is DISABLED for tokenizer {tokenizer_class.__name__} and dataset {dataset_name}
             """,
             "#" * 100,
+        )
+        # use the default hparams
+        best_params = dict(
+            model_type=constants.RNN_TYPE,
+            num_layers=constants.NUM_LAYERS,
+            hidden_size=constants.HIDDEN_SIZE,
+            dropout_prob=constants.DROPOUT_PROB,
+            learning_rate=constants.LEARNING_RATE,
+            embedding_size=constants.EMBEDDING_SIZE,
         )
 
     ################################################
@@ -233,6 +242,7 @@ def run(
             batch_size=batch_size,
             gpu_devices=gpu_devices,
             cpu_devices=cpu_devices,
+            best_params=best_params,
             vocab_coverage=vocab_coverage,
             dataset_name=dataset_id.lower(),
             tokenizer_class=tokenizer_class,
