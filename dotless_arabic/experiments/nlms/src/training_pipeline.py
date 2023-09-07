@@ -1,4 +1,5 @@
 import json
+import torch
 
 import wandb
 from tqdm.auto import tqdm
@@ -13,6 +14,7 @@ from dotless_arabic.utils import log_content
 from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.datasets.utils import tokens_frequency
 from dotless_arabic.experiments.nlms.src.models import LitRNNLM, LitTransformerLM
+from dotless_arabic.experiments.nlms.src.tuners import tune_lm_model
 from dotless_arabic.experiments.nlms.src.settings import configure_environment
 from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer
 from dotless_arabic.experiments.nlms.src.utils import (
@@ -38,6 +40,7 @@ def training_pipeline(
     results_file,
     vocab_coverage,
     tokenizer_class,
+    best_params=None,
     sequence_length=None,
     print_to_console=True,
     dataloader_workers=constants.CPU_COUNT,
@@ -195,6 +198,7 @@ def training_pipeline(
         workers=dataloader_workers,
         sequence_length=sequence_length,
     )
+
     val_dataloader = get_dataloader(
         dataset=val_dataset,
         tokenizer=tokenizer,
@@ -234,7 +238,34 @@ def training_pipeline(
             f"Model Type {model_type} is not supported. Put either 'RNN' or 'Transformer'"
         )
 
-    lm_model = model_class(vocab_size=tokenizer.vocab_size)
+    if best_params is None:
+        # tune the model
+        dataset_for_tuning = train_dataset[: int(len(train_dataset) * 0.1)]
+        tokenizer_for_tuning = get_tokenizer(
+            train_dataset=dataset_for_tuning,
+            vocab_size=max_vocab_size,
+            tokenizer_class=tokenizer_class,
+        )
+        train_dataloader_for_tuning = get_dataloader(
+            shuffle=True,
+            tokenizer=tokenizer_for_tuning,
+            sequence_length=sequence_length,
+            dataset=dataset_for_tuning,
+        )
+        val_dataloader_for_tuning = get_dataloader(
+            shuffle=False,
+            tokenizer=tokenizer_for_tuning,
+            sequence_length=sequence_length,
+            dataset=val_dataset,
+        )
+        best_params = tune_lm_model(
+            lm_model_class=model_class,
+            vocab_size=tokenizer_for_tuning.vocab_size,
+            train_dataloader=train_dataloader_for_tuning,
+            val_dataloader=val_dataloader_for_tuning,
+        )
+
+    lm_model = model_class(vocab_size=tokenizer.vocab_size, **best_params)
 
     log_content(
         content=f"""
@@ -324,6 +355,7 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+    return best_params
 
     # training_perplexity = calculate_perplexity(
     #     lm_model=lm_model,

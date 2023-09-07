@@ -55,8 +55,12 @@ class LitRNNLM(LightningModule):
                 batch_first=True,
             )
         self.dropout_layer = nn.Dropout(p=self.dropout_prob)
-        self.relu = nn.ReLU()
-        self.dense_layer = nn.Linear(
+        self.relu = nn.LeakyReLU()
+        self.first_dense_layer = nn.Linear(
+            in_features=self.hidden_size,
+            out_features=self.hidden_size,
+        )
+        self.second_dense_layer = nn.Linear(
             in_features=self.hidden_size,
             out_features=self.vocab_size,
         )
@@ -67,10 +71,15 @@ class LitRNNLM(LightningModule):
 
         # weights tieing
         if tie_weights:
-            assert (
-                self.embedding_size == self.hidden_size
-            ), "in weights tieing, embedding size should be the same as hidden size"
-            self.dense_layer.weight = self.embedding_layer.weight
+            if not self.embedding_size == self.hidden_size:
+                print(
+                    f"Cannot tie wight as embedding size is nto equal hidden size: {self.embedding_size}!={self.hidden_size}"
+                )
+            else:
+                # assert (
+                #     self.embedding_size == self.hidden_size
+                # ), "in weights tieing, embedding size should be the same as hidden size"
+                self.second_dense_layer.weight = self.embedding_layer.weight
 
     def forward(self, x, hiddens=None):
         outputs = self.embedding_layer(x)
@@ -94,9 +103,10 @@ class LitRNNLM(LightningModule):
             # sequence length is the second dim, first dim is the batch size
             total_length=x.size(1),
         )
+        outputs = self.first_dense_layer(outputs)
         outputs = self.dropout_layer(outputs)
         outputs = self.relu(outputs)
-        outputs = self.dense_layer(outputs)
+        outputs = self.second_dense_layer(outputs)
         return outputs, hiddens
 
     def step(self, batch, return_outputs=False):
@@ -143,6 +153,13 @@ class LitRNNLM(LightningModule):
         self.log("test_ppl", ppl)
         self.log("test_loss", loss, prog_bar=True)
         return loss
+
+    # def configure_optimizers(self):
+    #     optimizer = torch.optim.Adam(
+    #         self.parameters(),
+    #         lr=self.learning_rate,
+    #     )
+    #     return optimizer
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(

@@ -23,4 +23,4 @@ GPU_DEVICES = "0"  # consider only one CPU core if there is no GPU
 
 CPU_DEVICES = 1  # I tried with higher values but this did not work
 
-RNN_TYPE = "lstm"
+RNN_TYPE = "gru"

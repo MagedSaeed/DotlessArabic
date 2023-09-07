@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from torch import nn
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import (
     EarlyStopping,
@@ -12,6 +13,7 @@ from pytorch_lightning.callbacks import (
     RichProgressBar,
     LearningRateMonitor,
     StochasticWeightAveraging,
+    LearningRateFinder,
 )
 
 
@@ -89,6 +91,12 @@ def generate_text(
     )
 
 
+def xavier_init(model):
+    for p in model.parameters():
+        if p.dim() > 1:
+            nn.init.xavier_uniform_(p)
+
+
 def train_lm(
     lm_model,
     model_type,
@@ -122,11 +130,24 @@ def train_lm(
         filename="{epoch}-{val_loss:.3f}-{step}" + f"-{vocab_coverage}",
     )
     callbacks.append(checkpoint_callback)
+    # learning rate finder
+    # callbacks.append(
+    #     LearningRateFinder(
+    #         min_lr=1e-08,
+    #         max_lr=1,
+    #         num_training_steps=1_000,
+    #         mode="exponential",
+    #         early_stop_threshold=20,
+    #         update_attr=True,
+    #         attr_name="learning_rate",
+    #     )
+    # )
     # callbacks.append(StochasticWeightAveraging(0.1 * constants.LEARNING_RATE))
     early_stopping_callback = EarlyStopping(
         monitor="val_loss",
         min_delta=0.005,
         patience=20,
+        # patience=10,
         check_finite=True,
     )
     callbacks.append(early_stopping_callback)
@@ -138,12 +159,14 @@ def train_lm(
     )
     callbacks.append(lr_monitor)
     devices = gpu_devices if constants.DEVICE == "cuda" else cpu_devices
+    # initialze the model with xavier initialization
+    xavier_init(model=lm_model)
     trainer = Trainer(
         devices=devices,
         deterministic=True,
         callbacks=callbacks,
         logger=wandb_logger,
-        gradient_clip_val=7.5,  # for transformer model, this value might be very small, say 0.25
+        gradient_clip_val=3,  # for transformer model, this value might be very small, say 0.25
         fast_dev_run=one_run,
         max_epochs=max_epochs,
         val_check_interval=0.25,
