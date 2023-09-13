@@ -39,7 +39,7 @@ NON_CLASSICAL_METERS = [
     "شعر حر",
     "عدة أبحر",
     "عامي",
-    # None,
+    None,
 ]
 
 
@@ -51,7 +51,7 @@ def collect_dataset_for_analysis(results_file=None):
     return verses
 
 
-def collect_dataset_for_language_modeling(results_file=None, poems_as_samples=False):
+def collect_dataset_for_language_modeling(results_file=None, poems_as_samples=True):
     ashaar = datasets.load_dataset("arbml/ashaar", split="train")
 
     log_content(
@@ -80,7 +80,13 @@ def collect_dataset_for_language_modeling(results_file=None, poems_as_samples=Fa
             # consider only poems with 3 baits at least
             if len(poem) < 5:
                 continue
-            poems.append(" ".join(poem))
+            # chunk poems to size of 30 baits
+            verses_threshold = 60
+            for subpoem_start in range(0, len(poem), verses_threshold):
+                subpoem = poem[subpoem_start : subpoem_start + verses_threshold]
+                # same threshold as above
+                if len(subpoem) >= 5:
+                    poems.append(" ".join(subpoem))
         log_content(
             content=f"""
         Sample of datasets samples:
