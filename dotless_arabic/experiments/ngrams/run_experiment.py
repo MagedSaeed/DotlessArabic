@@ -29,8 +29,18 @@ from dotless_arabic.experiments.ngrams.src.train import training_pipeline
     required=True,
     type=click.Choice(list(constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING.keys())),
 )
-def run(dataset, tokenizer_class):
-
+@click.option(
+    "--poems_as_samples",
+    help="This option is only used for poems dataset. If False, it will consider the baits as a sample instead of the whole poem as a sample. Default: True",
+    required=False,
+    default=True,
+    type=bool,
+)
+def run(
+    dataset,
+    tokenizer_class,
+    poems_as_samples=True,
+):
     dataset_name = dataset + "_dataset"
 
     current_dir = Path(__file__).resolve().parent
@@ -46,9 +56,15 @@ def run(dataset, tokenizer_class):
         f"{results_dir}/results_dotted_tokenizer_{tokenizer_class.__name__}.txt"
     )
 
-    dataset = constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING[dataset](
-        results_file=dotted_results_file_path
-    )
+    if dataset == "poems":
+        dataset = constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING[dataset](
+            results_file=dotted_results_file_path,
+            poems_as_samples=poems_as_samples,
+        )
+    else:
+        dataset = constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING[dataset](
+            results_file=dotted_results_file_path
+        )
 
     # delete the current logging file, if exists
 

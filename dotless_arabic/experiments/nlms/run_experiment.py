@@ -89,6 +89,13 @@ from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipel
         case_sensitive=False,
     ),
 )
+@click.option(
+    "--poems_as_samples",
+    help="This option is only used for poems dataset. If False, it will consider the baits as a sample instead of the whole poem as a sample. Default: True",
+    required=False,
+    default=True,
+    type=bool,
+)
 def run(
     dataset,
     vocab_coverage,
@@ -100,6 +107,7 @@ def run(
     run_undotted,
     model_type,
     sequence_length=None,
+    poems_as_samples=True,
     seqlen_percentile=constants.SEQUENCE_LENGTH_PERCENTILE,
 ):
     dataset_name = dataset + "_dataset"
@@ -127,9 +135,15 @@ def run(
 
         Path(dotted_results_file_path).unlink(missing_ok=True)
 
-        dataset = constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING[dataset](
-            results_file=dotted_results_file_path
-        )
+        if dataset == "poems":
+            dataset = constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING[dataset](
+                results_file=dotted_results_file_path,
+                poems_as_samples=poems_as_samples,
+            )
+        else:
+            dataset = constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING[dataset](
+                results_file=dotted_results_file_path
+            )
 
     if run_undotted:
         undotted_results_file_path = f"{results_dir}/undotted_vocab_coverage_{vocab_coverage}_seqlen_percentile_{seqlen_percentile}.txt"
@@ -139,9 +153,15 @@ def run(
         Path(undotted_results_file_path).unlink(missing_ok=True)
 
         if not run_dotted:
-            dataset = constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING[dataset](
-                results_file=undotted_results_file_path
-            )
+            if dataset == "poems":
+                dataset = constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING[dataset](
+                    results_file=undotted_results_file_path,
+                    poems_as_samples=poems_as_samples,
+                )
+            else:
+                dataset = constants.COLLECT_DATASET_FOR_LANGUAGE_MODELLING[dataset](
+                    results_file=undotted_results_file_path
+                )
 
     dataset = list(
         map(
