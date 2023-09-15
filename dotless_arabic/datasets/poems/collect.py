@@ -77,16 +77,16 @@ def collect_dataset_for_language_modeling(results_file=None, poems_as_samples=Tr
     if poems_as_samples:
         poems = []
         for poem in tqdm(ashaar["poem verses"]):
-            # consider only poems with 3 baits at least
-            if len(poem) < 5:
-                continue
-            # chunk poems to size of 30 baits
-            verses_threshold = 60
+            # consider only poems with 1 baits at least
+            # if len(poem) <= 3:
+            #     continue
+            # chunk poems to size of 6 baits
+            verses_threshold = 12
             for subpoem_start in range(0, len(poem), verses_threshold):
                 subpoem = poem[subpoem_start : subpoem_start + verses_threshold]
-                # same threshold as above
-                if len(subpoem) >= 5:
-                    poems.append(" ".join(subpoem))
+                # the subpoem should at least has 1 bait
+                # if len(subpoem) >= 3:
+                poems.append(" ".join(subpoem))
         log_content(
             content=f"""
         Sample of datasets samples:
