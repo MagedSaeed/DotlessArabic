@@ -35,7 +35,7 @@ def training_pipeline(
     batch_size,
     model_type,
     gpu_devices,
-    cpu_devices,
+    # cpu_devices,
     dataset_name,
     results_file,
     vocab_coverage,
@@ -46,7 +46,7 @@ def training_pipeline(
     dataloader_workers=constants.CPU_COUNT,
     sequence_length_percentile=constants.SEQUENCE_LENGTH_PERCENTILE,
 ):
-    configure_environment()
+    configure_environment(gpu_devices=gpu_devices)
 
     train_dataset, test_dataset = train_test_split(
         dataset,
@@ -238,7 +238,7 @@ def training_pipeline(
             f"Model Type {model_type} is not supported. Put either 'RNN' or 'Transformer'"
         )
 
-    if best_params is None:
+    if not best_params:
         # tune the model
         dataset_for_tuning = train_dataset[: int(len(train_dataset) * 0.1)]
         tokenizer_for_tuning = get_tokenizer(
@@ -259,6 +259,7 @@ def training_pipeline(
             dataset=val_dataset,
         )
         best_params = tune_lm_model(
+            # gpu_devices=gpu_devices,
             lm_model_class=model_class,
             vocab_size=tokenizer_for_tuning.vocab_size,
             train_dataloader=train_dataloader_for_tuning,
@@ -288,7 +289,7 @@ def training_pipeline(
         lm_model=lm_model,
         model_type=model_type,
         dataset_id=dataset_id,
-        cpu_devices=cpu_devices,
+        # cpu_devices=cpu_devices,
         gpu_devices=gpu_devices,
         wandb_logger=wandb_logger,
         val_dataloader=val_dataloader,

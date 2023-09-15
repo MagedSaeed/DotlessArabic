@@ -1,5 +1,3 @@
-import math
-
 from pytorch_lightning.callbacks import (
     LearningRateMonitor,
     RichProgressBar,
@@ -25,7 +23,6 @@ def train_lm_for_tuning(
     lm_model_class,
     train_dataloader,
     val_dataloader,
-    gpu_devices=[0],
     max_epochs=5,
 ):
     lm_model = lm_model_class(
@@ -50,16 +47,17 @@ def train_lm_for_tuning(
             on="validation_end",
         )
     )
-    devices = gpu_devices
+    # devices = gpu_devices
     xavier_init(model=lm_model)
     trainer = Trainer(
-        devices=devices,
         accelerator="auto",
         deterministic=True,
         callbacks=callbacks,
         gradient_clip_val=3,  # for transformer model, this value might be very small, say 0.25
         max_epochs=max_epochs,
         val_check_interval=0.5,
+        enable_progress_bar=False,
+        enable_model_summary=False,
         log_every_n_steps=max(len(train_dataloader) // 50, 1),
     )
     trainer.validate(
@@ -124,6 +122,7 @@ def tune_lm_model(
             mode="min",
             scheduler=scheduler,
             # num_samples=100,
+            max_concurrent_trials=1,
         ),
         run_config=air.RunConfig(
             name=f"tune_lm",

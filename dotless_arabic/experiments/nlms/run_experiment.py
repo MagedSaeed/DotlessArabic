@@ -117,7 +117,7 @@ def run(
         run_dotted or run_undotted
     ), "run_dotted and run_undotted should not be both False"
 
-    gpu_devices = list(map(int, gpu_devices.split(",")))
+    # gpu_devices = list(map(int, gpu_devices.split(",")))
 
     current_dir = Path(__file__).resolve().parent
 
@@ -174,6 +174,8 @@ def run(
     ###### Dotted Dataset Training #################
     ################################################
 
+    best_params = None
+
     if run_dotted:
         log_content(
             content=f"""
@@ -192,14 +194,23 @@ def run(
 
         dataset_id = f"dotted-{dataset_name}".upper()
 
+        # best_params = {  # temporary for poems dataset (should not be commited to vc)
+        #     "num_layers": 2,
+        #     "hidden_size": 256,
+        #     "embedding_size": 512,
+        #     "dropout_prob": 0.2,
+        #     "learning_rate": 0.001,
+        # }
+
         best_params = training_pipeline(
             is_dotted=True,
             dataset=dataset,
             model_type=model_type,
             batch_size=batch_size,
             dataset_id=dataset_id,
+            best_params=best_params,
             gpu_devices=gpu_devices,
-            cpu_devices=cpu_devices,
+            # cpu_devices=cpu_devices,
             vocab_coverage=vocab_coverage,
             dataset_name=dataset_id.lower(),
             tokenizer_class=tokenizer_class,
@@ -223,14 +234,14 @@ def run(
             "#" * 100,
         )
         # use the default hparams
-        best_params = dict(
-            model_type=constants.RNN_TYPE,
-            num_layers=constants.NUM_LAYERS,
-            hidden_size=constants.HIDDEN_SIZE,
-            dropout_prob=constants.DROPOUT_PROB,
-            learning_rate=constants.LEARNING_RATE,
-            embedding_size=constants.EMBEDDING_SIZE,
-        )
+        # best_params = dict(
+        #     model_type=constants.RNN_TYPE,
+        #     num_layers=constants.NUM_LAYERS,
+        #     hidden_size=constants.HIDDEN_SIZE,
+        #     dropout_prob=constants.DROPOUT_PROB,
+        #     learning_rate=constants.LEARNING_RATE,
+        #     embedding_size=constants.EMBEDDING_SIZE,
+        # )
 
     ################################################
     ###### Undotted Dataset Training ###############
@@ -261,7 +272,7 @@ def run(
             dataset_id=dataset_id,
             batch_size=batch_size,
             gpu_devices=gpu_devices,
-            cpu_devices=cpu_devices,
+            # cpu_devices=cpu_devices,
             best_params=best_params,
             vocab_coverage=vocab_coverage,
             dataset_name=dataset_id.lower(),
