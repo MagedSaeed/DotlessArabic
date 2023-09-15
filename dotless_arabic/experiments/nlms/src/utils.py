@@ -107,7 +107,7 @@ def train_lm(
     train_dataloader,
     val_dataloader,
     gpu_devices,
-    cpu_devices,
+    # cpu_devices,
     callbacks=[],
     one_run=False,
     use_rich_progressbar=True,
@@ -158,11 +158,12 @@ def train_lm(
         log_momentum=True,
     )
     callbacks.append(lr_monitor)
-    devices = gpu_devices if constants.DEVICE == "cuda" else cpu_devices
+    # devices = gpu_devices.split(",") if constants.DEVICE == "cuda" else cpu_devices
     # initialze the model with xavier initialization
     xavier_init(model=lm_model)
+    # raise
     trainer = Trainer(
-        devices=devices,
+        devices=list(map(int, gpu_devices.split(","))),
         deterministic=True,
         callbacks=callbacks,
         logger=wandb_logger,
