@@ -13,6 +13,7 @@ class LitMeterClassificationModel(LightningModule):
     def __init__(
         self,
         vocab_size,
+        pad_token_id=1,
         dropout_prob=0.333,
         number_of_classes=16,
         num_layers=constants.GRU_LAYERS,
@@ -23,6 +24,8 @@ class LitMeterClassificationModel(LightningModule):
     ):
         super().__init__()
         self.save_hyperparameters()
+
+        self.pad_token_id = pad_token_id
 
         self.vocab_size = vocab_size
         self.num_layers = num_layers
@@ -48,6 +51,7 @@ class LitMeterClassificationModel(LightningModule):
         self.embedding_layer = nn.Embedding(
             num_embeddings=self.vocab_size,
             embedding_dim=self.embedding_size,
+            padding_idx=self.pad_token_id,
         )
         self.gru_layer = nn.GRU(
             input_size=self.embedding_size,
@@ -93,6 +97,7 @@ class LitMeterClassificationModel(LightningModule):
             loss,
             on_step=True,
             on_epoch=False,
+            prog_bar=True,
         )
         self.log(
             "train_acc",
@@ -125,7 +130,7 @@ class LitMeterClassificationModel(LightningModule):
     def predict_step(self, batch, batch_idx):
         inputs, labels = batch
         outputs = self(inputs)
-        labels = labels.squeeze()  # drop unnecessary dimention
+        labels = labels.squeeze()  # drop unnecessary dimension
         outputs = outputs[:, -1, :]  # take the results at the last time-step
         preds = torch.argmax(
             F.softmax(outputs, dim=1),
@@ -133,7 +138,7 @@ class LitMeterClassificationModel(LightningModule):
         )
         return labels, preds
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch, batch_idx, dataloader_idx=0):
         inputs, labels = batch
         outputs = self(inputs)
         labels = labels.squeeze()  # drop unnecessary dimention
@@ -152,6 +157,7 @@ class LitMeterClassificationModel(LightningModule):
             optimizer=optimizer,
             factor=0.1,
             patience=2,
+            verbose=True,
         )
         return {
             "optimizer": optimizer,

@@ -1,3 +1,4 @@
+import json
 import torch
 import torchmetrics
 from tqdm.auto import tqdm
@@ -5,6 +6,7 @@ from farasa.segmenter import FarasaSegmenter
 from pytorch_lightning.callbacks import Timer
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.utilities.model_summary import ModelSummary
+import wandb
 from dotless_arabic.experiments.meter_classification.src.models import (
     LitMeterClassificationModel,
 )
@@ -17,7 +19,7 @@ from dotless_arabic.experiments.meter_classification.src.datasets import get_dat
 from dotless_arabic.tokenizers import get_tokenizer
 from dotless_arabic.experiments.meter_classification.src import constants
 from dotless_arabic.experiments.meter_classification.src.utils import (
-    get_best_checkpoint,
+    # get_best_checkpoint,
     train_meter_classifier,
 )
 from dotless_arabic.experiments.meter_classification.src.models import (
@@ -211,14 +213,14 @@ def training_pipeline(
         meter_classifier=meter_classifier,
         callbacks=[timer_callback],
     )
-    meter_classifier = LitMeterClassificationModel.load_from_checkpoint(
-        get_best_checkpoint(
-            text_type=text_type,
-            dataset_name=dataset_name,
-            cap_threshold=cap_threshold,
-            tokenizer_class=tokenizer_class,
-        )
-    )
+    # meter_classifier = LitMeterClassificationModel.load_from_checkpoint(
+    #     get_best_checkpoint(
+    #         text_type=text_type,
+    #         dataset_name=dataset_name,
+    #         cap_threshold=cap_threshold,
+    #         tokenizer_class=tokenizer_class,
+    #     )
+    # )
 
     f'{timer_callback.time_elapsed("train"):.2f} seconds'
 
@@ -230,15 +232,21 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
 
-    results = trainer.test(meter_classifier, test_dataloader)[0]
+    results = trainer.test(
+        ckpt_path="best",
+        dataloaders=(
+            train_dataloader,
+            val_dataloader,
+            test_dataloader,
+        ),
+    )
 
-    test_accuracy = results["test_acc"]
-    test_loss = results["test_loss"]
+    # test_accuracy = results["test_acc"]
+    # test_loss = results["test_loss"]
 
     log_content(
         content=f"""
-        Test Accuracy: {test_accuracy:.4f}
-        Test Loss: {test_loss:.4f}
+        Test Results: {json.dumps(results,ensure_ascii=False,indent=4,)}
         """,
         results_file=results_file,
         print_to_console=print_to_console,
@@ -247,7 +255,8 @@ def training_pipeline(
     # calculate the confusion matrix
     predictions, labels = list(), list()
     for batch_predictions, batch_labels in trainer.predict(
-        meter_classifier, test_dataloader
+        ckpt_path="best",
+        dataloaders=test_dataloader,
     ):
         predictions.extend(batch_predictions.tolist())
         labels.extend(batch_labels.tolist())
@@ -266,3 +275,5 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+
+    wandb.finish()
