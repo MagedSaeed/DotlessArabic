@@ -26,17 +26,17 @@ from dotless_arabic.tokenizers import (
 from dotless_arabic.experiments.meter_classification.src import constants
 
 
-def get_best_checkpoint(
-    text_type,
-    dataset_name,
-    cap_threshold,
-    checkpoints_base_path="MC",
-    tokenizer_class=CharacterTokenizer,
-):
-    checkpoints_path = f"{checkpoints_base_path}/{dataset_name}/{text_type}/{tokenizer_class.__name__}/{cap_threshold}/checkpoints"
-    for file_name in os.listdir(checkpoints_path):
-        if file_name.startswith("epoch"):
-            return f"{checkpoints_path}/{file_name}"
+# def get_best_checkpoint(
+#     text_type,
+#     dataset_name,
+#     cap_threshold,
+#     checkpoints_base_path="MC",
+#     tokenizer_class=CharacterTokenizer,
+# ):
+#     checkpoints_path = f"{checkpoints_base_path}/{dataset_name}/{text_type}/{tokenizer_class.__name__}/{cap_threshold}/checkpoints"
+#     for file_name in os.listdir(checkpoints_path):
+#         if file_name.startswith("epoch"):
+#             return f"{checkpoints_path}/{file_name}"
 
 
 def get_vocab_size(
@@ -157,7 +157,6 @@ def train_meter_classifier(
         train_dataloader,
         val_dataloader,
     )
-    wandb.finish()
     return trainer
 
 
