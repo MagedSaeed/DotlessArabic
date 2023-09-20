@@ -90,28 +90,28 @@ def training_pipeline(
     x_val = list(map(process, tqdm(x_val)))
     x_test = list(map(process, tqdm(x_test)))
 
-    # log_content(
-    #     content=f"""
-    #     Removing Stopwords:
-    #     """,
-    #     results_file=results_file,
-    #     print_to_console=print_to_console,
-    # )
+    log_content(
+        content=f"""
+        Removing Stopwords:
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
 
-    # stopwords = list(map(process, nltk.corpus.stopwords.words("arabic")))
+    stopwords = list(map(process, nltk.corpus.stopwords.words("arabic")))
 
-    # x_train = [
-    #     " ".join(token for token in document.split() if token not in stopwords)
-    #     for document in tqdm(x_train)
-    # ]
-    # x_val = [
-    #     " ".join(token for token in document.split() if token not in stopwords)
-    #     for document in tqdm(x_val)
-    # ]
-    # x_test = [
-    #     " ".join(token for token in document.split() if token not in stopwords)
-    #     for document in tqdm(x_test)
-    # ]
+    x_train = [
+        " ".join(token for token in document.split() if token not in stopwords)
+        for document in tqdm(x_train)
+    ]
+    x_val = [
+        " ".join(token for token in document.split() if token not in stopwords)
+        for document in tqdm(x_val)
+    ]
+    x_test = [
+        " ".join(token for token in document.split() if token not in stopwords)
+        for document in tqdm(x_test)
+    ]
 
     # log_content(
     #     content=f"""
