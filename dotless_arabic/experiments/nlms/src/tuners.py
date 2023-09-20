@@ -1,3 +1,4 @@
+import ray
 from pytorch_lightning.callbacks import (
     LearningRateMonitor,
     RichProgressBar,
@@ -133,6 +134,6 @@ def tune_lm_model(
         param_space=lm_model_config,
     )
     results = tuner.fit()
-
+    ray.shutdown()
     print("Best hyperparameters found were: ", results.get_best_result().config)
     return results.get_best_result().config
