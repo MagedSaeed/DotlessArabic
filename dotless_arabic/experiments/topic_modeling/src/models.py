@@ -72,14 +72,15 @@ class LitTopicModelingModel(LightningModule):
         outputs = self.softmax(outputs)
         return outputs
 
-    def step(self, inputs, labels):
+    def step(self, inputs):
         outputs = self(inputs)
         outputs = outputs[:, -1, :]  # take the results at the last time-step
         return outputs
 
     def training_step(self, batch, batch_idx):
         inputs, labels = batch
-        outputs = self.step(inputs, labels)
+        labels = labels.view(-1)
+        outputs = self.step(inputs)
         loss = F.cross_entropy(outputs, labels)
         train_accuracy = self.train_accuracy(outputs, labels)
         self.log(
@@ -101,7 +102,8 @@ class LitTopicModelingModel(LightningModule):
 
     def validation_step(self, batch, batch_idx):
         inputs, labels = batch
-        outputs = self.step(inputs, labels)
+        labels = labels.view(-1)
+        outputs = self.step(inputs)
         loss = F.cross_entropy(outputs, labels)
         val_accuracy = self.val_accuracy(outputs, labels)
         self.log("val_loss", loss, prog_bar=True)
@@ -110,7 +112,8 @@ class LitTopicModelingModel(LightningModule):
 
     def test_step(self, batch, batch_idx):
         inputs, labels = batch
-        outputs = self.step(inputs, labels)
+        labels = labels.view(-1)
+        outputs = self.step(inputs)
         loss = F.cross_entropy(outputs, labels)
         test_accuracy = self.test_accuracy(outputs, labels)
         metrics = {"test_acc": test_accuracy, "test_loss": loss}

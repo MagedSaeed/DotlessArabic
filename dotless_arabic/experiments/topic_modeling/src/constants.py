@@ -15,7 +15,7 @@ EMBEDDING_SIZE = 512
 LEARNING_RATE = 0.001
 DEFAULT_VOCAB_COVERAGE = 0.9
 
-SEQUENCE_LENGTH_PERCENTILE = 0.95
+SEQUENCE_LENGTH_PERCENTILE = 0.9
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LIGHTING_ACCELERATOR = "auto"  # used by pytorch_lightning
