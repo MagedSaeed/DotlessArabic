@@ -11,7 +11,7 @@ class LitTopicModelingModel(LightningModule):
     def __init__(
         self,
         vocab_size,
-        num_layers=2,
+        num_layers=3,
         num_classes=7,
         pad_token_id=1,
         rnn_hiddens=128,

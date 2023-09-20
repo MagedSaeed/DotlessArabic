@@ -39,7 +39,7 @@ class NewsPapersDataset(Dataset):
 
     def __getitem__(self, index):
         inputs = torch.LongTensor(self.encoded_dataset[index])
-        outputs = torch.LongTensor([self.y[index]], dtype=torch.float32)
+        outputs = torch.LongTensor([self.y[index]])
         return inputs, outputs
 
     def __len__(self):
