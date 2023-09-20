@@ -186,8 +186,9 @@ def get_sequence_length(
 
 
 def filter_empty_items(xs, ys):
+    assert len(xs) == len(ys), "xs and ys must have the same length"
     filtered_x, filtered_y = list(), list()
-    for x, y in zip(xs, ys):
+    for x, y in tqdm(zip(xs, ys), total=len(xs)):
         processed_x = process(x)
         if len(processed_x) > 0:
             filtered_x.append(x)

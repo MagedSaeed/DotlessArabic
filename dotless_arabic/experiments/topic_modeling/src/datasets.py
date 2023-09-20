@@ -8,7 +8,7 @@ from dotless_arabic.processing import undot
 from dotless_arabic.experiments.sentiment_analysis.src import constants
 
 
-class ReviewsDataset(Dataset):
+class NewsPapersDataset(Dataset):
     def __init__(
         self,
         X,
@@ -39,7 +39,7 @@ class ReviewsDataset(Dataset):
 
     def __getitem__(self, index):
         inputs = torch.LongTensor(self.encoded_dataset[index])
-        outputs = torch.tensor([self.y[index]], dtype=torch.float32)
+        outputs = torch.LongTensor([self.y[index]], dtype=torch.float32)
         return inputs, outputs
 
     def __len__(self):
@@ -59,7 +59,7 @@ def get_dataloader(
     workers=constants.CPU_COUNT,
     batch_size=constants.DEFAULT_BATCH_SIZE,
 ):
-    reviews_dataset = ReviewsDataset(
+    reviews_dataset = NewsPapersDataset(
         X=docs,
         y=labels,
         use_tqdm=use_tqdm,
