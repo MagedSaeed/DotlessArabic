@@ -86,17 +86,9 @@ def get_dataset_split(dataset_folder=DATASET_FOLDER, split="Train"):
     return dataset
 
 
-def get_train_split():
+def collect_train_dataset_for_topic_modeling():
     return get_dataset_split(split="Train")
 
 
-def get_test_split(dataset_folder=DATASET_FOLDER):
-    return get_dataset_split(split="Test")
-
-
-def collect_train_dataset_for_topic_modeling():
-    return get_train_split()
-
-
 def collect_test_dataset_for_topic_modeling():
-    return get_test_split()
+    return get_dataset_split(split="Test")
