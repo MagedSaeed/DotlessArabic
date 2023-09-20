@@ -1,5 +1,4 @@
 import json
-import torch
 
 import wandb
 from tqdm.auto import tqdm
@@ -155,9 +154,10 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+
     log_content(
         content=f"""
-        Building DataLoaders
+        Getting Vocab counts
         """,
         results_file=results_file,
         print_to_console=print_to_console,
@@ -184,6 +184,14 @@ def training_pipeline(
         test vocab count: {test_vocab_count:,}
         test tokens count: {test_tokens_count:,}
         {'-'*40}
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
+    log_content(
+        content=f"""
+        Building DataLoaders
         """,
         results_file=results_file,
         print_to_console=print_to_console,
@@ -266,7 +274,10 @@ def training_pipeline(
             val_dataloader=val_dataloader_for_tuning,
         )
 
-    lm_model = model_class(vocab_size=tokenizer.vocab_size, **best_params)
+    lm_model = model_class(
+        vocab_size=tokenizer.vocab_size,
+        **best_params,
+    )
 
     log_content(
         content=f"""
@@ -357,39 +368,3 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
     return best_params
-
-    # training_perplexity = calculate_perplexity(
-    #     lm_model=lm_model,
-    #     tokenizer=tokenizer,
-    #     dataset=train_dataset,
-    #     batch_size=batch_size,
-    #     undot_text=not is_dotted,
-    #     sequence_length=sequence_length,
-    # )
-
-    # perplexity_with_oovs = calculate_perplexity(
-    #     lm_model=lm_model,
-    #     tokenizer=tokenizer,
-    #     dataset=test_dataset,
-    #     undot_text=not is_dotted,
-    #     sequence_length=sequence_length,
-    # )
-
-    # perplexity_without_oovs = calculate_perplexity(
-    #     lm_model=lm_model,
-    #     tokenizer=tokenizer,
-    #     dataset=test_dataset,
-    #     undot_text=not is_dotted,
-    #     sequence_length=sequence_length,
-    #     ignore_oovs=True,
-    # )
-
-    # log_content(
-    #     content=f"""
-    #     Training Perplexity: {training_perplexity}
-    #     Perplexity with OOVs: {perplexity_with_oovs}
-    #     Perplexity without OOVs: {perplexity_without_oovs:,}
-    #     """,
-    #     results_file=results_file,
-    #     print_to_console=print_to_console,
-    # )
