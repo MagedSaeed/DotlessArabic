@@ -1,3 +1,4 @@
+import ray
 from pytorch_lightning.callbacks import (
     LearningRateMonitor,
     RichProgressBar,
@@ -134,4 +135,5 @@ def tune_sentiment_analyzer_model(
     results = tuner.fit()
 
     print("Best hyperparameters found were: ", results.get_best_result().config)
+    ray.shutdown()
     return results.get_best_result().config
