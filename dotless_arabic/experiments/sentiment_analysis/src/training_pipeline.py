@@ -251,7 +251,7 @@ def training_pipeline(
     timer_callback = Timer()
     per_epoch_timer_classback = EpochTimerCallback()
 
-    if best_hparams is None:
+    if not best_hparams:
         # tune the model
         # reinitialize the dataloaders as they will be exhausted when training
         train_dataloader = get_dataloader(
