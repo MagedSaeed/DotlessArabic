@@ -39,7 +39,7 @@ def training_pipeline(
     results_file,
     vocab_coverage,
     tokenizer_class,
-    best_params=None,
+    best_hparams=None,
     sequence_length=None,
     print_to_console=True,
     dataloader_workers=constants.CPU_COUNT,
@@ -246,7 +246,7 @@ def training_pipeline(
             f"Model Type {model_type} is not supported. Put either 'RNN' or 'Transformer'"
         )
 
-    if not best_params:
+    if not best_hparams:
         # tune the model
         dataset_for_tuning = train_dataset[: int(len(train_dataset) * 0.1)]
         tokenizer_for_tuning = get_tokenizer(
@@ -266,7 +266,7 @@ def training_pipeline(
             sequence_length=sequence_length,
             dataset=val_dataset,
         )
-        best_params = tune_lm_model(
+        best_hparams = tune_lm_model(
             # gpu_devices=gpu_devices,
             lm_model_class=model_class,
             vocab_size=tokenizer_for_tuning.vocab_size,
@@ -276,7 +276,7 @@ def training_pipeline(
 
     lm_model = model_class(
         vocab_size=tokenizer.vocab_size,
-        **best_params,
+        **best_hparams,
     )
 
     log_content(
@@ -367,4 +367,4 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
-    return best_params
+    return best_hparams
