@@ -83,7 +83,7 @@ def run(
 
     tokenizer_class = TOKENIZERS_MAP[tokenizer_class]
 
-    experiment_best_hparams = best_hparams.get(
+    experiment_best_hparams = best_hparams["labr"].get(
         tokenizer_class.__name__,
         {},
     )
