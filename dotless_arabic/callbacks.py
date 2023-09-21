@@ -18,7 +18,6 @@ class EpochTimerCallback(Callback):
 
     def on_train_end(self, trainer, pl_module):
         self.average_epochs_time = sum(self.epochs_times) / len(self.epochs_times)
-        pl_module.log(
-            name="per-epoch-avg-time",
-            value=self.average_epochs_time,
+        pl_module.logger.experiment.log(
+            {"per-epoch-avg-time": self.average_epochs_time}
         )

@@ -322,8 +322,6 @@ def training_pipeline(
         ),
     )
 
-    wandb.finish()
-
     log_content(
         content=f"""
         Perplexity Results for Train,Validation, and Test Dataloaders:
@@ -363,6 +361,9 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+    wandb_logger.experiment.log(
+        {"epoch-avg-time": per_epoch_timer_classback.average_epochs_time}
+    )
 
     prompt = "<bos> "
 
@@ -376,4 +377,5 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+    wandb.finish()
     return best_hparams
