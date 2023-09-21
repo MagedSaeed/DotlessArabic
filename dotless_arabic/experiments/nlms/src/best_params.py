@@ -2,10 +2,10 @@ best_params = {
     "quran": {
         "WordTokenization": dict(
             num_layers=2,
-            learning_rate=0.001,
+            learning_rate=0.01,
             hidden_size=256,
-            embedding_size=512,
-            dropout_prop=0.2,
+            embedding_size=256,
+            dropout_prob=0.333,
         ),
         # "FarasaMorphologicalTokenizer": dict(
         #     num_layers=2,

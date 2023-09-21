@@ -14,6 +14,7 @@ from dotless_arabic.utils import log_content
 from dotless_arabic.processing import process
 from dotless_arabic.tokenizers import TOKENIZERS_MAP
 from dotless_arabic.experiments.nlms.src import constants
+from dotless_arabic.experiments.nlms.src.best_params import best_params
 from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
 
 
@@ -128,6 +129,8 @@ def run(
 
     tokenizer_class = TOKENIZERS_MAP[tokenizer_class]
 
+    experiment_best_hparams = best_params.get(dataset, {}).get(tokenizer_class, {})
+
     if run_dotted:
         dotted_results_file_path = f"{results_dir}/dotted_vocab_coverage_{vocab_coverage}_seqlen_percentile_{seqlen_percentile}.txt"
 
@@ -174,8 +177,6 @@ def run(
     ###### Dotted Dataset Training #################
     ################################################
 
-    best_params = None
-
     if run_dotted:
         log_content(
             content=f"""
@@ -194,27 +195,19 @@ def run(
 
         dataset_id = f"dotted-{dataset_name}".upper()
 
-        # best_params = {  # temporary for poems dataset (should not be commited to vc)
-        #     "num_layers": 2,
-        #     "hidden_size": 256,
-        #     "embedding_size": 512,
-        #     "dropout_prob": 0.2,
-        #     "learning_rate": 0.001,
-        # }
-
-        best_params = training_pipeline(
+        experiment_best_hparams = training_pipeline(
             is_dotted=True,
             dataset=dataset,
             model_type=model_type,
             batch_size=batch_size,
             dataset_id=dataset_id,
-            best_params=best_params,
             gpu_devices=gpu_devices,
             # cpu_devices=cpu_devices,
             vocab_coverage=vocab_coverage,
             dataset_name=dataset_id.lower(),
             tokenizer_class=tokenizer_class,
             sequence_length=sequence_length,
+            best_hparams=experiment_best_hparams,
             results_file=dotted_results_file_path,
             sequence_length_percentile=sequence_length_percentile,
         )
@@ -273,11 +266,11 @@ def run(
             batch_size=batch_size,
             gpu_devices=gpu_devices,
             # cpu_devices=cpu_devices,
-            best_params=best_params,
             vocab_coverage=vocab_coverage,
             dataset_name=dataset_id.lower(),
             tokenizer_class=tokenizer_class,
             sequence_length=sequence_length,
+            best_hparams=experiment_best_hparams,
             results_file=undotted_results_file_path,
             sequence_length_percentile=sequence_length_percentile,
         )
