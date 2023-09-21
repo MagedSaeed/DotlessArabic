@@ -11,7 +11,7 @@ from pytorch_lightning.callbacks import Timer
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.utilities.model_summary import ModelSummary
 from dotless_arabic.experiments.topic_modeling.src.tuners import (
-    tune_sentiment_analyzer_model,
+    tune_topic_modeling_model,
 )
 
 
@@ -25,12 +25,12 @@ from dotless_arabic.experiments.topic_modeling.src.settings import (
 from dotless_arabic.experiments.topic_modeling.src import constants
 from dotless_arabic.experiments.topic_modeling.src.utils import (
     get_oovs_rate,
-    train_sentiment_analyzer,
+    train_topic_modeler,
     get_sequence_length,
     filter_empty_items,
 )
 from dotless_arabic.experiments.topic_modeling.src.models import (
-    LitSentimentAnalysisModel,
+    LitTopicModelingModel,
 )
 
 from dotless_arabic.datasets.sanad.collect import (
@@ -74,30 +74,44 @@ def training_pipeline(
         test_size=0.1,
     )
 
-    x_test, y_test = test_dataset.keys(), test_dataset.values()
+    num_classes = len(set(y_train))
 
-    # log_content(
-    #     content=f"""
-    #     Removing Stopwords:
-    #     """,
-    #     results_file=results_file,
-    #     print_to_console=print_to_console,
-    # )
+    x_test, y_test = list(test_dataset.keys()), list(test_dataset.values())
 
-    # stopwords = list(map(process, nltk.corpus.stopwords.words("arabic")))
+    log_content(
+        content=f"""
+        Processing texts:
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
 
-    # x_train = [
-    #     " ".join(token for token in document.split() if token not in stopwords)
-    #     for document in tqdm(x_train)
-    # ]
-    # x_val = [
-    #     " ".join(token for token in document.split() if token not in stopwords)
-    #     for document in tqdm(x_val)
-    # ]
-    # x_test = [
-    #     " ".join(token for token in document.split() if token not in stopwords)
-    #     for document in tqdm(x_test)
-    # ]
+    x_train = list(map(process, tqdm(x_train)))
+    x_val = list(map(process, tqdm(x_val)))
+    x_test = list(map(process, tqdm(x_test)))
+
+    log_content(
+        content=f"""
+        Removing Stopwords:
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
+    stopwords = list(map(process, nltk.corpus.stopwords.words("arabic")))
+
+    x_train = [
+        " ".join(token for token in document.split() if token not in stopwords)
+        for document in tqdm(x_train)
+    ]
+    x_val = [
+        " ".join(token for token in document.split() if token not in stopwords)
+        for document in tqdm(x_val)
+    ]
+    x_test = [
+        " ".join(token for token in document.split() if token not in stopwords)
+        for document in tqdm(x_test)
+    ]
 
     # log_content(
     #     content=f"""
@@ -291,7 +305,8 @@ def training_pipeline(
         # )
         pass
 
-    topics_modeler = LitSentimentAnalysisModel(
+    topics_modeler = LitTopicModelingModel(
+        num_classes=num_classes,
         vocab_size=tokenizer.vocab_size,
         # **best_params,
     )
@@ -311,15 +326,15 @@ def training_pipeline(
         name=f"{text_type}_{tokenizer_class.__name__}",
     )
     wandb_logger.watch(topics_modeler, log="all")
-    trainer = train_sentiment_analyzer(
+    trainer = train_topic_modeler(
         text_type=text_type,
         gpu_devices=gpu_devices,
         wandb_logger=wandb_logger,
+        topic_modeler=topics_modeler,
         val_dataloader=val_dataloader,
         train_dataloader=train_dataloader,
         max_epochs=constants.MAX_EPOCHS,
         tokenizer_class=tokenizer_class,
-        sentiment_analyzer=topics_modeler,
         callbacks=[timer_callback],
     )
 
