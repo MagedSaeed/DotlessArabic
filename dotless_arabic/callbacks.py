@@ -6,6 +6,7 @@ class EpochTimerCallback(Callback):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.epochs_times = list()
+        self.average_epochs_time = 0
 
     def on_epoch_start(self, trainer, pl_module):
         self.start_time = time.time()
@@ -16,5 +17,8 @@ class EpochTimerCallback(Callback):
         self.epochs_times.append(epoch_time)
 
     def on_train_end(self, trainer, pl_module):
-        average_epochs_time = sum(self.epochs_times) / len(self.epochs_times)
-        pl_module.log("average_epoch_time", average_epochs_time)
+        self.average_epochs_time = sum(self.epochs_times) / len(self.epochs_times)
+        pl_module.log(
+            name="per-epoch-time",
+            value=self.average_epochs_time,
+        )
