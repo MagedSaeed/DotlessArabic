@@ -129,7 +129,13 @@ def run(
 
     tokenizer_class = TOKENIZERS_MAP[tokenizer_class]
 
-    experiment_best_hparams = best_params.get(dataset, {}).get(tokenizer_class, {})
+    experiment_best_hparams = best_params.get(
+        dataset,
+        {},
+    ).get(
+        tokenizer_class.__name__,
+        {},
+    )
 
     if run_dotted:
         dotted_results_file_path = f"{results_dir}/dotted_vocab_coverage_{vocab_coverage}_seqlen_percentile_{seqlen_percentile}.txt"
