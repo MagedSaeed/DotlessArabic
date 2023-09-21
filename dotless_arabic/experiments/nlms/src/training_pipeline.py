@@ -358,7 +358,7 @@ def training_pipeline(
     )
     log_content(
         content=f"""
-        Training Time for one epoch: {f'{per_epoch_timer_classback.average_epochs_time:.3f} seconds'}
+        Average training Time for one epoch: {f'{per_epoch_timer_classback.average_epochs_time:.3f} seconds'}
         """,
         results_file=results_file,
         print_to_console=print_to_console,

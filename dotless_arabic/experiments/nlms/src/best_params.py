@@ -1,6 +1,6 @@
 best_params = {
     "quran": {
-        "WordTokenization": dict(
+        "WordTokenizer": dict(
             num_layers=2,
             learning_rate=0.01,
             hidden_size=256,
@@ -30,7 +30,7 @@ best_params = {
         # ),
     },
     "sanadset_hadeeth": {
-        "WordTokenization": dict(
+        "WordTokenizer": dict(
             num_layers=2,
             learning_rate=0.001,
             hidden_size=256,
@@ -60,7 +60,7 @@ best_params = {
         # ),
     },
     "poems": {
-        "WordTokenization": dict(
+        "WordTokenizer": dict(
             num_layers=2,
             learning_rate=0.001,
             hidden_size=256,
@@ -90,7 +90,7 @@ best_params = {
         # ),
     },
     "wikipedia": {
-        "WordTokenization": dict(
+        "WordTokenizer": dict(
             num_layers=2,
             learning_rate=0.001,
             hidden_size=512,
@@ -120,7 +120,7 @@ best_params = {
         # ),
     },
     # "news": {
-    #     "WordTokenization": dict(
+    #     "WordTokenizer": dict(
     #         num_layers=2,
     #         learning_rate=0.001,
     #         hidden_size=512,
