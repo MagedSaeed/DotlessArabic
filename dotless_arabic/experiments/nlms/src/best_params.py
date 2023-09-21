@@ -35,7 +35,7 @@ best_params = {
             learning_rate=0.001,
             hidden_size=256,
             embedding_size=512,
-            dropout_prop=0.2,
+            dropout_prob=0.2,
         ),
         # "FarasaMorphologicalTokenizer": dict(
         #     num_layers=2,
@@ -65,7 +65,7 @@ best_params = {
             learning_rate=0.001,
             hidden_size=256,
             embedding_size=512,
-            dropout_prop=0.2,
+            dropout_prob=0.2,
         ),
         # "FarasaMorphologicalTokenizer": dict(
         #     num_layers=2,
@@ -95,7 +95,7 @@ best_params = {
             learning_rate=0.001,
             hidden_size=512,
             embedding_size=512,
-            dropout_prop=0.2,
+            dropout_prob=0.2,
         ),
         # "FarasaMorphologicalTokenizer": dict(
         #     num_layers=2,
