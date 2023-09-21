@@ -53,7 +53,7 @@ def training_pipeline(
     gpu_devices,
     results_file,
     tokenizer_class,
-    best_params=None,
+    best_hparams=None,
     print_to_console=True,
     dataloader_workers=constants.CPU_COUNT,
 ):
@@ -248,7 +248,7 @@ def training_pipeline(
 
     timer_callback = Timer()
 
-    if best_params is None:
+    if best_hparams is None:
         # tune the model
         # reinitialize the dataloaders as they will be exhausted when training
         train_dataloader = get_dataloader(
@@ -284,14 +284,15 @@ def training_pipeline(
             sequence_length=sequence_length,
         )
 
-        best_params = tune_sentiment_analyzer_model(
+        best_hparams = tune_sentiment_analyzer_model(
             vocab_size=tokenizer.vocab_size,
             train_dataloader=train_dataloader,
             val_dataloader=val_dataloader,
         )
 
     sentiment_analyzer = LitSentimentAnalysisModel(
-        vocab_size=tokenizer.vocab_size, **best_params
+        vocab_size=tokenizer.vocab_size, 
+        **best_hparams,
     )
 
     log_content(

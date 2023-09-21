@@ -11,6 +11,7 @@ if "." not in sys.path:
 from dotless_arabic.utils import log_content
 from dotless_arabic.tokenizers import TOKENIZERS_MAP
 from dotless_arabic.experiments.sentiment_analysis.src import constants
+from dotless_arabic.experiments.sentiment_analysis.src.best_hparams import best_hparams
 from dotless_arabic.experiments.sentiment_analysis.src.training_pipeline import (
     training_pipeline,
 )
@@ -82,6 +83,11 @@ def run(
 
     tokenizer_class = TOKENIZERS_MAP[tokenizer_class]
 
+    experiment_best_hparams = best_hparams.get(
+        tokenizer_class.__name__,
+        {},
+    )
+
     if run_dotted:
         dotted_results_file_path = f"{results_dir}/dotted.txt"
 
@@ -108,11 +114,12 @@ def run(
             results_file=dotted_results_file_path,
         )
 
-        best_params = training_pipeline(
+        experiment_best_hparams = training_pipeline(
             is_dotted=True,
             batch_size=batch_size,
             gpu_devices=gpu_devices,
             tokenizer_class=tokenizer_class,
+            best_hparams=experiment_best_hparams,
             results_file=dotted_results_file_path,
         )
 
@@ -147,8 +154,8 @@ def run(
             is_dotted=False,
             batch_size=batch_size,
             gpu_devices=gpu_devices,
-            best_params=best_params,
             tokenizer_class=tokenizer_class,
+            best_hparams=experiment_best_hparams,
             results_file=undotted_results_file_path,
         )
 
