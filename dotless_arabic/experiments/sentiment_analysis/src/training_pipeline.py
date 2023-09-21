@@ -103,17 +103,29 @@ def training_pipeline(
 
     log_content(
         content=f"""
-        Stemming:
+        Processing:
         """,
         results_file=results_file,
         print_to_console=print_to_console,
     )
 
-    stemmer = FarasaStemmer(interactive=True)
+    x_train = [process(document) for document in tqdm(x_train)]
+    x_val = [process(document) for document in tqdm(x_val)]
+    x_test = [process(document) for document in tqdm(x_test)]
 
-    x_train = [stemmer.stem(document) for document in tqdm(x_train)]
-    x_val = [stemmer.stem(document) for document in tqdm(x_val)]
-    x_test = [stemmer.stem(document) for document in tqdm(x_test)]
+    # log_content(
+    #     content=f"""
+    #     Stemming:
+    #     """,
+    #     results_file=results_file,
+    #     print_to_console=print_to_console,
+    # )
+
+    # stemmer = FarasaStemmer(interactive=True)
+
+    # x_train = [stemmer.stem(document) for document in tqdm(x_train)]
+    # x_val = [stemmer.stem(document) for document in tqdm(x_val)]
+    # x_test = [stemmer.stem(document) for document in tqdm(x_test)]
 
     log_content(
         content=f"""
