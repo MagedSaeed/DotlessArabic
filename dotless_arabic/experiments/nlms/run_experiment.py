@@ -14,7 +14,7 @@ from dotless_arabic.utils import log_content
 from dotless_arabic.processing import process
 from dotless_arabic.tokenizers import TOKENIZERS_MAP
 from dotless_arabic.experiments.nlms.src import constants
-from dotless_arabic.experiments.nlms.src.best_params import best_params
+from dotless_arabic.experiments.nlms.src.best_hparams import best_hparams
 from dotless_arabic.experiments.nlms.src.training_pipeline import training_pipeline
 
 
@@ -129,7 +129,7 @@ def run(
 
     tokenizer_class = TOKENIZERS_MAP[tokenizer_class]
 
-    experiment_best_hparams = best_params.get(
+    experiment_best_hparams = best_hparams.get(
         dataset,
         {},
     ).get(

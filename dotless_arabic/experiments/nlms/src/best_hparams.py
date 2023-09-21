@@ -1,4 +1,4 @@
-best_params = {
+best_hparams = {
     "quran": {
         "WordTokenizer": dict(
             num_layers=2,
