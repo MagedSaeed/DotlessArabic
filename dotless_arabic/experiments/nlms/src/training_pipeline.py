@@ -11,6 +11,7 @@ from pytorch_lightning.utilities.model_summary import ModelSummary
 
 
 from dotless_arabic.utils import log_content
+from dotless_arabic.callbacks import EpochTimerCallback
 from dotless_arabic.experiments.nlms.src import constants
 from dotless_arabic.datasets.utils import tokens_frequency
 from dotless_arabic.experiments.nlms.src.models import LitRNNLM, LitTransformerLM
@@ -228,6 +229,7 @@ def training_pipeline(
     )
 
     timer_callback = Timer()
+    per_epoch_timer_classback = EpochTimerCallback()
 
     if model_type.lower() == "rnn":
         model_class = LitRNNLM
@@ -298,7 +300,7 @@ def training_pipeline(
         tokenizer_class=tokenizer_class,
         train_dataloader=train_dataloader,
         # callbacks=[loss_metrics_callback, timer_callback],
-        callbacks=[timer_callback],
+        callbacks=[timer_callback, per_epoch_timer_classback],
     )
     results = trainer.test(
         ckpt_path="best",
@@ -338,7 +340,14 @@ def training_pipeline(
 
     log_content(
         content=f"""
-        Training Time: {f'{timer_callback.time_elapsed("train"):.2f} seconds'}
+        Training Time: {f'{timer_callback.time_elapsed("train"):.3f} seconds'}
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+    log_content(
+        content=f"""
+        Training Time for one epoch: {f'{per_epoch_timer_classback.average_epochs_time:.3f} seconds'}
         """,
         results_file=results_file,
         print_to_console=print_to_console,

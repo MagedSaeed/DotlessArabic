@@ -22,7 +22,6 @@ from tqdm.auto import tqdm
 from farasa.segmenter import FarasaSegmenter
 
 from dotless_arabic.processing import undot
-from dotless_arabic.callbacks import EpochTimerCallback
 from dotless_arabic.experiments.nlms.src import constants, datasets
 from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer, WordTokenizer
 from dotless_arabic.experiments.nlms.src.models import LitRNNLM, LitTransformerLM
@@ -159,7 +158,6 @@ def train_lm(
         log_momentum=True,
     )
     callbacks.append(lr_monitor)
-    callbacks.append(EpochTimerCallback())
     # devices = gpu_devices.split(",") if constants.DEVICE == "cuda" else cpu_devices
     # initialze the model with xavier initialization
     xavier_init(model=lm_model)
