@@ -145,7 +145,7 @@ def train_lm(
     # callbacks.append(StochasticWeightAveraging(0.1 * constants.LEARNING_RATE))
     early_stopping_callback = EarlyStopping(
         monitor="val_loss",
-        min_delta=0.005,
+        min_delta=0.05,
         patience=20,
         # patience=10,
         check_finite=True,
