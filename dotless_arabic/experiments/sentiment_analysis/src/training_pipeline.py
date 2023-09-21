@@ -10,6 +10,7 @@ from farasa.segmenter import FarasaSegmenter
 from pytorch_lightning.callbacks import Timer
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.utilities.model_summary import ModelSummary
+import wandb
 from dotless_arabic.experiments.sentiment_analysis.src.tuners import (
     tune_sentiment_analyzer_model,
 )
@@ -18,6 +19,7 @@ from dotless_arabic.experiments.sentiment_analysis.src.tuners import (
 from dotless_arabic.utils import log_content
 from dotless_arabic.processing import process
 
+from dotless_arabic.callbacks import EpochTimerCallback
 from dotless_arabic.experiments.sentiment_analysis.src.datasets import get_dataloader
 from dotless_arabic.experiments.sentiment_analysis.src.settings import (
     configure_environment,
@@ -247,6 +249,7 @@ def training_pipeline(
     )
 
     timer_callback = Timer()
+    per_epoch_timer_classback = EpochTimerCallback()
 
     if best_hparams is None:
         # tune the model
@@ -291,7 +294,7 @@ def training_pipeline(
         )
 
     sentiment_analyzer = LitSentimentAnalysisModel(
-        vocab_size=tokenizer.vocab_size, 
+        vocab_size=tokenizer.vocab_size,
         **best_hparams,
     )
 
@@ -319,10 +322,8 @@ def training_pipeline(
         max_epochs=constants.MAX_EPOCHS,
         tokenizer_class=tokenizer_class,
         sentiment_analyzer=sentiment_analyzer,
-        callbacks=[timer_callback],
+        callbacks=[timer_callback, per_epoch_timer_classback],
     )
-
-    f'{timer_callback.time_elapsed("train"):.2f} seconds'
 
     log_content(
         content=f"""
@@ -345,7 +346,20 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
 
-    return best_params
+    log_content(
+        content=f"""
+        Average training Time for one epoch: {f'{per_epoch_timer_classback.average_epochs_time:.3f} seconds'}
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+    wandb_logger.experiment.log(
+        {"epoch-avg-time": per_epoch_timer_classback.average_epochs_time}
+    )
+
+    wandb.finish()
+
+    return best_hparams
 
     # calculate the confusion matrix
     # predictions, labels = list(), list()

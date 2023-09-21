@@ -6,13 +6,11 @@ import torch
 
 from pytorch_lightning import seed_everything
 
-from dotless_arabic.experiments.meter_classification.src import constants
-
 
 def configure_environment():
     random.seed(42)
     nltk.download("stopwords")
-    os.environ["WANDB_MODE"] = "disabled"
+    # os.environ["WANDB_MODE"] = "disabled"
     os.environ["CUDA_LAUNCH_BLOCKING"] = "1"  # to see CUDA errors
     torch.cuda.empty_cache()  # to free gpu memory
     seed_everything(42, workers=True)

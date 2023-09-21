@@ -142,7 +142,6 @@ def train_sentiment_analyzer(
         train_dataloader,
         val_dataloader,
     )
-    wandb.finish()
     return trainer
 
 
