@@ -10,8 +10,8 @@ if "." not in sys.path:
 
 from dotless_arabic.utils import log_content
 from dotless_arabic.tokenizers import TOKENIZERS_MAP
-from dotless_arabic.experiments.sentiment_analysis.src import constants
-from dotless_arabic.experiments.sentiment_analysis.src.training_pipeline import (
+from dotless_arabic.experiments.topic_modeling.src import constants
+from dotless_arabic.experiments.topic_modeling.src.training_pipeline import (
     training_pipeline,
 )
 

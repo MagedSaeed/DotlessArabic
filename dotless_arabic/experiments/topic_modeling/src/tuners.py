@@ -15,12 +15,12 @@ from ray.tune.integration.pytorch_lightning import (
     TuneReportCheckpointCallback,
 )
 
-from dotless_arabic.experiments.sentiment_analysis.src.models import (
+from dotless_arabic.experiments.topic_modeling.src.models import (
     LitTopicModelingModel,
 )
 
 
-def train_sentiment_analyzer_for_tuning(
+def train_topic_modeler_for_tuning(
     config,
     vocab_size,
     train_dataloader,
@@ -72,12 +72,12 @@ def train_sentiment_analyzer_for_tuning(
     )
 
 
-def tune_sentiment_analyzer_model(
+def tune_topic_modeling_model(
     vocab_size,
     train_dataloader,
     val_dataloader,
 ):
-    sentiment_analyzer_model_config = {
+    topic_modeling_model_config = {
         "num_layers": tune.grid_search([2, 3]),
         "rnn_hiddens": tune.grid_search([128, 256, 512]),
         "rnn_dropout": tune.grid_search([0.25, 0.5, 0.6]),
@@ -108,7 +108,7 @@ def tune_sentiment_analyzer_model(
     )
 
     train_fn_with_parameters = tune.with_parameters(
-        train_sentiment_analyzer_for_tuning,
+        train_topic_modeler_for_tuning,
         vocab_size=vocab_size,
         train_dataloader=train_dataloader,
         val_dataloader=val_dataloader,
@@ -125,12 +125,12 @@ def tune_sentiment_analyzer_model(
             max_concurrent_trials=1,
         ),
         run_config=air.RunConfig(
-            name=f"tune_sentiment_analyzer",
+            name=f"tune_topic_modeler",
             progress_reporter=reporter,
             verbose=2,
         ),
         # param_space=param_space,
-        param_space=sentiment_analyzer_model_config,
+        param_space=topic_modeling_model_config,
     )
     results = tuner.fit()
 
