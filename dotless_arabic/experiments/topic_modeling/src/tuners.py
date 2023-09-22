@@ -80,8 +80,8 @@ def tune_topic_modeling_model(
     topic_modeling_model_config = {
         "num_layers": tune.grid_search([2, 3]),
         "rnn_hiddens": tune.grid_search([128, 256, 512]),
-        "rnn_dropout": tune.grid_search([0.25, 0.5, 0.6]),
-        "dropout_prob": tune.grid_search([0.25, 0.5, 0.6]),
+        "rnn_dropout": tune.grid_search([0.25, 0.5]),
+        "dropout_prob": tune.grid_search([0.25, 0.5]),
         "embedding_size": tune.grid_search([128, 256, 512]),
         "learning_rate": tune.grid_search([0.01, 0.001]),
     }

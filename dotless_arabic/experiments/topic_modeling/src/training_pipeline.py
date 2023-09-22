@@ -10,6 +10,8 @@ from farasa.segmenter import FarasaSegmenter
 from pytorch_lightning.callbacks import Timer
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.utilities.model_summary import ModelSummary
+import wandb
+from dotless_arabic.callbacks import EpochTimerCallback
 from dotless_arabic.experiments.topic_modeling.src.tuners import (
     tune_topic_modeling_model,
 )
@@ -24,6 +26,7 @@ from dotless_arabic.experiments.topic_modeling.src.settings import (
 )
 from dotless_arabic.experiments.topic_modeling.src import constants
 from dotless_arabic.experiments.topic_modeling.src.utils import (
+    get_balanced_sub_dataset,
     get_oovs_rate,
     train_topic_modeler,
     get_sequence_length,
@@ -112,6 +115,18 @@ def training_pipeline(
         " ".join(token for token in document.split() if token not in stopwords)
         for document in tqdm(x_test)
     ]
+
+    log_content(
+        content=f"""
+        Processing:
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
+    x_train = [process(document) for document in tqdm(x_train)]
+    x_val = [process(document) for document in tqdm(x_val)]
+    x_test = [process(document) for document in tqdm(x_test)]
 
     # log_content(
     #     content=f"""
@@ -262,53 +277,59 @@ def training_pipeline(
 
     timer_callback = Timer()
 
-    if best_params is None:
-        # tune the model
-        # reinitialize the dataloaders as they will be exhausted when training
-        # train_dataloader = get_dataloader(
-        #     shuffle=True,
-        #     docs=x_train,
-        #     labels=y_train,
-        #     use_tqdm=False,
-        #     tokenizer=tokenizer,
-        #     batch_size=batch_size,
-        #     undot_text=not is_dotted,
-        #     workers=dataloader_workers,
-        #     sequence_length=sequence_length,
-        # )
-        # val_dataloader = get_dataloader(
-        #     docs=x_val,
-        #     labels=y_val,
-        #     use_tqdm=False,
-        #     tokenizer=tokenizer,
-        #     batch_size=batch_size,
-        #     undot_text=not is_dotted,
-        #     workers=dataloader_workers,
-        #     sequence_length=sequence_length,
-        #     drop_last=constants.DEFAULT_BATCH_SIZE < len(x_val),
-        # )
-        # test_dataloader = get_dataloader(
-        #     docs=x_test,
-        #     labels=y_test,
-        #     use_tqdm=False,
-        #     tokenizer=tokenizer,
-        #     batch_size=batch_size,
-        #     undot_text=not is_dotted,
-        #     workers=dataloader_workers,
-        #     sequence_length=sequence_length,
-        # )
+    per_epoch_timer = EpochTimerCallback()
 
-        # best_params = tune_sentiment_analyzer_model(
-        #     vocab_size=tokenizer.vocab_size,
-        #     train_dataloader=train_dataloader,
-        #     val_dataloader=val_dataloader,
-        # )
-        pass
+    if not best_params:
+        # tune the model
+        sub_x_train, sub_y_train = get_balanced_sub_dataset(
+            xs=x_train,
+            ys=y_train,
+            classes_threshold=1000,
+        )
+        sub_x_val, sub_y_val = get_balanced_sub_dataset(
+            xs=x_val,
+            ys=y_val,
+            classes_threshold=100,
+        )
+
+        sub_tokenizer = get_tokenizer(
+            undot_text=False,
+            vocab_size=vocab_size,
+            train_dataset=sub_x_train,
+            tokenizer_class=tokenizer_class,
+        )
+
+        sub_train_dataloader = get_dataloader(
+            workers=1,
+            shuffle=True,
+            docs=sub_x_train,
+            labels=sub_y_train,
+            use_tqdm=False,
+            undot_text=False,
+            batch_size=batch_size,
+            tokenizer=sub_tokenizer,
+            sequence_length=get_sequence_length(dataset=sub_x_train),
+        )
+        sub_val_dataloader = get_dataloader(
+            workers=1,
+            docs=sub_x_val,
+            labels=sub_y_val,
+            use_tqdm=False,
+            undot_text=False,
+            tokenizer=sub_tokenizer,
+            sequence_length=get_sequence_length(dataset=sub_x_train),
+        )
+
+        best_params = tune_topic_modeling_model(
+            vocab_size=tokenizer.vocab_size,
+            train_dataloader=sub_train_dataloader,
+            val_dataloader=sub_val_dataloader,
+        )
 
     topics_modeler = LitTopicModelingModel(
         num_classes=num_classes,
         vocab_size=tokenizer.vocab_size,
-        # **best_params,
+        **best_params,
     )
 
     log_content(
@@ -335,10 +356,8 @@ def training_pipeline(
         train_dataloader=train_dataloader,
         max_epochs=constants.MAX_EPOCHS,
         tokenizer_class=tokenizer_class,
-        callbacks=[timer_callback],
+        callbacks=[timer_callback, per_epoch_timer],
     )
-
-    f'{timer_callback.time_elapsed("train"):.2f} seconds'
 
     log_content(
         content=f"""
@@ -347,6 +366,15 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+
+    log_content(
+        content=f"""
+        Average training Time for one epoch: {f'{per_epoch_timer.average_epochs_time:.3f} seconds'}
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+    wandb_logger.experiment.log({"epoch-avg-time": per_epoch_timer.average_epochs_time})
 
     results = trainer.test(
         ckpt_path="best",
@@ -360,6 +388,8 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+
+    wandb.finish()
 
     return best_params
 

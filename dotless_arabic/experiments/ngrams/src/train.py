@@ -23,6 +23,8 @@ def train_lm_model(
     print_to_console=True,
     delete_train_file=False,
 ):
+    # useful resources
+    # https://github.com/alvations/usaarhat-repo/blob/master/Ken-Options.md
     execute_bash(
         f"mkdir -p {constants.LMs_DIR}/LMs/{dataset_name}/{ngram}",
         print_to_console=print_to_console,
