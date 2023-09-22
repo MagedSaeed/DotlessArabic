@@ -142,7 +142,6 @@ def train_topic_modeler(
         train_dataloader,
         val_dataloader,
     )
-    wandb.finish()
     return trainer
 
 
@@ -194,3 +193,16 @@ def filter_empty_items(xs, ys):
             filtered_x.append(x)
             filtered_y.append(y)
     return filtered_x, filtered_y
+
+
+def get_balanced_sub_dataset(xs, ys, classes_threshold=1000):
+    assert len(xs) == len(ys), "xs and ys must have the same length"
+    classes_counts = defaultdict(int)
+    sub_xs, sub_ys = list(), list()
+    for x, y in tqdm(zip(xs, ys), total=len(xs)):
+        if classes_counts[y] > classes_threshold:
+            continue
+        sub_xs.append(x)
+        sub_ys.append(y)
+        classes_counts[y] += 1
+    return sub_xs, sub_ys
