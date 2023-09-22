@@ -30,7 +30,7 @@ def download_and_cache_dataset(
         print(file_path)
         if os.path.exists(file_path):
             log_content(
-                content=f"Retreiving Dataset ZIP filefrom cache",
+                content=f"Retrieving Dataset ZIP file from cache",
                 results_file=log_file,
             )
         else:
@@ -63,7 +63,7 @@ def download_and_cache_dataset(
                 return
         if unzip:
             if not os.path.exists(dataset_folder):
-                log_content(content=f"UNZIPPING", results_file=log_content)
+                log_content(content=f"UNZIPPING", results_file=log_file)
                 with zipfile.ZipFile(file_path, "r") as zip_file:
                     zip_file.extractall(dataset_folder)
 
@@ -73,17 +73,19 @@ def download_and_cache_dataset(
 
 def get_dataset_split(dataset_folder=DATASET_FOLDER, split="Train"):
     download_and_cache_dataset()
-    dataset = defaultdict(list)
+    dataset = dict()
     for newspaper_folder in os.listdir(dataset_folder):
         articles_classes_path = dataset_folder + "/" + newspaper_folder + "/" + split
-        for article_class in os.listdir(articles_classes_path):
+        for article_class_index, article_class in enumerate(
+            os.listdir(articles_classes_path)
+        ):
             for file in os.listdir(articles_classes_path + "/" + article_class):
                 with open(
                     articles_classes_path + "/" + article_class + "/" + file,
                     "r",
                 ) as article_file:
-                    dataset[article_class].append(article_file.read())
-    return dataset
+                    dataset[article_file.read()] = article_class_index
+    return dict(dataset)
 
 
 def collect_train_dataset_for_topic_modeling():
