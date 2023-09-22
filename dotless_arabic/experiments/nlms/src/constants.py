@@ -12,7 +12,7 @@ DROPOUT_PROB = 0.333
 EMBEDDING_SIZE = 512
 LEARNING_RATE = 0.001
 DEFAULT_VOCAB_COVERAGE = 0.95  # for tokenizer to consider only tokens that cover this value of the running text
-SEQUENCE_LENGTH_PERCENTILE = 0.99  # percentile to consider lengths and return up to that percentile. 0.5 percentile should return the average
+SEQUENCE_LENGTH_PERCENTILE = 0.99  # percentile to consider lengths and return up to that percentile. 0.5 percentile should return the average length of dataset samples
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LIGHTING_ACCELERATOR = "auto"  # used by pytorch_lightning
 
