@@ -9,7 +9,7 @@ MAX_EPOCHS = 50
 DEFAULT_BATCH_SIZE = 128
 DEFAULT_VOCAB_COVERAGE = 0.9
 
-SEQUENCE_LENGTH_PERCENTILE = 0.8
+SEQUENCE_LENGTH_PERCENTILE = 0.9
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LIGHTING_ACCELERATOR = "auto"  # used by pytorch_lightning
