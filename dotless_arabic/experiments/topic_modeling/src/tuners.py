@@ -86,7 +86,7 @@ def tune_topic_modeling_model(
         "learning_rate": tune.grid_search([0.01, 0.001]),
     }
 
-    scheduler = ASHAScheduler(grace_period=10)
+    scheduler = ASHAScheduler(grace_period=20)
 
     reporter = CLIReporter(
         parameter_columns=[
