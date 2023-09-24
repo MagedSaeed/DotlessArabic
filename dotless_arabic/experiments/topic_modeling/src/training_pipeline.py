@@ -82,6 +82,14 @@ def training_pipeline(
 
     num_classes = len(set(y_train))
 
+    log_content(
+        content=f"""
+        Number of classes is: {num_classes}
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
     x_test, y_test = list(test_dataset.keys()), list(test_dataset.values())
 
     log_content(
@@ -96,40 +104,28 @@ def training_pipeline(
     x_val = list(map(process, tqdm(x_val)))
     x_test = list(map(process, tqdm(x_test)))
 
-    log_content(
-        content=f"""
-        Removing Stopwords:
-        """,
-        results_file=results_file,
-        print_to_console=print_to_console,
-    )
+    # log_content(
+    #     content=f"""
+    #     Removing Stopwords:
+    #     """,
+    #     results_file=results_file,
+    #     print_to_console=print_to_console,
+    # )
 
-    stopwords = list(map(process, nltk.corpus.stopwords.words("arabic")))
+    # stopwords = list(map(process, nltk.corpus.stopwords.words("arabic")))
 
-    x_train = [
-        " ".join(token for token in document.split() if token not in stopwords)
-        for document in tqdm(x_train)
-    ]
-    x_val = [
-        " ".join(token for token in document.split() if token not in stopwords)
-        for document in tqdm(x_val)
-    ]
-    x_test = [
-        " ".join(token for token in document.split() if token not in stopwords)
-        for document in tqdm(x_test)
-    ]
-
-    log_content(
-        content=f"""
-        Processing:
-        """,
-        results_file=results_file,
-        print_to_console=print_to_console,
-    )
-
-    x_train = [process(document) for document in tqdm(x_train)]
-    x_val = [process(document) for document in tqdm(x_val)]
-    x_test = [process(document) for document in tqdm(x_test)]
+    # x_train = [
+    #     " ".join(token for token in document.split() if token not in stopwords)
+    #     for document in tqdm(x_train)
+    # ]
+    # x_val = [
+    #     " ".join(token for token in document.split() if token not in stopwords)
+    #     for document in tqdm(x_val)
+    # ]
+    # x_test = [
+    #     " ".join(token for token in document.split() if token not in stopwords)
+    #     for document in tqdm(x_test)
+    # ]
 
     # log_content(
     #     content=f"""
@@ -216,6 +212,7 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+
     log_content(
         content=f"""
         Building DataLoaders
@@ -252,7 +249,7 @@ def training_pipeline(
         workers=dataloader_workers,
         sequence_length=sequence_length,
     )
-    # print(test_dataloader.dataset[:5])
+
     log_content(
         content=f"""
         Train DataLoader: {len(train_dataloader):,}
@@ -383,12 +380,16 @@ def training_pipeline(
 
     results = trainer.test(
         ckpt_path="best",
-        dataloaders=test_dataloader,
+        dataloaders=(
+            train_dataloader,
+            val_dataloader,
+            test_dataloader,
+        ),
     )
 
     log_content(
         content=f"""
-        Results : {json.dumps(results,ensure_ascii=False,indent=4)}
+        Results: {json.dumps(results,ensure_ascii=False,indent=4)}
         """,
         results_file=results_file,
         print_to_console=print_to_console,
