@@ -78,7 +78,7 @@ def tune_topic_modeling_model(
     val_dataloader,
 ):
     topic_modeling_model_config = {
-        "num_layers": tune.grid_search([2, 3]),
+        # "num_layers": tune.grid_search([2, 3]), # from their baseline, 2 layers produce good results
         "rnn_hiddens": tune.grid_search([128, 256, 512]),
         "rnn_dropout": tune.grid_search([0.25, 0.5]),
         "dropout_prob": tune.grid_search([0.25, 0.5]),
