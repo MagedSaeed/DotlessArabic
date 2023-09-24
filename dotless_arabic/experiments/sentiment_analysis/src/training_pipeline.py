@@ -60,6 +60,8 @@ def training_pipeline(
     dataloader_workers=constants.CPU_COUNT,
 ):
     configure_environment()
+    if best_hparams is None:
+        best_hparams = {}
 
     train_dataset = collect_train_dataset_for_sentiment_analysis()
     test_dataset = collect_test_dataset_for_sentiment_analysis()

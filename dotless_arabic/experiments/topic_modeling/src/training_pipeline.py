@@ -62,6 +62,9 @@ def training_pipeline(
 ):
     configure_environment()
 
+    if best_params is None:
+        best_params = {}
+
     train_dataset = collect_train_dataset_for_topic_modeling()
     test_dataset = collect_test_dataset_for_topic_modeling()
 
