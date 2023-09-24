@@ -15,17 +15,14 @@ from pytorch_lightning.callbacks import (
     LearningRateMonitor,
 )
 
-import wandb
-
 from farasa.segmenter import FarasaSegmenter
 from dotless_arabic.processing.processing import process
 
 from dotless_arabic.tokenizers import (
-    CharacterTokenizer,
     WordTokenizer,
     FarasaMorphologicalTokenizer,
 )
-from dotless_arabic.experiments.sentiment_analysis.src import constants
+from dotless_arabic.experiments.topic_modeling.src import constants
 
 
 def get_vocab_size(
@@ -129,7 +126,7 @@ def train_topic_modeler(
         gradient_clip_val=1,
         fast_dev_run=one_run,
         max_epochs=max_epochs,
-        val_check_interval=0.5,
+        val_check_interval=0.25,
         accelerator=constants.LIGHTING_ACCELERATOR,
         log_every_n_steps=max(len(train_dataloader) // 25, 1),
     )

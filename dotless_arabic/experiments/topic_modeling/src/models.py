@@ -11,12 +11,12 @@ class LitTopicModelingModel(LightningModule):
     def __init__(
         self,
         vocab_size,
-        num_layers=3,
+        num_layers=2,
         num_classes=7,
         pad_token_id=1,
         rnn_hiddens=128,
-        rnn_dropout=0.3,
-        dropout_prob=0.45,
+        rnn_dropout=0.25,
+        dropout_prob=0.5,
         embedding_size=256,
         learning_rate=0.001,
     ):
@@ -55,21 +55,20 @@ class LitTopicModelingModel(LightningModule):
             num_layers=self.num_layers,
             dropout=rnn_dropout,
             batch_first=True,
-            bidirectional=False,
+            bidirectional=True,
         )
         self.dropout_layer = nn.Dropout(p=self.dropout_prob)
         self.dense_layer = nn.Linear(
             in_features=self.rnn_hiddens,
             out_features=num_classes,
         )
-        self.softmax = nn.Softmax()
 
     def forward(self, x, hiddens=None):
         outputs = self.embedding_layer(x)
         outputs = self.dropout_layer(outputs)
         outputs, hiddens = self.rnn(outputs)
+        outputs = outputs[:, :, : self.rnn_hiddens] + outputs[:, :, self.rnn_hiddens :]
         outputs = self.dense_layer(outputs)
-        outputs = self.softmax(outputs)
         return outputs
 
     def step(self, inputs):
@@ -110,7 +109,7 @@ class LitTopicModelingModel(LightningModule):
         self.log("val_acc", val_accuracy, prog_bar=True)
         return {"val_loss": loss}
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch, batch_idx, dataloader_idx=0):
         inputs, labels = batch
         labels = labels.view(-1)
         outputs = self.step(inputs)

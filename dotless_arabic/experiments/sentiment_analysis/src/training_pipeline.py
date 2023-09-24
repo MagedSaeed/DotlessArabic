@@ -60,6 +60,8 @@ def training_pipeline(
     dataloader_workers=constants.CPU_COUNT,
 ):
     configure_environment()
+    if best_hparams is None:
+        best_hparams = {}
 
     train_dataset = collect_train_dataset_for_sentiment_analysis()
     test_dataset = collect_test_dataset_for_sentiment_analysis()
@@ -187,7 +189,9 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
 
-    sequence_length = get_sequence_length(dataset=x_train)
+    sequence_length = get_sequence_length(
+        dataset=[tokenizer.tokenize_from_splits(document) for document in x_train]
+    )
 
     log_content(
         content=f"""
