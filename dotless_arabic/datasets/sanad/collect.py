@@ -71,11 +71,19 @@ def download_and_cache_dataset(
         print(f"An error occurred: {str(e)}")
 
 
-def get_dataset_split(dataset_folder=DATASET_FOLDER, split="Train"):
+def get_dataset_split(
+    dataset_folder=DATASET_FOLDER,
+    split="Train",
+    newspapers=("khaleej",),
+):
+    accepted_newspapers = ("khaleej", "arabiya", "akhbarona")
+    assert set(newspapers).issubset(
+        set(accepted_newspapers)
+    ), f"newspapers should be part of {accepted_newspapers}"
     download_and_cache_dataset()
     dataset = dict()
-    for newspaper_folder in os.listdir(dataset_folder):
-        articles_classes_path = dataset_folder + "/" + newspaper_folder + "/" + split
+    for newspaper in newspapers:
+        articles_classes_path = dataset_folder + "/" + newspaper + "/" + split
         for article_class_index, article_class in enumerate(
             os.listdir(articles_classes_path)
         ):
@@ -88,9 +96,9 @@ def get_dataset_split(dataset_folder=DATASET_FOLDER, split="Train"):
     return dict(dataset)
 
 
-def collect_train_dataset_for_topic_modeling():
-    return get_dataset_split(split="Train")
+def collect_train_dataset_for_topic_modeling(newspapers=("khaleej",)):
+    return get_dataset_split(split="Train", newspapers=newspapers)
 
 
-def collect_test_dataset_for_topic_modeling():
-    return get_dataset_split(split="Test")
+def collect_test_dataset_for_topic_modeling(newspapers=("khaleej",)):
+    return get_dataset_split(split="Test", newspapers=newspapers)
