@@ -283,49 +283,49 @@ def training_pipeline(
 
     if not best_params:
         # tune the model
-        sub_x_train, sub_y_train = get_balanced_sub_dataset(
-            xs=x_train,
-            ys=y_train,
-            classes_threshold=1000,
-        )
-        sub_x_val, sub_y_val = get_balanced_sub_dataset(
-            xs=x_val,
-            ys=y_val,
-            classes_threshold=100,
-        )
+        # sub_x_train, sub_y_train = get_balanced_sub_dataset(
+        #     xs=x_train,
+        #     ys=y_train,
+        #     classes_threshold=1000,
+        # )
+        # sub_x_val, sub_y_val = get_balanced_sub_dataset(
+        #     xs=x_val,
+        #     ys=y_val,
+        #     classes_threshold=100,
+        # )
 
-        sub_tokenizer = get_tokenizer(
-            undot_text=False,
-            vocab_size=vocab_size,
-            train_dataset=sub_x_train,
-            tokenizer_class=tokenizer_class,
-        )
+        # sub_tokenizer = get_tokenizer(
+        #     undot_text=False,
+        #     vocab_size=vocab_size,
+        #     train_dataset=sub_x_train,
+        #     tokenizer_class=tokenizer_class,
+        # )
 
-        sub_train_dataloader = get_dataloader(
+        train_dataloader_for_tuning = get_dataloader(
             workers=1,
             shuffle=True,
-            docs=sub_x_train,
-            labels=sub_y_train,
+            docs=x_train,
+            labels=y_train,
             use_tqdm=False,
             undot_text=False,
+            tokenizer=tokenizer,
             batch_size=batch_size,
-            tokenizer=sub_tokenizer,
-            sequence_length=get_sequence_length(dataset=sub_x_train),
+            sequence_length=sequence_length,
         )
-        sub_val_dataloader = get_dataloader(
+        val_dataloader_for_tuning = get_dataloader(
             workers=1,
-            docs=sub_x_val,
-            labels=sub_y_val,
+            docs=x_val,
+            labels=y_val,
             use_tqdm=False,
             undot_text=False,
-            tokenizer=sub_tokenizer,
-            sequence_length=get_sequence_length(dataset=sub_x_train),
+            tokenizer=tokenizer,
+            sequence_length=sequence_length,
         )
 
         best_params = tune_topic_modeling_model(
             vocab_size=tokenizer.vocab_size,
-            train_dataloader=sub_train_dataloader,
-            val_dataloader=sub_val_dataloader,
+            train_dataloader=train_dataloader_for_tuning,
+            val_dataloader=val_dataloader_for_tuning,
         )
 
     topics_modeler = LitTopicModelingModel(
