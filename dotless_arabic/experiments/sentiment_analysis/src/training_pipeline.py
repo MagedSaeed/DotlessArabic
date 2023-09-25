@@ -270,7 +270,7 @@ def training_pipeline(
     if not best_hparams:
         # tune the model
         # reinitialize the dataloaders as they will be exhausted when training
-        train_dataloader = get_dataloader(
+        train_dataloader_for_tuning = get_dataloader(
             shuffle=True,
             docs=x_train,
             labels=y_train,
@@ -281,7 +281,7 @@ def training_pipeline(
             workers=dataloader_workers,
             sequence_length=sequence_length,
         )
-        val_dataloader = get_dataloader(
+        val_dataloader_for_tuning = get_dataloader(
             docs=x_val,
             labels=y_val,
             use_tqdm=False,
@@ -292,21 +292,11 @@ def training_pipeline(
             sequence_length=sequence_length,
             drop_last=constants.DEFAULT_BATCH_SIZE < len(x_val),
         )
-        test_dataloader = get_dataloader(
-            docs=x_test,
-            labels=y_test,
-            use_tqdm=False,
-            tokenizer=tokenizer,
-            batch_size=batch_size,
-            undot_text=not is_dotted,
-            workers=dataloader_workers,
-            sequence_length=sequence_length,
-        )
 
         best_hparams = tune_sentiment_analyzer_model(
             vocab_size=tokenizer.vocab_size,
-            train_dataloader=train_dataloader,
-            val_dataloader=val_dataloader,
+            train_dataloader=train_dataloader_for_tuning,
+            val_dataloader=val_dataloader_for_tuning,
         )
 
     sentiment_analyzer = LitSentimentAnalysisModel(
@@ -351,7 +341,11 @@ def training_pipeline(
 
     results = trainer.test(
         ckpt_path="best",
-        dataloaders=test_dataloader,
+        dataloaders=(
+            train_dataloader,
+            val_dataloader,
+            test_dataloader,
+        ),
     )
 
     log_content(
