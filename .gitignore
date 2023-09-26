@@ -136,3 +136,5 @@ kenlm
 MC
 MeterClassification
 .jupyter_ystore.db
+
+**/lightning_logs
