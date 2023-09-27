@@ -109,7 +109,7 @@ class LitSentimentAnalysisModel(LightningModule):
         self.log("val_acc", val_accuracy, prog_bar=True)
         return {"val_loss": loss}
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch, batch_idx, dataloader_idx=0):
         inputs, labels = batch
         outputs = self.step(inputs, labels)
         loss = F.binary_cross_entropy(outputs, labels)

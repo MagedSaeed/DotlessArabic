@@ -107,7 +107,7 @@ def train_topic_modeler(
     early_stopping_callback = EarlyStopping(
         monitor="val_loss",
         min_delta=0.005,
-        patience=10,
+        patience=40,
         check_finite=True,
     )
     callbacks.append(early_stopping_callback)
