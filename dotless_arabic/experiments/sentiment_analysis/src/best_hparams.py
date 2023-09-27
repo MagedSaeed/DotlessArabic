@@ -3,9 +3,9 @@ best_hparams = {
         "WordTokenizer": dict(
             num_layers=2,
             rnn_hiddens=128,
-            rnn_dropout=0.33,
-            dropout_prob=0.6,
-            embedding_size=256,
+            rnn_dropout=0.5,
+            dropout_prob=0.5,
+            embedding_size=512,
             learning_rate=0.01,
         ),
         # "FarasaMorphologicalTokenizer": dict(
