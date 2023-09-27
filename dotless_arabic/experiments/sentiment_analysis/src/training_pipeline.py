@@ -190,7 +190,7 @@ def training_pipeline(
     )
 
     sequence_length = get_sequence_length(
-        dataset=[tokenizer.tokenize_from_splits(document) for document in x_train]
+        dataset=[tokenizer.tokenize_from_splits(document) for document in tqdm(x_train)]
     )
 
     log_content(
