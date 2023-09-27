@@ -110,7 +110,7 @@ def train_sentiment_analyzer(
     early_stopping_callback = EarlyStopping(
         monitor="val_loss",
         min_delta=0.005,
-        patience=10,
+        patience=40,
         check_finite=True,
     )
     callbacks.append(early_stopping_callback)
@@ -129,7 +129,7 @@ def train_sentiment_analyzer(
         gradient_clip_val=1,
         fast_dev_run=one_run,
         max_epochs=max_epochs,
-        val_check_interval=0.5,
+        val_check_interval=0.25,
         accelerator=constants.LIGHTING_ACCELERATOR,
         log_every_n_steps=max(len(train_dataloader) // 25, 1),
     )
