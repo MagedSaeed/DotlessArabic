@@ -1,7 +1,7 @@
 best_params = {
     "sanad": {
         "WordTokenizer": dict(
-            rnn_hiddens=128,
+            rnn_hiddens=512,
             rnn_dropout=0.5,
             dropout_prob=0.5,
             embedding_size=128,
