@@ -77,3 +77,18 @@ python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --token
 python dotless_arabic/experiments/nlms/run_experiment.py --dataset=wikipedia --tokenizer_class=CharacterTokenizer --seqlen_percentile=0.95 --gpu_devices=1;
 python dotless_arabic/experiments/nlms/run_experiment.py --dataset=news --tokenizer_class=CharacterTokenizer --seqlen_percentile=0.95 --gpu_devices=1;
 ```
+
+## If you want to clear tuning data while running bulk experiments, you can use a similar bash script to the following depending on the location of ray tuning data (seems to be ~/ray_results for linux):
+```bash
+rm -r ~/ray_results/tune_lm/
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=quran --tokenizer_class=FarasaMorphologicalTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+rm -r ~/ray_results/tune_lm/
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=sanadset_hadeeth --tokenizer_class=FarasaMorphologicalTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+rm -r ~/ray_results/tune_lm/
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=poems --tokenizer_class=FarasaMorphologicalTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+rm -r ~/ray_results/tune_lm/
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=wikipedia --tokenizer_class=FarasaMorphologicalTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+rm -r ~/ray_results/tune_lm/
+python dotless_arabic/experiments/nlms/run_experiment.py --dataset=news --tokenizer_class=FarasaMorphologicalTokenizer --seqlen_percentile=0.975 --gpu_devices=1;
+rm -r ~/ray_results/tune_lm/
+```
