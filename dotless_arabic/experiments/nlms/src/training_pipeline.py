@@ -250,17 +250,22 @@ def training_pipeline(
 
     if not best_hparams:
         # tune the model
-        dataset_for_tuning = train_dataset[: int(len(train_dataset) * 0.1)]
+        train_dataset_for_tuning = train_dataset[: int(len(train_dataset) * 0.1)]
+
         tokenizer_for_tuning = get_tokenizer(
-            train_dataset=dataset_for_tuning,
-            vocab_size=max_vocab_size,
+            train_dataset=train_dataset_for_tuning,
+            vocab_size=get_vocab_size(
+                dataset=train_dataset_for_tuning,
+                undot_text=False,
+                vocab_coverage=vocab_coverage,
+            ),
             tokenizer_class=tokenizer_class,
         )
         train_dataloader_for_tuning = get_dataloader(
             shuffle=True,
             tokenizer=tokenizer_for_tuning,
             sequence_length=sequence_length,
-            dataset=dataset_for_tuning,
+            dataset=train_dataset_for_tuning,
         )
         val_dataloader_for_tuning = get_dataloader(
             shuffle=False,
