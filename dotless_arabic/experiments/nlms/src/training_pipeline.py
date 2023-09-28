@@ -255,9 +255,10 @@ def training_pipeline(
         tokenizer_for_tuning = get_tokenizer(
             train_dataset=train_dataset_for_tuning,
             vocab_size=get_vocab_size(
-                dataset=train_dataset_for_tuning,
                 undot_text=False,
+                return_all_vocab_size=False,
                 vocab_coverage=vocab_coverage,
+                dataset=train_dataset_for_tuning,
             ),
             tokenizer_class=tokenizer_class,
         )
