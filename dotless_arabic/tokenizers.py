@@ -1,5 +1,9 @@
+import io
 import re
+import tempfile
+import warnings
 import tkseem as tk
+import sentencepiece as spm
 from functools import lru_cache
 from collections import defaultdict
 from farasa.segmenter import FarasaSegmenter
@@ -188,11 +192,123 @@ class FarasaMorphologicalTokenizer(tk.FarasaMorphologicalTokenizer):
         self.vocab_size = len(self.vocab)
 
 
+class SentencePieceTokenizer(tk.SentencePieceTokenizer):
+    """Sentencepiece based tokenization."""
+
+    def train(
+        self,
+        text=None,
+        file_path=None,
+        model_type="bpe",
+        **kwargs,
+    ):
+        """Train using sentence piece
+
+        Args:
+            file_path (str): file to train
+            model_type (str, optional): train using sp. Defaults to "bpe".
+        """
+        assert (
+            text is not None or file_path is not None
+        ), "file_path or text should be provided"
+
+        if file_path:
+            text = open(file_path, "r").read().splitlines()
+
+        text_file = tempfile.NamedTemporaryFile()
+
+        with open(text_file.name, "w") as file:
+            file.write(text)
+
+        print("Training SentencePiece ...")
+        self.model = io.BytesIO()
+
+        """
+        This was written to catche a special case for sentencepiece. If higher vocab size than the total dataset vocabulary is given, it gives an error. Hence this custom training procesdure.
+        Curerntly, this should not be a concern for the task done in this repo, however, it is here for future changes if any.
+        """
+
+        # def _train(vocab_size):
+        #     spm.SentencePieceTrainer.train(
+        #         input=text_file.name,
+        #         model_writer=self.model,
+        #         vocab_size=vocab_size,
+        #         model_type=model_type,
+        #         character_coverage=kwargs.get("character_coverage", 1.0),
+        #         unk_id=0,
+        #         pad_id=1,
+        #         bos_id=kwargs.get("bos_id", -1),
+        #         eos_id=kwargs.get("eos_id", -1),
+        #         user_defined_symbols=self.special_tokens,
+        #         normalization_rule_name="identity",
+        #         minloglevel=1,  # to suppress train logs, https://github.com/speechbrain/speechbrain/pull/206#issuecomment-669260984
+        #     )
+
+        # try:
+        #     _train(vocab_size=self.vocab_size)
+        # except RuntimeError as e:
+        #     error_message = str(e)
+        #     print(error_message)
+        #     if "Please set it to a value" in error_message:
+        #         vocab_size = int(
+        #             "".join(c for c in error_message.split("<=")[-1] if c.isdigit())
+        #         )
+        #         print(
+        #             f"the given vocab_size ({self.vocab_size}) is high for sentnecepiece. Reducing it to {vocab_size} and retraining the model."
+        #         )
+        #         self.vocab_size = vocab_size
+        #         _train(vocab_size=self.vocab_size)
+        #     else:
+        #         raise e
+
+        spm.SentencePieceTrainer.train(
+            input=text_file.name,
+            model_writer=self.model,
+            vocab_size=self.vocab_size,
+            model_type=model_type,
+            character_coverage=kwargs.get("character_coverage", 1.0),
+            unk_id=0,
+            pad_id=1,
+            bos_id=kwargs.get("bos_id", -1),
+            eos_id=kwargs.get("eos_id", -1),
+            user_defined_symbols=self.special_tokens,
+            normalization_rule_name="identity",
+            minloglevel=1,  # to suppress train logs, https://github.com/speechbrain/speechbrain/pull/206#issuecomment-669260984
+        )
+
+        model_file = tempfile.NamedTemporaryFile()
+        self.save_model(model_file.name)
+        self.sp = spm.SentencePieceProcessor(model_file=model_file.name)
+        self.vocab_size = self.sp.vocab_size()
+        self.vocab = {
+            self.sp.id_to_piece(id): id for id in range(self.sp.get_piece_size())
+        }
+
+    def split_text(self, text):
+        """
+        For this tokenizer, split text is the same as tokenize
+        """
+        warnings.warn(
+            "sentencepiece tokenizer cannot split text unless with PBE mode. It needs to be trained first!"
+        )
+        return self.tokenize(text)
+
+    def tokenize_from_splits(self, text):
+        """
+        For this tokenizer, split text is the same as tokenize
+        """
+        warnings.warn(
+            "sentencepiece tokenizer cannot split text unless with PBE mode. It needs to be trained first!"
+        )
+        return self.tokenize(text)
+
+
 TOKENIZERS_MAP = {
     tokenizer_class.__name__: tokenizer_class
     for tokenizer_class in [
         WordTokenizer,
         FarasaMorphologicalTokenizer,
+        SentencePieceTokenizer,
         DisjointLetterTokenizer,
         CharacterTokenizer,
     ]
@@ -201,9 +317,9 @@ TOKENIZERS_MAP = {
 
 def get_tokenizer(
     train_dataset,
+    tokenizer_class,
     undot_text=False,
     vocab_size=10_000,
-    tokenizer_class=CharacterTokenizer,
 ):
     if undot_text:
         text = "\n".join(undot(item) for item in train_dataset if item.strip())
