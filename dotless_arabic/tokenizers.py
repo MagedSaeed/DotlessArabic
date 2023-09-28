@@ -224,57 +224,41 @@ class SentencePieceTokenizer(tk.SentencePieceTokenizer):
         self.model = io.BytesIO()
 
         """
-        This was written to catche a special case for sentencepiece. If higher vocab size than the total dataset vocabulary is given, it gives an error. Hence this custom training procesdure.
-        Curerntly, this should not be a concern for the task done in this repo, however, it is here for future changes if any.
+        This was written to catch a special case for sentencepiece.
+        If higher vocab size than the total dataset vocabulary is given, it gives an error. Hence this custom training procedure.
         """
 
-        # def _train(vocab_size):
-        #     spm.SentencePieceTrainer.train(
-        #         input=text_file.name,
-        #         model_writer=self.model,
-        #         vocab_size=vocab_size,
-        #         model_type=model_type,
-        #         character_coverage=kwargs.get("character_coverage", 1.0),
-        #         unk_id=0,
-        #         pad_id=1,
-        #         bos_id=kwargs.get("bos_id", -1),
-        #         eos_id=kwargs.get("eos_id", -1),
-        #         user_defined_symbols=self.special_tokens,
-        #         normalization_rule_name="identity",
-        #         minloglevel=1,  # to suppress train logs, https://github.com/speechbrain/speechbrain/pull/206#issuecomment-669260984
-        #     )
+        def _train(vocab_size):
+            spm.SentencePieceTrainer.train(
+                input=text_file.name,
+                model_writer=self.model,
+                vocab_size=vocab_size,
+                model_type=model_type,
+                character_coverage=kwargs.get("character_coverage", 1.0),
+                unk_id=0,
+                pad_id=1,
+                bos_id=kwargs.get("bos_id", -1),
+                eos_id=kwargs.get("eos_id", -1),
+                user_defined_symbols=self.special_tokens,
+                normalization_rule_name="identity",
+                minloglevel=1,  # to suppress train logs, https://github.com/speechbrain/speechbrain/pull/206#issuecomment-669260984
+            )
 
-        # try:
-        #     _train(vocab_size=self.vocab_size)
-        # except RuntimeError as e:
-        #     error_message = str(e)
-        #     print(error_message)
-        #     if "Please set it to a value" in error_message:
-        #         vocab_size = int(
-        #             "".join(c for c in error_message.split("<=")[-1] if c.isdigit())
-        #         )
-        #         print(
-        #             f"the given vocab_size ({self.vocab_size}) is high for sentnecepiece. Reducing it to {vocab_size} and retraining the model."
-        #         )
-        #         self.vocab_size = vocab_size
-        #         _train(vocab_size=self.vocab_size)
-        #     else:
-        #         raise e
-
-        spm.SentencePieceTrainer.train(
-            input=text_file.name,
-            model_writer=self.model,
-            vocab_size=self.vocab_size,
-            model_type=model_type,
-            character_coverage=kwargs.get("character_coverage", 1.0),
-            unk_id=0,
-            pad_id=1,
-            bos_id=kwargs.get("bos_id", -1),
-            eos_id=kwargs.get("eos_id", -1),
-            user_defined_symbols=self.special_tokens,
-            normalization_rule_name="identity",
-            minloglevel=1,  # to suppress train logs, https://github.com/speechbrain/speechbrain/pull/206#issuecomment-669260984
-        )
+        try:
+            _train(vocab_size=self.vocab_size)
+        except RuntimeError as e:
+            error_message = str(e)
+            if "Please set it to a value" in error_message:
+                vocab_size = int(
+                    "".join(c for c in error_message.split("<=")[-1] if c.isdigit())
+                )
+                warnings.warn(
+                    f"the given vocab_size ({self.vocab_size}) is more than the total dataset vocabulary. This cause an error for SentencePieceTokenizer. Reducing it to max vocab_size of dataset {vocab_size} and retraining the model."
+                )
+                self.vocab_size = vocab_size
+                _train(vocab_size=self.vocab_size)
+            else:
+                raise e
 
         model_file = tempfile.NamedTemporaryFile()
         self.save_model(model_file.name)
