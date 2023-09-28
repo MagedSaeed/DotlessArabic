@@ -29,7 +29,7 @@ def get_vocab_size(
     dataset,
     use_tqdm=True,
     undot_text=False,
-    return_all_vocab=True,
+    return_all_vocab_size=True,
     tokenizer_class=WordTokenizer,
     vocab_coverage=constants.DEFAULT_VOCAB_COVERAGE,
 ):
@@ -68,7 +68,7 @@ def get_vocab_size(
         vocab += 1
         if current_coverage > vocab_coverage:
             break
-    if return_all_vocab:
+    if return_all_vocab_size:
         return vocab, len(sorted_words_frequencies.keys())
     return vocab
 
