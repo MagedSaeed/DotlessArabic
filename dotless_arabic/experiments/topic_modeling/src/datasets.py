@@ -5,7 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 
 from dotless_arabic.processing import undot
 
-from dotless_arabic.experiments.sentiment_analysis.src import constants
+from dotless_arabic.experiments.topic_modeling.src import constants
 
 
 class NewsPapersDataset(Dataset):
