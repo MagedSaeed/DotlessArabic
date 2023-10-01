@@ -123,6 +123,35 @@ def training_pipeline(
 
     log_content(
         content=f"""
+        Getting source and target tokenizers
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+    source_tokenizer = get_source_tokenizer(
+        train_dataset=train_dataset,
+        tokenizer_class=tokenizer_class,
+        source_language_code=source_language_code,
+    )
+    target_tokenizer = get_target_tokenizer(
+        train_dataset=train_dataset,
+        tokenizer_class=tokenizer_class,
+        target_language_code=target_language_code,
+    )
+    log_content(
+        content=f"""
+        Source vocab size: {source_tokenizer.vocab_size}
+        Target vocab size: {target_tokenizer.vocab_size}
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
+    wandb_logger.experiment.log({"source_vocab_size": source_tokenizer.vocab_size})
+    wandb_logger.experiment.log({"target_vocab_size": target_tokenizer.vocab_size})
+
+    log_content(
+        content=f"""
         Calculate sequence length:
         """,
         results_file=results_file,
@@ -130,10 +159,20 @@ def training_pipeline(
     )
 
     source_max_sequence_length = get_sequence_length(
-        dataset=train_dataset[source_language_code]
+        dataset=list(
+            map(
+                source_tokenizer.tokenize,
+                tqdm(train_dataset[source_language_code]),
+            )
+        )
     )
     target_max_sequence_length = get_sequence_length(
-        dataset=train_dataset[target_language_code]
+        dataset=list(
+            map(
+                target_tokenizer.tokenize,
+                tqdm(train_dataset[target_language_code]),
+            )
+        )
     )
 
     log_content(
@@ -165,35 +204,6 @@ def training_pipeline(
     )
 
     wandb_logger.experiment.log({"sequence_length": sequence_length})
-
-    log_content(
-        content=f"""
-        Getting source and target tokenizers
-        """,
-        results_file=results_file,
-        print_to_console=print_to_console,
-    )
-    source_tokenizer = get_source_tokenizer(
-        train_dataset=train_dataset,
-        tokenizer_class=tokenizer_class,
-        source_language_code=source_language_code,
-    )
-    target_tokenizer = get_target_tokenizer(
-        train_dataset=train_dataset,
-        tokenizer_class=tokenizer_class,
-        target_language_code=target_language_code,
-    )
-    log_content(
-        content=f"""
-        Source vocab size: {source_tokenizer.vocab_size}
-        Target vocab size: {target_tokenizer.vocab_size}
-        """,
-        results_file=results_file,
-        print_to_console=print_to_console,
-    )
-
-    wandb_logger.experiment.log({"source_vocab_size": source_tokenizer.vocab_size})
-    wandb_logger.experiment.log({"target_vocab_size": target_tokenizer.vocab_size})
 
     log_content(
         content=f"""
