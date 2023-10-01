@@ -149,10 +149,23 @@ def get_source_tokenizer(
     source_language_code,
     tokenizer_class=WordTokenizer,
 ):
-    tokenizer = tokenizer_class(
-        vocab_size=10**10
-    )  # high vocab size, higher than the possible vocab size :)
+    if tokenizer_class == SentencePieceTokenizer:
+        tokenizer = tokenizer_class(vocab_size=10**4)
+    else:
+        tokenizer = tokenizer_class(
+            vocab_size=10**10
+        )  # high vocab size, higher than the possible vocab size :)
     tokenizer.train(text="\n".join(train_dataset[source_language_code]))
+    # if tokenizer_class != SentencePieceTokenizer:
+    #     vocab = {
+    #         vocab: freq
+    #         for vocab, freq in tokenizer.vocab.items()
+    #         if freq > 1 or freq < 0
+    #     }
+    #     tokenizer.vocab = vocab
+    #     tokenizer.vocab_size = len(vocab)
+    #     tokenizer.vocab_size
+    #     tokenizer.vocab_size
     return tokenizer
 
 
@@ -161,7 +174,16 @@ def get_target_tokenizer(
     target_language_code,
     tokenizer_class=WordTokenizer,
 ):
-    tokenizer = tokenizer_class(vocab_size=10**10, special_tokens=["<bos>", "<eos>"])
+    if tokenizer_class == SentencePieceTokenizer:
+        tokenizer = tokenizer_class(
+            vocab_size=10**4,
+            special_tokens=["<bos>", "<eos>"],
+        )
+    else:
+        tokenizer = tokenizer_class(
+            vocab_size=10**10,
+            special_tokens=["<bos>", "<eos>"],
+        )
     tokenizer.train(text="\n".join(train_dataset[target_language_code]))
     # delete 1-freq words if tokenizer class is not Sentencepiece
     if tokenizer_class != SentencePieceTokenizer:
