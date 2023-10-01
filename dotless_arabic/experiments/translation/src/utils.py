@@ -211,12 +211,12 @@ def get_sequence_length(
     percentile=constants.SEQUENCE_LENGTH_PERCENTILE,
 ):
     """
-    The dataset is NOT expected to be tokenized, unless maybe in other exps
+    The dataset is expected to be tokenized.
     """
     lengths = []
     dataset = tqdm(dataset) if use_tqdm else dataset
     for document in dataset:
-        lengths.append(len(document.split()))
+        lengths.append(len(document))
     lengths = sorted(lengths)
     lengths_count = len(lengths)
     percentile_index = math.floor(lengths_count * percentile)
