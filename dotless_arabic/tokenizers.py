@@ -195,6 +195,22 @@ class FarasaMorphologicalTokenizer(tk.FarasaMorphologicalTokenizer):
 class SentencePieceTokenizer(tk.SentencePieceTokenizer):
     """Sentencepiece based tokenization."""
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # self, unk_token="<UNK>", pad_token="<PAD>", vocab_size=10000, special_tokens=[],
+        special_tokens = kwargs.get("special_tokens")
+        self.bos_token = "<s>"  # sentencepiece defaults
+        self.bos_id = -1
+        self.eos_token = "</s>"  # sentencepiece defaults
+        self.eos_id = -1
+        if special_tokens:
+            if "<bos>" in special_tokens:
+                self.bos_token = "<bos>"
+                self.bos_id = 2
+            if "<eos>" in special_tokens:
+                self.eos_token = "<eos>"
+                self.eos_id = 3
+
     def train(
         self,
         text=None,
@@ -229,6 +245,7 @@ class SentencePieceTokenizer(tk.SentencePieceTokenizer):
         """
 
         def _train(vocab_size):
+            # https://github.com/google/sentencepiece/blob/master/doc/options.md
             spm.SentencePieceTrainer.train(
                 input=text_file.name,
                 model_writer=self.model,
@@ -237,10 +254,14 @@ class SentencePieceTokenizer(tk.SentencePieceTokenizer):
                 character_coverage=kwargs.get("character_coverage", 1.0),
                 unk_id=0,
                 pad_id=1,
-                bos_id=kwargs.get("bos_id", -1),
-                eos_id=kwargs.get("eos_id", -1),
-                user_defined_symbols=self.special_tokens,
+                bos_id=self.bos_id,
+                eos_id=self.eos_id,
+                pad_piece=self.pad_token,
+                unk_piece=self.unk_token,
+                bos_piece=self.bos_token,
+                eos_piece=self.eos_token,
                 normalization_rule_name="identity",
+                user_defined_symbols=self.special_tokens,
                 minloglevel=1,  # to suppress train logs, https://github.com/speechbrain/speechbrain/pull/206#issuecomment-669260984
             )
 
