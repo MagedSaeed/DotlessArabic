@@ -68,7 +68,7 @@ def train_translator(
         monitor="val_loss",
         # min_delta=0.025,
         min_delta=0,
-        patience=6,
+        patience=20,
         check_finite=True,
     )
     callbacks.append(early_stopping_callback)
@@ -83,7 +83,7 @@ def train_translator(
     trainer = Trainer(
         deterministic=True,
         callbacks=callbacks,
-        gradient_clip_val=5,
+        gradient_clip_val=1,
         max_epochs=max_epochs,
         val_check_interval=0.25,
         accelerator="auto",
