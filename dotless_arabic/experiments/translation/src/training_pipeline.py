@@ -327,9 +327,13 @@ def training_pipeline(
         # )
         pass
 
+    assert source_tokenizer.token_to_id(
+        source_tokenizer.pad_token
+    ) == target_tokenizer.token_to_id(target_tokenizer.pad_token)
     translator = TranslationTransformer(
         src_vocab_size=source_tokenizer.vocab_size,
         tgt_vocab_size=target_tokenizer.vocab_size,
+        pad_token_id=source_tokenizer.token_to_id(source_tokenizer.pad_token),
     )
 
     log_content(
@@ -389,6 +393,7 @@ def training_pipeline(
     blue_score = get_blue_score(
         model=TranslationTransformer.load_from_checkpoint(
             trainer.checkpoint_callback.best_model_path
+            # f"NMT/{text_type}/{tokenizer_class.__name__}/checkpoints/last.ckpt"
         ).to(constants.DEVICE),
         source_tokenizer=source_tokenizer,
         target_tokenizer=target_tokenizer,
