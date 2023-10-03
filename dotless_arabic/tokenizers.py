@@ -256,6 +256,7 @@ class SentencePieceTokenizer(tk.SentencePieceTokenizer):
                 pad_id=1,
                 bos_id=self.bos_id,
                 eos_id=self.eos_id,
+                add_dummy_prefix=False,
                 pad_piece=self.pad_token,
                 unk_piece=self.unk_token,
                 bos_piece=self.bos_token,
