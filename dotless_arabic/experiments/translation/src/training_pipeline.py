@@ -34,9 +34,15 @@ from dotless_arabic.experiments.translation.src.models import (
     TranslationTransformer,
 )
 
-from dotless_arabic.datasets.open_subtitles_arbml_subset.collect import (
-    collect_parallel_train_dataset_for_translation,
+# from dotless_arabic.datasets.open_subtitles_arbml_subset.collect import (
+#     collect_parallel_train_dataset_for_translation,
+#     collect_parallel_test_dataset_for_translation,
+# )
+
+from dotless_arabic.datasets.ted_multi.collect import (
     collect_parallel_test_dataset_for_translation,
+    collect_parallel_train_dataset_for_translation,
+    collect_parallel_val_dataset_for_translation,
 )
 
 
@@ -64,16 +70,94 @@ def training_pipeline(
     source_language_code = "en"
     target_language_code = "ar"
 
-    train_dataset = collect_parallel_train_dataset_for_translation()
-    # split train to train and val
-    train_val_dataset = train_dataset.train_test_split(
-        test_size=0.1,
-        seed=constants.RANDOM_SEED,
+    log_content(
+        content=f"""
+        Collecting dataset splits:
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
     )
-    train_dataset = train_val_dataset["train"].to_pandas()
-    val_dataset = train_val_dataset["test"].to_pandas()
 
+    train_dataset = collect_parallel_train_dataset_for_translation().to_pandas()
+    val_dataset = collect_parallel_val_dataset_for_translation().to_pandas()
     test_dataset = collect_parallel_test_dataset_for_translation().to_pandas()
+
+    log_content(
+        content=f"""
+        Segmenting arabic with farasa:
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
+    segmenter = FarasaSegmenter(interactive=True)
+
+    tqdm.pandas()
+
+    train_dataset["ar"] = train_dataset["ar"].progress_map(
+        lambda text: segmenter.segment(text)
+    )
+    val_dataset["ar"] = val_dataset["ar"].progress_map(
+        lambda text: segmenter.segment(text)
+    )
+    test_dataset["ar"] = test_dataset["ar"].progress_map(
+        lambda text: segmenter.segment(text)
+    )
+
+    # train_dataset = collect_parallel_train_dataset_for_translation()
+    # # split train to train and val
+    # train_val_dataset = train_dataset.train_test_split(
+    #     test_size=0.1,
+    #     seed=constants.RANDOM_SEED,
+    # )
+    # train_dataset = train_val_dataset["train"].to_pandas()
+    # val_dataset = train_val_dataset["test"].to_pandas()
+
+    # test_dataset = collect_parallel_test_dataset_for_translation().to_pandas()
+
+    # def prepare_columns(example):
+    #     example["ar"] = example["translation"]["ar"]
+    #     example["en"] = example["translation"]["en"]
+    #     return example
+
+    # dataset = datasets.load_dataset("iwslt2017", "iwslt2017-ar-en")
+
+    # train_dataset = (
+    #     dataset["train"]
+    #     .filter(
+    #         lambda example: len(example["translation"]["ar"])
+    #         and len(example["translation"]["en"])
+    #     )
+    #     .map(
+    #         prepare_columns,
+    #         remove_columns=["translation"],
+    #     )
+    #     .to_pandas()
+    # )
+    # val_dataset = (
+    #     dataset["validation"]
+    #     .filter(
+    #         lambda example: len(example["translation"]["ar"])
+    #         and len(example["translation"]["en"])
+    #     )
+    #     .map(
+    #         prepare_columns,
+    #         remove_columns=["translation"],
+    #     )
+    #     .to_pandas()
+    # )
+    # test_dataset = (
+    #     dataset["test"]
+    #     .filter(
+    #         lambda example: len(example["translation"]["ar"])
+    #         and len(example["translation"]["en"])
+    #     )
+    #     .map(
+    #         prepare_columns,
+    #         remove_columns=["translation"],
+    #     )
+    #     .to_pandas()
+    # )
 
     log_content(
         content=f"""
