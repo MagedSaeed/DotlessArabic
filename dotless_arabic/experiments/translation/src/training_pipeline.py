@@ -4,6 +4,9 @@ from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.utilities.model_summary import ModelSummary
 import wandb
 from tqdm.auto import tqdm
+
+from farasa.segmenter import FarasaSegmenter
+
 from dotless_arabic.callbacks import EpochTimerCallback
 from dotless_arabic.experiments.translation.src.tuners import (
     tune_translation_model,
