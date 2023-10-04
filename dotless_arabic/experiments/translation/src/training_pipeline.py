@@ -279,54 +279,6 @@ def training_pipeline(
 
     per_epoch_timer = EpochTimerCallback()
 
-    if not best_params:
-        # tune the model
-        # sub_x_train, sub_y_train = get_balanced_sub_dataset(
-        #     xs=x_train,
-        #     ys=y_train,
-        #     classes_threshold=1000,
-        # )
-        # sub_x_val, sub_y_val = get_balanced_sub_dataset(
-        #     xs=x_val,
-        #     ys=y_val,
-        #     classes_threshold=100,
-        # )
-
-        # sub_tokenizer = get_tokenizer(
-        #     undot_text=False,
-        #     vocab_size=vocab_size,
-        #     train_dataset=sub_x_train,
-        #     tokenizer_class=tokenizer_class,
-        # )
-
-        # train_dataloader_for_tuning = get_dataloader(
-        #     workers=1,
-        #     shuffle=True,
-        #     docs=x_train,
-        #     labels=y_train,
-        #     use_tqdm=False,
-        #     undot_text=False,
-        #     tokenizer=tokenizer,
-        #     batch_size=batch_size,
-        #     sequence_length=sequence_length,
-        # )
-        # val_dataloader_for_tuning = get_dataloader(
-        #     workers=1,
-        #     docs=x_val,
-        #     labels=y_val,
-        #     use_tqdm=False,
-        #     undot_text=False,
-        #     tokenizer=tokenizer,
-        #     sequence_length=sequence_length,
-        # )
-
-        # best_params = tune_topic_modeling_model(
-        #     vocab_size=tokenizer.vocab_size,
-        #     train_dataloader=train_dataloader_for_tuning,
-        #     val_dataloader=val_dataloader_for_tuning,
-        # )
-        pass
-
     assert source_tokenizer.token_to_id(
         source_tokenizer.pad_token
     ) == target_tokenizer.token_to_id(target_tokenizer.pad_token)
