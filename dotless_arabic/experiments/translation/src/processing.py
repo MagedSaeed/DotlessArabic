@@ -8,8 +8,8 @@ from dotless_arabic import constants
 
 
 def process_source(text):
-    clean_text = text.replace("&quot", "")
-    clean_text = clean_text.replace("&amp", "")
+    clean_text = text.replace("quot", "")
+    clean_text = clean_text.replace("amp", "")
     strip_chars = string.punctuation
     clean_text = "".join(c for c in text if c not in strip_chars)
     clean_text = re.sub("\s{2,}", " ", clean_text).strip()
@@ -25,7 +25,7 @@ def process_target(text):
     # return clean_text
     strip_chars = string.punctuation
     text = "".join(c for c in text if c not in strip_chars)
-    text = text.replace("&quot", "")
+    text = text.replace("quot", "")
     # replace less known arabic unicode characters with their mapping from the well known arabic characters
     text = text.translate(str.maketrans(constants.UNICODE_LETTERS_MAPPING))
 
