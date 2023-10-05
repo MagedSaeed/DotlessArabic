@@ -6,6 +6,7 @@ import wandb
 from tqdm.auto import tqdm
 
 from farasa.segmenter import FarasaSegmenter
+import mosestokenizer
 
 from dotless_arabic.callbacks import EpochTimerCallback
 from dotless_arabic.experiments.translation.src.tuners import (
@@ -43,8 +44,8 @@ from dotless_arabic.experiments.translation.src.models import (
 # )
 
 from dotless_arabic.datasets.ted_multi.collect import (
-    collect_parallel_test_dataset_for_translation,
     collect_parallel_train_dataset_for_translation,
+    collect_parallel_test_dataset_for_translation,
     collect_parallel_val_dataset_for_translation,
 )
 
@@ -80,10 +81,65 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+    # train_dataset = collect_parallel_train_dataset_for_translation().to_pandas()
+    # split train to train and val
+    # train_val_dataset = train_dataset.train_test_split(
+    #     test_size=0.1,
+    #     seed=constants.RANDOM_SEED,
+    # )
+    # train_dataset = train_val_dataset["train"].to_pandas()
+    # val_dataset = train_val_dataset["test"].to_pandas()
+    # val_dataset = collect_parallel_val_dataset_for_translation().to_pandas()
 
     train_dataset = collect_parallel_train_dataset_for_translation().to_pandas()
     val_dataset = collect_parallel_val_dataset_for_translation().to_pandas()
     test_dataset = collect_parallel_test_dataset_for_translation().to_pandas()
+
+    log_content(
+        content=f"""
+        Processing source and target sequences:
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
+    train_dataset[source_language_code] = list(
+        map(
+            process_source,
+            tqdm(train_dataset[source_language_code]),
+        )
+    )
+    val_dataset[source_language_code] = list(
+        map(
+            process_source,
+            tqdm(val_dataset[source_language_code]),
+        )
+    )
+    test_dataset[source_language_code] = list(
+        map(
+            process_source,
+            tqdm(test_dataset[source_language_code]),
+        )
+    )
+
+    train_dataset[target_language_code] = list(
+        map(
+            process_target,
+            tqdm(train_dataset[target_language_code]),
+        )
+    )
+    val_dataset[target_language_code] = list(
+        map(
+            process_target,
+            tqdm(val_dataset[target_language_code]),
+        )
+    )
+    test_dataset[target_language_code] = list(
+        map(
+            process_target,
+            tqdm(test_dataset[target_language_code]),
+        )
+    )
 
     log_content(
         content=f"""
@@ -98,14 +154,33 @@ def training_pipeline(
     tqdm.pandas()
 
     train_dataset["ar"] = train_dataset["ar"].progress_map(
-        lambda text: segmenter.segment(text)
+        lambda text: segmenter.segment(text).replace("+", "▁ ")
     )
     val_dataset["ar"] = val_dataset["ar"].progress_map(
-        lambda text: segmenter.segment(text)
+        lambda text: segmenter.segment(text).replace("+", "▁ ")
     )
     test_dataset["ar"] = test_dataset["ar"].progress_map(
-        lambda text: segmenter.segment(text)
+        lambda text: segmenter.segment(text).replace("+", "▁ ")
     )
+
+    log_content(
+        content=f"""
+        Segmenting english with moses:
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
+    with mosestokenizer.MosesTokenizer("en") as moses_tokenizer:
+        train_dataset["en"] = train_dataset["en"].progress_map(
+            lambda text: " ".join(moses_tokenizer(text))
+        )
+        val_dataset["en"] = val_dataset["en"].progress_map(
+            lambda text: " ".join(moses_tokenizer(text))
+        )
+        test_dataset["en"] = test_dataset["en"].progress_map(
+            lambda text: " ".join(moses_tokenizer(text))
+        )
 
     # train_dataset = collect_parallel_train_dataset_for_translation()
     # # split train to train and val
@@ -164,53 +239,7 @@ def training_pipeline(
 
     log_content(
         content=f"""
-        Processing source and target sequences:
-        """,
-        results_file=results_file,
-        print_to_console=print_to_console,
-    )
-
-    train_dataset[source_language_code] = list(
-        map(
-            process_source,
-            tqdm(train_dataset[source_language_code]),
-        )
-    )
-    val_dataset[source_language_code] = list(
-        map(
-            process_source,
-            tqdm(val_dataset[source_language_code]),
-        )
-    )
-    test_dataset[source_language_code] = list(
-        map(
-            process_source,
-            tqdm(test_dataset[source_language_code]),
-        )
-    )
-
-    train_dataset[target_language_code] = list(
-        map(
-            process_target,
-            tqdm(train_dataset[target_language_code]),
-        )
-    )
-    val_dataset[target_language_code] = list(
-        map(
-            process_target,
-            tqdm(val_dataset[target_language_code]),
-        )
-    )
-    test_dataset[target_language_code] = list(
-        map(
-            process_target,
-            tqdm(test_dataset[target_language_code]),
-        )
-    )
-
-    log_content(
-        content=f"""
-        Getting source and target tokenizers
+        Building source and target tokenizers
         """,
         results_file=results_file,
         print_to_console=print_to_console,
@@ -388,6 +417,7 @@ def training_pipeline(
         gpu_devices=gpu_devices,
         wandb_logger=wandb_logger,
         translator=translator,
+        validate_and_fit=False,
         val_dataloader=val_dataloader,
         train_dataloader=train_dataloader,
         max_epochs=constants.MAX_EPOCHS,
@@ -431,8 +461,8 @@ def training_pipeline(
 
     blue_score = get_blue_score(
         model=TranslationTransformer.load_from_checkpoint(
-            trainer.checkpoint_callback.best_model_path
-            # f"NMT/{text_type}/{tokenizer_class.__name__}/checkpoints/last.ckpt"
+            # trainer.checkpoint_callback.best_model_path
+            f"NMT/{text_type}/{tokenizer_class.__name__}/checkpoints/last.ckpt"
         ).to(constants.DEVICE),
         source_tokenizer=source_tokenizer,
         target_tokenizer=target_tokenizer,
