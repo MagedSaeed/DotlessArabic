@@ -88,13 +88,13 @@ class TranslationTransformer(LightningModule):
         src_vocab_size,
         tgt_vocab_size,
         nhead=8,
-        emb_size=256,
+        emb_size=128,
         pad_token_id=1,
         num_decoder_layers=2,
         num_encoder_layers=2,
         dim_feedforward=2048,
         dropout: float = 0.1,
-        learning_rate=0.0001,
+        learning_rate=0.001,
         # src_vocab_size=source_tokenizer.vocab_size,
         # tgt_vocab_size=target_tokenizer.vocab_size,
     ):
@@ -184,7 +184,7 @@ class TranslationTransformer(LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, eps=1e-9)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer=optimizer,
-            factor=0.25,
+            factor=0.5,
             patience=1,
             verbose=True,
         )
@@ -206,24 +206,24 @@ class TranslationTransformer(LightningModule):
         encoded_input_sentence = (
             torch.tensor(source_tokenizer.encode(input_sentence))
             .view(1, -1)
-            .to(constants.DEVICE)
+            .to(self.device)
         )
         target = "<bos> "
-        for i in range(
-            max_sequence_length,
-        ):
-            encoded_target = (
-                torch.tensor(target_tokenizer.encode(target))
-                .view(1, -1)
-                .to(constants.DEVICE)
+        encoded_target = target_tokenizer.encode(target)
+        for i in range(max_sequence_length):
+            outputs = self(
+                src=encoded_input_sentence,
+                trg=torch.tensor(encoded_target).view(1, -1).to(self.device),
             )
-            outputs = self(src=encoded_input_sentence, trg=encoded_target)
-            next_word_id = torch.argmax(outputs[0, i, :])
+            next_word_id = torch.argmax(outputs[:, i, :])
+            encoded_target.append(next_word_id)
             next_word = target_tokenizer.id_to_token(next_word_id)
             target += f"{next_word.strip()} "
             if next_word == "<eos>":
                 break
+        # target = re.sub("\s+", "", target).strip()
+        # target = target_tokenizer.detokenize(target)
+        target = re.sub("\s+", " ", target).strip()
         if was_training:
             self.train()
-        target = re.sub("\s+", " ", target).strip()
         return target
