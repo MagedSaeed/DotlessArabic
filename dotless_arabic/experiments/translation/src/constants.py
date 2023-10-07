@@ -19,6 +19,6 @@ CPU_DEVICES = 1  # I tried with higher values but this did not work
 
 CPU_COUNT = os.cpu_count()
 
-SEQUENCE_LENGTH_PERCENTILE = 0.95  # to neglect outliers documents in terms of length
+SEQUENCE_LENGTH_PERCENTILE = 0.85  # to neglect outliers documents in terms of length
 
 DEFAULT_TOKENIZER_CLASS = WordTokenizer
