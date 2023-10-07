@@ -70,7 +70,7 @@ def train_translator(
         monitor="val_loss",
         # min_delta=0.025,
         min_delta=0,
-        patience=20,
+        patience=40,
         check_finite=True,
     )
     callbacks.append(early_stopping_callback)
@@ -88,6 +88,7 @@ def train_translator(
         gradient_clip_val=1,
         max_epochs=max_epochs,
         val_check_interval=0.25,
+        # check_val_every_n_epoch=1,
         accelerator="auto",
         logger=wandb_logger,
         fast_dev_run=one_run,
@@ -134,15 +135,15 @@ def create_features_from_text_list(
 ):
     encoded = list()
     for doc in tqdm(text_list):
-        if is_source:
-            encoded_doc = tokenizer.encode(process_source(doc))
-        else:
-            encoded_doc = tokenizer.encode("<bos> " + process_target(doc) + " <eos>")
+        # if is_source:
+        #     encoded_doc = tokenizer.encode(doc)
+        # else:
+        encoded_doc = tokenizer.encode("<bos> " + doc + " <eos>")
         encoded_doc = tokenizer.pad(encoded_doc, length=sequence_length)
         encoded_doc = encoded_doc[:sequence_length]
-        if not is_source:
-            if encoded_doc[-1] != tokenizer.token_to_id(tokenizer.pad_token):
-                encoded_doc[-1] = tokenizer.token_to_id("<eos>")
+        if encoded_doc[-1] != tokenizer.token_to_id(tokenizer.pad_token):
+            # if not is_source:
+            encoded_doc[-1] = tokenizer.token_to_id("<eos>")
         encoded.append(np.array(encoded_doc))
     return np.array(encoded)
 
@@ -154,10 +155,15 @@ def get_source_tokenizer(
 ):
     if tokenizer_class == SentencePieceTokenizer:
         # tokenizer = tokenizer_class(vocab_size=10**4)
-        tokenizer = tokenizer_class(vocab_size=5_000)
+        tokenizer = tokenizer_class(
+            vocab_size=8_000,
+            special_tokens=["<bos>", "<eos>"],
+        )
     else:
         tokenizer = tokenizer_class(
-            vocab_size=10**10
+            vocab_size=10**10,
+            special_tokens=["<bos>", "<eos>"],
+            # vocab_size=30_000,
         )  # high vocab size, higher than the possible vocab size :)
     tokenizer.train(text="\n".join(train_dataset[source_language_code]))
     # if tokenizer_class != SentencePieceTokenizer:
@@ -181,12 +187,13 @@ def get_target_tokenizer(
     if tokenizer_class == SentencePieceTokenizer:
         tokenizer = tokenizer_class(
             # vocab_size=10**4,
-            vocab_size=5_000,
+            vocab_size=8_000,
             special_tokens=["<bos>", "<eos>"],
         )
     else:
         tokenizer = tokenizer_class(
             vocab_size=10**10,
+            # vocab_size=90_000,
             special_tokens=["<bos>", "<eos>"],
         )
     tokenizer.train(text="\n".join(train_dataset[target_language_code]))
@@ -213,13 +220,18 @@ def get_blue_score(
     max_sequence_length,
     blue_n_gram=4,
     use_tqdm=True,
+    show_translations_for=100,
 ):
-    source_sentences = source_sentences[:30]
-    target_sentences = target_sentences[:30]
+    # source_sentences = source_sentences[:100]
+    # target_sentences = target_sentences[:100]
+    source_sentences = [
+        f"<bos> {sentence[:max_sequence_length-2]} <eos>"
+        for sentence in source_sentences
+    ]
+    targets = [[f"<bos> {sentence} <eos>"] for sentence in target_sentences]
     if use_tqdm:
         source_sentences = tqdm(source_sentences)
         target_sentences = tqdm(target_sentences)
-    targets = [[f"<bos> {sentence} <eos>"] for sentence in target_sentences]
     predictions = [
         model.translate(
             input_sentence=sentence,
@@ -229,21 +241,24 @@ def get_blue_score(
         )
         for sentence in source_sentences
     ]
-    predictions = list(map(lambda text: text.replace("▁ ", ""), predictions))
+    predictions = list(map(lambda text: text.replace("+ ", ""), predictions))
     targets = list(
         map(
-            lambda texts: [text.replace("▁ ", "") for text in texts],
+            lambda texts: [text.replace("+ ", "") for text in texts],
             targets,
         )
     )
-    for s, p, t in zip(source_sentences, predictions, targets):
+    for i, (s, p, t) in enumerate(zip(source_sentences, predictions, targets)):
         print(f"Source: {s}")
         print(f"Prediction: {p}")
         print(f"Target: {t}")
+        print("*" * 80)
+        if i > show_translations_for:
+            break
     blue_calculator = BLEUScore(n_gram=blue_n_gram)
     blue_score = blue_calculator(predictions, targets)
     print("blue score", blue_score)
-    sacre_bleu_calculator = SacreBLEUScore(ngram=blue_n_gram)
+    sacre_bleu_calculator = SacreBLEUScore(n_gram=blue_n_gram)
     sacre_blue_score = sacre_bleu_calculator(predictions, targets)
     print("sacre blue", sacre_blue_score)
     return blue_score
