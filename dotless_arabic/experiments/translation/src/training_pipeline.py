@@ -13,6 +13,8 @@ from dotless_arabic.experiments.translation.src.tuners import (
     tune_translation_model,
 )
 
+import datasets
+
 from dotless_arabic.utils import log_content
 
 from dotless_arabic.experiments.translation.src.processing import (
@@ -91,9 +93,67 @@ def training_pipeline(
     # val_dataset = train_val_dataset["test"].to_pandas()
     # val_dataset = collect_parallel_val_dataset_for_translation().to_pandas()
 
-    train_dataset = collect_parallel_train_dataset_for_translation().to_pandas()
-    val_dataset = collect_parallel_val_dataset_for_translation().to_pandas()
-    test_dataset = collect_parallel_test_dataset_for_translation().to_pandas()
+    # train_dataset = collect_parallel_train_dataset_for_translation().to_pandas()
+    # val_dataset = collect_parallel_val_dataset_for_translation().to_pandas()
+    # test_dataset = collect_parallel_test_dataset_for_translation().to_pandas()
+
+    # train_dataset = collect_parallel_train_dataset_for_translation()
+    # # split train to train and val
+    # train_val_dataset = train_dataset.train_test_split(
+    #     test_size=0.1,
+    #     seed=constants.RANDOM_SEED,
+    # )
+    # train_dataset = train_val_dataset["train"].to_pandas()
+    # val_dataset = train_val_dataset["test"].to_pandas()
+
+    # test_dataset = collect_parallel_test_dataset_for_translation().to_pandas()
+
+    def prepare_columns(example):
+        example["ar"] = example["translation"]["ar"]
+        example["en"] = example["translation"]["en"]
+        return example
+
+    dataset = datasets.load_dataset("iwslt2017", "iwslt2017-ar-en")
+
+    train_dataset = (
+        dataset["train"]
+        .filter(
+            lambda example: len(example["translation"]["ar"])
+            and len(example["translation"]["en"])
+        )
+        .map(
+            prepare_columns,
+            remove_columns=["translation"],
+        )
+        # .select(range(1000))
+        .to_pandas()
+    )
+    val_dataset = (
+        dataset["validation"]
+        .filter(
+            lambda example: len(example["translation"]["ar"])
+            and len(example["translation"]["en"])
+        )
+        .map(
+            prepare_columns,
+            remove_columns=["translation"],
+        )
+        # .select(range(10))
+        .to_pandas()
+    )
+    test_dataset = (
+        dataset["test"]
+        .filter(
+            lambda example: len(example["translation"]["ar"])
+            and len(example["translation"]["en"])
+        )
+        .map(
+            prepare_columns,
+            remove_columns=["translation"],
+        )
+        # .select(range(10))
+        .to_pandas()
+    )
 
     log_content(
         content=f"""
@@ -154,13 +214,13 @@ def training_pipeline(
     tqdm.pandas()
 
     train_dataset["ar"] = train_dataset["ar"].progress_map(
-        lambda text: segmenter.segment(text).replace("+", "▁ ")
+        lambda text: segmenter.segment(text).replace("+", "+ ")
     )
     val_dataset["ar"] = val_dataset["ar"].progress_map(
-        lambda text: segmenter.segment(text).replace("+", "▁ ")
+        lambda text: segmenter.segment(text).replace("+", "+ ")
     )
     test_dataset["ar"] = test_dataset["ar"].progress_map(
-        lambda text: segmenter.segment(text).replace("+", "▁ ")
+        lambda text: segmenter.segment(text).replace("+", "+ ")
     )
 
     log_content(
@@ -182,61 +242,6 @@ def training_pipeline(
             lambda text: " ".join(moses_tokenizer(text))
         )
 
-    # train_dataset = collect_parallel_train_dataset_for_translation()
-    # # split train to train and val
-    # train_val_dataset = train_dataset.train_test_split(
-    #     test_size=0.1,
-    #     seed=constants.RANDOM_SEED,
-    # )
-    # train_dataset = train_val_dataset["train"].to_pandas()
-    # val_dataset = train_val_dataset["test"].to_pandas()
-
-    # test_dataset = collect_parallel_test_dataset_for_translation().to_pandas()
-
-    # def prepare_columns(example):
-    #     example["ar"] = example["translation"]["ar"]
-    #     example["en"] = example["translation"]["en"]
-    #     return example
-
-    # dataset = datasets.load_dataset("iwslt2017", "iwslt2017-ar-en")
-
-    # train_dataset = (
-    #     dataset["train"]
-    #     .filter(
-    #         lambda example: len(example["translation"]["ar"])
-    #         and len(example["translation"]["en"])
-    #     )
-    #     .map(
-    #         prepare_columns,
-    #         remove_columns=["translation"],
-    #     )
-    #     .to_pandas()
-    # )
-    # val_dataset = (
-    #     dataset["validation"]
-    #     .filter(
-    #         lambda example: len(example["translation"]["ar"])
-    #         and len(example["translation"]["en"])
-    #     )
-    #     .map(
-    #         prepare_columns,
-    #         remove_columns=["translation"],
-    #     )
-    #     .to_pandas()
-    # )
-    # test_dataset = (
-    #     dataset["test"]
-    #     .filter(
-    #         lambda example: len(example["translation"]["ar"])
-    #         and len(example["translation"]["en"])
-    #     )
-    #     .map(
-    #         prepare_columns,
-    #         remove_columns=["translation"],
-    #     )
-    #     .to_pandas()
-    # )
-
     log_content(
         content=f"""
         Building source and target tokenizers
@@ -254,6 +259,7 @@ def training_pipeline(
         tokenizer_class=tokenizer_class,
         target_language_code=target_language_code,
     )
+
     log_content(
         content=f"""
         Source vocab size: {source_tokenizer.vocab_size}
@@ -302,13 +308,15 @@ def training_pipeline(
     )
 
     sequence_length = int(
-        sum(
-            [
-                source_max_sequence_length,
-                target_max_sequence_length,
-            ]
+        (
+            sum(
+                [
+                    source_max_sequence_length,
+                    target_max_sequence_length,
+                ]
+            )
+            / 2
         )
-        / 2
     )
 
     log_content(
@@ -328,6 +336,7 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
+    # train_dataset = train_dataset[:100]
     train_dataloader = get_dataloader(
         shuffle=True,
         batch_size=batch_size,
@@ -414,14 +423,14 @@ def training_pipeline(
     wandb_logger.watch(translator, log="all")
     trainer = train_translator(
         text_type=text_type,
+        translator=translator,
+        validate_and_fit=True,
         gpu_devices=gpu_devices,
         wandb_logger=wandb_logger,
-        translator=translator,
-        validate_and_fit=False,
         val_dataloader=val_dataloader,
         train_dataloader=train_dataloader,
-        max_epochs=constants.MAX_EPOCHS,
         tokenizer_class=tokenizer_class,
+        max_epochs=constants.MAX_EPOCHS,
         callbacks=[timer_callback, per_epoch_timer],
     )
 
