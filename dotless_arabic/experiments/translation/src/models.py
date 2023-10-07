@@ -215,7 +215,7 @@ class TranslationTransformer(LightningModule):
                 src=encoded_input_sentence,
                 trg=torch.tensor(encoded_target).view(1, -1).to(self.device),
             )
-            next_word_id = torch.argmax(outputs[:, i, :])
+            next_word_id = torch.argmax(outputs[:, i, :]).item()
             encoded_target.append(next_word_id)
             next_word = target_tokenizer.id_to_token(next_word_id)
             target += f"{next_word.strip()} "
