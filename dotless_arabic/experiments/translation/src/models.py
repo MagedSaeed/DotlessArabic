@@ -64,6 +64,9 @@ class TokenEmbedding(nn.Module):
         self.emb_size = emb_size
 
     def forward(self, tokens: Tensor):
+        # return self.embedding(tokens.long()) * math.sqrt(self.emb_size)
+        return self.embedding(tokens) * math.sqrt(self.emb_size)
+
 
 def create_masks(src, tgt, pad_idx):
     src_seq_len = src.shape[1]
@@ -95,8 +98,6 @@ class TranslationTransformer(LightningModule):
         dim_feedforward=2048,
         dropout: float = 0.1,
         learning_rate=0.001,
-        # src_vocab_size=source_tokenizer.vocab_size,
-        # tgt_vocab_size=target_tokenizer.vocab_size,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -117,10 +118,7 @@ class TranslationTransformer(LightningModule):
         )
         self.src_tok_emb = TokenEmbedding(src_vocab_size, emb_size)
         self.tgt_tok_emb = TokenEmbedding(tgt_vocab_size, emb_size)
-        self.positional_encoding = PositionalEncoding(
-            emb_size,
-            dropout=dropout,
-        )
+        self.positional_encoding = PositionalEncoding(emb_size, dropout=dropout)
         self.dense = nn.Linear(emb_size, tgt_vocab_size)
 
     def forward(self, src, trg):
@@ -181,7 +179,10 @@ class TranslationTransformer(LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, eps=1e-9)
+        optimizer = torch.optim.Adam(
+            self.parameters(),
+            lr=self.learning_rate,
+        )
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer=optimizer,
             factor=0.5,
@@ -193,6 +194,7 @@ class TranslationTransformer(LightningModule):
             "lr_scheduler": scheduler,
             "monitor": "val_loss",
         }
+        # return optimizer
 
     def translate(
         self,
