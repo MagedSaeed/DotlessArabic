@@ -201,27 +201,28 @@ def training_pipeline(
         )
     )
 
-    log_content(
-        content=f"""
-        Segmenting arabic with farasa:
-        """,
-        results_file=results_file,
-        print_to_console=print_to_console,
-    )
-
-    segmenter = FarasaSegmenter(interactive=True)
-
     tqdm.pandas()
 
-    train_dataset["ar"] = train_dataset["ar"].progress_map(
-        lambda text: segmenter.segment(text).replace("+", "+ ")
-    )
-    val_dataset["ar"] = val_dataset["ar"].progress_map(
-        lambda text: segmenter.segment(text).replace("+", "+ ")
-    )
-    test_dataset["ar"] = test_dataset["ar"].progress_map(
-        lambda text: segmenter.segment(text).replace("+", "+ ")
-    )
+    if tokenizer_class == WordTokenizer:
+        log_content(
+            content=f"""
+            Segmenting arabic with farasa:
+            """,
+            results_file=results_file,
+            print_to_console=print_to_console,
+        )
+
+        segmenter = FarasaSegmenter(interactive=True)
+
+        train_dataset["ar"] = train_dataset["ar"].progress_map(
+            lambda text: segmenter.segment(text).replace("+", "+ ")
+        )
+        val_dataset["ar"] = val_dataset["ar"].progress_map(
+            lambda text: segmenter.segment(text).replace("+", "+ ")
+        )
+        test_dataset["ar"] = test_dataset["ar"].progress_map(
+            lambda text: segmenter.segment(text).replace("+", "+ ")
+        )
 
     log_content(
         content=f"""
