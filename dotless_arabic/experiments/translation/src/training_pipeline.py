@@ -14,6 +14,7 @@ from dotless_arabic.experiments.translation.src.tuners import (
 )
 
 import datasets
+from dotless_arabic.tokenizers import WordTokenizer
 
 from dotless_arabic.utils import log_content
 
