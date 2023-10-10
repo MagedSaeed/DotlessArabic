@@ -70,7 +70,7 @@ def train_translator(
         monitor="val_loss",
         # min_delta=0.025,
         min_delta=0,
-        patience=40,
+        patience=20,
         check_finite=True,
     )
     callbacks.append(early_stopping_callback)
@@ -138,7 +138,11 @@ def create_features_from_text_list(
         # if is_source:
         #     encoded_doc = tokenizer.encode(doc)
         # else:
-        encoded_doc = tokenizer.encode("<bos> " + doc + " <eos>")
+        encoded_doc = [
+            tokenizer.token_to_id(token) for token in tokenizer.split_text(doc)
+        ]
+        encoded_doc.insert(0, tokenizer.token_to_id("<bos>"))
+        encoded_doc.insert(-1, tokenizer.token_to_id("<eos>"))
         encoded_doc = tokenizer.pad(encoded_doc, length=sequence_length)
         encoded_doc = encoded_doc[:sequence_length]
         if encoded_doc[-1] != tokenizer.token_to_id(tokenizer.pad_token):
@@ -156,7 +160,7 @@ def get_source_tokenizer(
     if tokenizer_class == SentencePieceTokenizer:
         # tokenizer = tokenizer_class(vocab_size=10**4)
         tokenizer = tokenizer_class(
-            vocab_size=8_000,
+            vocab_size=5_000,
             special_tokens=["<bos>", "<eos>"],
         )
     else:
@@ -165,7 +169,7 @@ def get_source_tokenizer(
             special_tokens=["<bos>", "<eos>"],
             # vocab_size=30_000,
         )  # high vocab size, higher than the possible vocab size :)
-    tokenizer.train(text="\n".join(train_dataset[source_language_code]))
+    tokenizer.train(text="\n".join(tqdm(train_dataset[source_language_code])))
     # if tokenizer_class != SentencePieceTokenizer:
     #     vocab = {
     #         vocab: freq
@@ -187,7 +191,7 @@ def get_target_tokenizer(
     if tokenizer_class == SentencePieceTokenizer:
         tokenizer = tokenizer_class(
             # vocab_size=10**4,
-            vocab_size=8_000,
+            vocab_size=5_000,
             special_tokens=["<bos>", "<eos>"],
         )
     else:
@@ -196,7 +200,7 @@ def get_target_tokenizer(
             # vocab_size=90_000,
             special_tokens=["<bos>", "<eos>"],
         )
-    tokenizer.train(text="\n".join(train_dataset[target_language_code]))
+    tokenizer.train(text="\n".join(tqdm(train_dataset[target_language_code])))
     # delete 1-freq words if tokenizer class is not Sentencepiece
     # if tokenizer_class != SentencePieceTokenizer:
     #     vocab = {
@@ -217,7 +221,8 @@ def get_blue_score(
     target_sentences,
     source_tokenizer,
     target_tokenizer,
-    max_sequence_length,
+    source_max_sequence_length,
+    target_max_sequence_length,
     blue_n_gram=4,
     use_tqdm=True,
     show_translations_for=100,
@@ -225,7 +230,7 @@ def get_blue_score(
     # source_sentences = source_sentences[:100]
     # target_sentences = target_sentences[:100]
     source_sentences = [
-        f"<bos> {sentence[:max_sequence_length-2]} <eos>"
+        f"<bos> {' '.join(source_tokenizer.split_text(sentence)[:source_max_sequence_length-2])} <eos>"
         for sentence in source_sentences
     ]
     targets = [[f"<bos> {sentence} <eos>"] for sentence in target_sentences]
@@ -237,7 +242,7 @@ def get_blue_score(
             input_sentence=sentence,
             source_tokenizer=source_tokenizer,
             target_tokenizer=target_tokenizer,
-            max_sequence_length=max_sequence_length,
+            max_sequence_length=target_max_sequence_length,
         )
         for sentence in source_sentences
     ]
@@ -248,6 +253,13 @@ def get_blue_score(
             targets,
         )
     )
+    # predictions = list(map(lambda text: text.replace("+ ", ""), predictions))
+    # targets = list(
+    #     map(
+    #         lambda texts: [text.replace("+ ", "") for text in texts],
+    #         targets,
+    #     )
+    # )
     for i, (s, p, t) in enumerate(zip(source_sentences, predictions, targets)):
         print(f"Source: {s}")
         print(f"Prediction: {p}")
@@ -261,7 +273,7 @@ def get_blue_score(
     sacre_bleu_calculator = SacreBLEUScore(n_gram=blue_n_gram)
     sacre_blue_score = sacre_bleu_calculator(predictions, targets)
     print("sacre blue", sacre_blue_score)
-    return blue_score
+    return sacre_blue_score
 
 
 def get_sequence_length(

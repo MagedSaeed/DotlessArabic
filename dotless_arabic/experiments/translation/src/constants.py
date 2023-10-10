@@ -7,7 +7,7 @@ from dotless_arabic.experiments.constants import *
 from dotless_arabic.tokenizers import WordTokenizer
 
 
-MAX_EPOCHS = 250
+MAX_EPOCHS = 100
 DEFAULT_BATCH_SIZE = 64
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"

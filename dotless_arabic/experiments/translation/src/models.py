@@ -225,7 +225,13 @@ class TranslationTransformer(LightningModule):
                 break
         # target = re.sub("\s+", "", target).strip()
         # target = target_tokenizer.detokenize(target)
-        target = re.sub("\s+", " ", target).strip()
+        # target = re.sub("\s+", " ", target).strip()
         if was_training:
             self.train()
-        return target
+        # return " ".join(target_tokenizer.decode(target_tokenizer.encode(target)))
+        return (
+            target_tokenizer.detokenize(target_tokenizer.decode(encoded_target))
+            .replace("<bos>", "<bos> ")
+            .replace("<eos>", " <eos>")
+            .strip()
+        )
