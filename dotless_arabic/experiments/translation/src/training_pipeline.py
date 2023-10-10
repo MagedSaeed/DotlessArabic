@@ -15,6 +15,7 @@ from dotless_arabic.experiments.translation.src.tuners import (
 
 import datasets
 from dotless_arabic.tokenizers import WordTokenizer
+from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer, WordTokenizer
 
 from dotless_arabic.utils import log_content
 
@@ -203,27 +204,26 @@ def training_pipeline(
     )
 
     tqdm.pandas()
+    # if tokenizer_class == WordTokenizer:
+    #     log_content(
+    #         content=f"""
+    #         Segmenting arabic with farasa:
+    #         """,
+    #         results_file=results_file,
+    #         print_to_console=print_to_console,
+    #     )
 
-    if tokenizer_class == WordTokenizer:
-        log_content(
-            content=f"""
-            Segmenting arabic with farasa:
-            """,
-            results_file=results_file,
-            print_to_console=print_to_console,
-        )
+    #     segmenter = FarasaSegmenter(interactive=True)
 
-        segmenter = FarasaSegmenter(interactive=True)
-
-        train_dataset["ar"] = train_dataset["ar"].progress_map(
-            lambda text: segmenter.segment(text).replace("+", "+ ")
-        )
-        val_dataset["ar"] = val_dataset["ar"].progress_map(
-            lambda text: segmenter.segment(text).replace("+", "+ ")
-        )
-        test_dataset["ar"] = test_dataset["ar"].progress_map(
-            lambda text: segmenter.segment(text).replace("+", "+ ")
-        )
+    #     train_dataset["ar"] = train_dataset["ar"].progress_map(
+    #         lambda text: segmenter.segment(text).replace("+", "+ ")
+    #     )
+    #     val_dataset["ar"] = val_dataset["ar"].progress_map(
+    #         lambda text: segmenter.segment(text).replace("+", "+ ")
+    #     )
+    #     test_dataset["ar"] = test_dataset["ar"].progress_map(
+    #         lambda text: segmenter.segment(text).replace("+", "+ ")
+    #     )
 
     log_content(
         content=f"""
@@ -253,7 +253,7 @@ def training_pipeline(
     )
     source_tokenizer = get_source_tokenizer(
         train_dataset=train_dataset,
-        tokenizer_class=tokenizer_class,
+        tokenizer_class=WordTokenizer,
         source_language_code=source_language_code,
     )
     target_tokenizer = get_target_tokenizer(
@@ -285,7 +285,7 @@ def training_pipeline(
     source_max_sequence_length = get_sequence_length(
         dataset=list(
             map(
-                source_tokenizer.tokenize,
+                source_tokenizer.split_text,
                 tqdm(train_dataset[source_language_code]),
             )
         )
@@ -293,7 +293,7 @@ def training_pipeline(
     target_max_sequence_length = get_sequence_length(
         dataset=list(
             map(
-                target_tokenizer.tokenize,
+                target_tokenizer.split_text,
                 tqdm(train_dataset[target_language_code]),
             )
         )
@@ -303,33 +303,14 @@ def training_pipeline(
         content=f"""
         Source Max Doc Length: {source_max_sequence_length}
         Target Max Doc Length: {target_max_sequence_length}
-        setting the sequence length to be the avg of the two
         """,
+        # setting the sequence length to be the avg of the two
         results_file=results_file,
         print_to_console=print_to_console,
     )
 
-    sequence_length = int(
-        (
-            sum(
-                [
-                    source_max_sequence_length,
-                    target_max_sequence_length,
-                ]
-            )
-            / 2
-        )
-    )
-
-    log_content(
-        content=f"""
-        Sequence Length: {sequence_length}
-        """,
-        results_file=results_file,
-        print_to_console=print_to_console,
-    )
-
-    wandb_logger.experiment.log({"sequence_length": sequence_length})
+    wandb_logger.experiment.log({"source-sequence-length": source_max_sequence_length})
+    wandb_logger.experiment.log({"target-sequence-length": target_max_sequence_length})
 
     log_content(
         content=f"""
@@ -343,32 +324,35 @@ def training_pipeline(
         shuffle=True,
         batch_size=batch_size,
         dataset=train_dataset,
-        sequence_length=sequence_length,
         source_tokenizer=source_tokenizer,
         target_tokenizer=target_tokenizer,
         source_language_code=source_language_code,
         target_language_code=target_language_code,
+        source_sequence_length=source_max_sequence_length,
+        target_sequence_length=target_max_sequence_length,
     )
     val_dataloader = get_dataloader(
         shuffle=False,
         dataset=val_dataset,
         batch_size=batch_size,
-        sequence_length=sequence_length,
         target_tokenizer=target_tokenizer,
         source_tokenizer=source_tokenizer,
         source_language_code=source_language_code,
         target_language_code=target_language_code,
+        source_sequence_length=source_max_sequence_length,
+        target_sequence_length=target_max_sequence_length,
     )
 
     test_dataloader = get_dataloader(
         shuffle=False,
         dataset=test_dataset,
         batch_size=batch_size,
-        sequence_length=sequence_length,
         source_tokenizer=source_tokenizer,
         target_tokenizer=target_tokenizer,
         source_language_code=source_language_code,
         target_language_code=target_language_code,
+        source_sequence_length=source_max_sequence_length,
+        target_sequence_length=target_max_sequence_length,
     )
 
     log_content(
@@ -423,10 +407,11 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
     wandb_logger.watch(translator, log="all")
+    validate_and_fit = True
     trainer = train_translator(
         text_type=text_type,
         translator=translator,
-        validate_and_fit=True,
+        validate_and_fit=validate_and_fit,
         gpu_devices=gpu_devices,
         wandb_logger=wandb_logger,
         val_dataloader=val_dataloader,
@@ -436,61 +421,65 @@ def training_pipeline(
         callbacks=[timer_callback, per_epoch_timer],
     )
 
-    log_content(
-        content=f"""
-        Training Time: {f'{timer_callback.time_elapsed("train"):.2f} seconds'}
-        """,
-        results_file=results_file,
-        print_to_console=print_to_console,
-    )
+    # if validate_and_fit:
+    #     log_content(
+    #         content=f"""
+    #         Training Time: {f'{timer_callback.time_elapsed("train"):.2f} seconds'}
+    #         """,
+    #         results_file=results_file,
+    #         print_to_console=print_to_console,
+    #     )
 
-    log_content(
-        content=f"""
-        Average training Time for one epoch: {f'{per_epoch_timer.average_epochs_time:.3f} seconds'}
-        """,
-        results_file=results_file,
-        print_to_console=print_to_console,
-    )
-    wandb_logger.experiment.log({"epoch-avg-time": per_epoch_timer.average_epochs_time})
+    #     log_content(
+    #         content=f"""
+    #         Average training Time for one epoch: {f'{per_epoch_timer.average_epochs_time:.3f} seconds'}
+    #         """,
+    #         results_file=results_file,
+    #         print_to_console=print_to_console,
+    #     )
+    #     wandb_logger.experiment.log(
+    #         {"epoch-avg-time": per_epoch_timer.average_epochs_time}
+    #     )
 
-    results = trainer.test(
-        ckpt_path="best",
-        dataloaders=(
-            train_dataloader,
-            val_dataloader,
-            test_dataloader,
-        ),
-    )
+    #     results = trainer.test(
+    #         ckpt_path="best",
+    #         dataloaders=(
+    #             train_dataloader,
+    #             val_dataloader,
+    #             test_dataloader,
+    #         ),
+    #     )
 
-    log_content(
-        content=f"""
-        Losses: {json.dumps(results,ensure_ascii=False,indent=4)}
-        """,
-        results_file=results_file,
-        print_to_console=print_to_console,
-    )
+    #     log_content(
+    #         content=f"""
+    #         Losses: {json.dumps(results,ensure_ascii=False,indent=4)}
+    #         """,
+    #         results_file=results_file,
+    #         print_to_console=print_to_console,
+    #     )
 
     blue_score = get_blue_score(
         model=TranslationTransformer.load_from_checkpoint(
-            # trainer.checkpoint_callback.best_model_path
-            f"NMT/{text_type}/{tokenizer_class.__name__}/checkpoints/last.ckpt"
+            trainer.checkpoint_callback.best_model_path
+            # f"NMT/{text_type}/{tokenizer_class.__name__}/checkpoints/last.ckpt"
         ).to(constants.DEVICE),
         source_tokenizer=source_tokenizer,
         target_tokenizer=target_tokenizer,
-        max_sequence_length=sequence_length,
+        source_max_sequence_length=source_max_sequence_length,
+        target_max_sequence_length=target_max_sequence_length,
         source_sentences=test_dataset[source_language_code],
         target_sentences=test_dataset[target_language_code],
     )
 
     log_content(
         content=f"""
-        Test blue score: {blue_score}
+        Test blue score (sacre): {blue_score}
         """,
         results_file=results_file,
         print_to_console=print_to_console,
     )
 
-    wandb_logger.experiment.log({"test-blue-score": blue_score})
+    wandb_logger.experiment.log({"test-sacre-blue-score": blue_score})
 
     wandb.finish()
 
