@@ -14,7 +14,6 @@ from dotless_arabic.processing import (
 
 
 def collect_dataset_for_analysis(results_file=None):
-
     with open("../wikipedia_dataset.txt", "r") as news_dataset_file:
         wikipedia_dataset = news_dataset_file.read().splitlines()
 
@@ -63,4 +62,11 @@ def collect_dataset_for_language_modeling(results_file=None):
         results_file=results_file,
     )
 
+    return dataset
+
+
+def collect_dataset_for_dots_retreival():
+    dataset = collect_dataset_for_analysis()
+    dataset = dataset_dot_transform(dataset_newline_transform(dataset))
+    dataset = list(filter(lambda document: len(document.split()) >= 30, tqdm(dataset)))
     return dataset
