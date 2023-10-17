@@ -378,7 +378,7 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
     wandb_logger.watch(translator, log="all")
-    validate_and_fit = True
+    validate_and_fit = False
     trainer = train_translator(
         text_type=text_type,
         translator=translator,
