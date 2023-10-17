@@ -36,10 +36,13 @@ def xavier_init(model):
 def train_translator(
     translator,
     wandb_logger,
-    tokenizer_class,
     train_dataloader,
     val_dataloader,
     gpu_devices,
+    source_lang,
+    target_lang,
+    source_tokenizer_class,
+    target_tokenizer_class,
     callbacks=None,
     one_run=False,
     text_type="dotted",
@@ -48,7 +51,8 @@ def train_translator(
     max_epochs=constants.MAX_EPOCHS,
 ):
     # remove any previous checkpoints
-    checkpoints_path = Path(f"NMT/{text_type}/{tokenizer_class.__name__}/checkpoints")
+    checkpoints_dir = f"NMT/{source_lang}_to_{target_lang}/{source_tokenizer_class.__name__}_to_{target_tokenizer_class.__name__}/{text_type}/checkpoints"
+    checkpoints_path = Path(checkpoints_dir)
     if callbacks is None:
         callbacks = []
     if validate_and_fit:
@@ -59,11 +63,11 @@ def train_translator(
         verbose=False,
         save_last=True,
         monitor="val_loss",
+        dirpath=checkpoints_dir,
         save_weights_only=False,
         auto_insert_metric_name=True,
         save_on_train_epoch_end=False,
         filename="{epoch}-{val_loss:.3f}-{step}",
-        dirpath=f"NMT/{text_type}/{tokenizer_class.__name__}/checkpoints",
     )
     callbacks = list()
     callbacks.append(checkpoint_callback)

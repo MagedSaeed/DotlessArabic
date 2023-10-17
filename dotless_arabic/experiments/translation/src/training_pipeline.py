@@ -378,18 +378,21 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
     wandb_logger.watch(translator, log="all")
-    validate_and_fit = False
+    validate_and_fit = True
     trainer = train_translator(
         text_type=text_type,
         translator=translator,
         gpu_devices=gpu_devices,
         wandb_logger=wandb_logger,
         val_dataloader=val_dataloader,
+        max_epochs=constants.MAX_EPOCHS,
+        source_lang=source_language_code,
+        target_lang=target_language_code,
         train_dataloader=train_dataloader,
         validate_and_fit=validate_and_fit,
-        tokenizer_class=source_tokenizer_class,
-        max_epochs=constants.MAX_EPOCHS,
         callbacks=[timer_callback, per_epoch_timer],
+        source_tokenizer_class=source_tokenizer_class,
+        target_tokenizer_class=target_tokenizer_class,
     )
 
     if validate_and_fit:
