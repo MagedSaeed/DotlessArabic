@@ -2,10 +2,10 @@
 nltk==3.*
 tqdm==4.*
 rich==13.*
-torch==2.*
 wandb==0.*
 click==8.*
 pandas==2.*
+torch==2.1.*
 rarfile==4.*
 datasets==2.*
 pyarabic==0.*

@@ -15,7 +15,8 @@ def get_dataloader(
     target_language_code,
     source_tokenizer,
     target_tokenizer,
-    sequence_length,
+    source_sequence_length,
+    target_sequence_length,
     use_tqdm=True,
     shuffle=False,
     drop_last=False,
@@ -35,13 +36,13 @@ def get_dataloader(
         is_source=True,
         text_list=source_dataset,
         tokenizer=source_tokenizer,
-        sequence_length=sequence_length,
+        sequence_length=source_sequence_length,
     )
     encoded_target_dataset = create_features_from_text_list(
         is_source=False,
         text_list=target_dataset,
         tokenizer=target_tokenizer,
-        sequence_length=sequence_length,
+        sequence_length=target_sequence_length,
     )
     torch_dataset = TensorDataset(
         torch.from_numpy(encoded_source_dataset),
