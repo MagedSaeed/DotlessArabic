@@ -18,10 +18,26 @@ from dotless_arabic.experiments.translation.src.training_pipeline import (
 
 @click.command()
 @click.option(
-    "--tokenizer_class",
+    "--source_tokenizer_class",
     default=constants.DEFAULT_TOKENIZER_CLASS,
-    help="Tokenizer class to tokenize the dataset",
-    type=click.Choice(list(TOKENIZERS_MAP.keys())),
+    help="Tokenizer class to tokenize the source dataset",
+    type=click.Choice(["WordTokenizer", "SentencePieceTokenizer"]),
+)
+@click.option(
+    "--target_tokenizer_class",
+    default=constants.DEFAULT_TOKENIZER_CLASS,
+    help="Tokenizer class to tokenize the target dataset",
+    type=click.Choice(["WordTokenizer", "SentencePieceTokenizer"]),
+)
+@click.option(
+    "--source_lang",
+    help="Source Language",
+    type=click.Choice(["en", "ar"]),
+)
+@click.option(
+    "--target_lang",
+    help="Target Language",
+    type=click.Choice(["en", "ar"]),
 )
 @click.option(
     "--gpu_devices",
@@ -48,7 +64,10 @@ from dotless_arabic.experiments.translation.src.training_pipeline import (
     default=True,
 )
 def run(
-    tokenizer_class,
+    source_tokenizer_class,
+    target_tokenizer_class,
+    source_lang,
+    target_lang,
     gpu_devices,
     batch_size,
     run_dotted,
@@ -62,12 +81,13 @@ def run(
 
     current_dir = Path(__file__).resolve().parent
 
-    results_dir = f"{current_dir}/results/{tokenizer_class}"
+    results_dir = f"{current_dir}/results/{source_lang}_to_{target_lang}/{source_tokenizer_class}_to_{target_tokenizer_class}"
 
     # create results dir if not exists
     Path(results_dir).mkdir(parents=True, exist_ok=True)
 
-    tokenizer_class = TOKENIZERS_MAP[tokenizer_class]
+    source_tokenizer_class = TOKENIZERS_MAP[source_tokenizer_class]
+    target_tokenizer_class = TOKENIZERS_MAP[target_tokenizer_class]
 
     if run_dotted:
         dotted_results_file_path = f"{results_dir}/dotted.txt"
@@ -90,7 +110,7 @@ def run(
     if run_dotted:
         log_content(
             content=f"""
-                Dotted Training Started at {datetime.now()} for tokenizer: {tokenizer_class.__name__}
+                Dotted Training Started at {datetime.now()} for tokenizer: {source_tokenizer_class.__name__}
                 """,
             results_file=dotted_results_file_path,
         )
@@ -99,13 +119,16 @@ def run(
             is_dotted=True,
             batch_size=batch_size,
             gpu_devices=gpu_devices,
-            tokenizer_class=tokenizer_class,
+            source_language_code=source_lang,
+            target_language_code=target_lang,
             results_file=dotted_results_file_path,
+            source_tokenizer_class=source_tokenizer_class,
+            target_tokenizer_class=target_tokenizer_class,
         )
 
         log_content(
             content=f"""
-            Dotted Training Finished for tokenizer {tokenizer_class.__name__} at {datetime.now()}
+            Dotted Training Finished for tokenizer {source_tokenizer_class.__name__} at {datetime.now()}
             """,
             results_file=dotted_results_file_path,
         )
@@ -113,7 +136,7 @@ def run(
         print(
             "#" * 100,
             f"""
-            Dotted Experiment is DISABLED for tokenizer {tokenizer_class.__name__}
+            Dotted Experiment is DISABLED for tokenizer {source_tokenizer_class.__name__}
             """,
             "#" * 100,
         )
@@ -125,7 +148,7 @@ def run(
     if run_undotted:
         log_content(
             content=f"""
-            Undotted Training Started at {datetime.now()} for tokenizer: {tokenizer_class.__name__}
+            Undotted Training Started at {datetime.now()} for tokenizer: {source_tokenizer_class.__name__}
             """,
             results_file=undotted_results_file_path,
         )
@@ -135,13 +158,16 @@ def run(
             batch_size=batch_size,
             gpu_devices=gpu_devices,
             best_params=best_params,
-            tokenizer_class=tokenizer_class,
+            source_language_code=source_lang,
+            target_language_code=target_lang,
             results_file=undotted_results_file_path,
+            source_tokenizer_class=source_tokenizer_class,
+            target_tokenizer_class=target_tokenizer_class,
         )
 
         log_content(
             content=f"""
-            Undotted Training Finished for tokenizer {tokenizer_class.__name__} at {datetime.now()}
+            Undotted Training Finished for tokenizer {source_tokenizer_class.__name__} at {datetime.now()}
             """,
             results_file=undotted_results_file_path,
         )
@@ -149,7 +175,7 @@ def run(
         print(
             "#" * 100,
             f"""
-            UNDotted Experiment is DISABLED for tokenizer {tokenizer_class.__name__}
+            UNDotted Experiment is DISABLED for tokenizer {source_tokenizer_class.__name__}
             """,
             "#" * 100,
         )
