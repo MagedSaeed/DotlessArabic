@@ -74,7 +74,8 @@ def create_masks(src, tgt, pad_idx):
     tgt_mask = nn.Transformer.generate_square_subsequent_mask(
         tgt_seq_len,
         device=constants.DEVICE,
-    ).to(torch.bool)
+        dtype=torch.bool,
+    )
     src_mask = torch.zeros(
         (src_seq_len, src_seq_len),
         device=constants.DEVICE,
@@ -91,13 +92,13 @@ class TranslationTransformer(LightningModule):
         src_vocab_size,
         tgt_vocab_size,
         nhead=8,
-        emb_size=128,
+        emb_size=256,
         pad_token_id=1,
-        num_decoder_layers=2,
-        num_encoder_layers=2,
+        num_decoder_layers=3,
+        num_encoder_layers=3,
         dim_feedforward=2048,
         dropout: float = 0.1,
-        learning_rate=0.001,
+        learning_rate=0.0001,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -206,7 +207,12 @@ class TranslationTransformer(LightningModule):
         was_training = self.training is True
         self.eval()
         encoded_input_sentence = (
-            torch.tensor(source_tokenizer.encode(input_sentence))
+            torch.tensor(
+                [
+                    source_tokenizer.token_to_id(token)
+                    for token in input_sentence.split()
+                ]
+            )
             .view(1, -1)
             .to(self.device)
         )
