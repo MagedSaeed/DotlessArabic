@@ -7,7 +7,7 @@ import torch
 
 from tqdm.auto import tqdm
 
-from torchmetrics.text import BLEUScore, SacreBLEUScore
+from torchmetrics.text import SacreBLEUScore
 
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import (
@@ -18,9 +18,10 @@ from pytorch_lightning.callbacks import (
 )
 
 from dotless_arabic.experiments.translation.src.processing import (
-    process_source,
-    process_target,
+    process_en,
+    process_ar,
 )
+from dotless_arabic.processing.processing import undot
 
 from dotless_arabic.tokenizers import WordTokenizer, SentencePieceTokenizer
 from dotless_arabic.experiments.translation.src import constants
@@ -70,7 +71,7 @@ def train_translator(
         monitor="val_loss",
         # min_delta=0.025,
         min_delta=0,
-        patience=20,
+        patience=10,
         check_finite=True,
     )
     callbacks.append(early_stopping_callback)
@@ -128,16 +129,12 @@ def get_oovs_rate(
 
 
 def create_features_from_text_list(
-    text_list,
-    tokenizer,
-    sequence_length,
-    is_source=False,
+    text_list, tokenizer, sequence_length, undot_text=False
 ):
     encoded = list()
     for doc in tqdm(text_list):
-        # if is_source:
-        #     encoded_doc = tokenizer.encode(doc)
-        # else:
+        if undot_text:
+            doc = undot(doc)
         encoded_doc = [
             tokenizer.token_to_id(token) for token in tokenizer.split_text(doc)
         ]
@@ -146,7 +143,6 @@ def create_features_from_text_list(
         encoded_doc = tokenizer.pad(encoded_doc, length=sequence_length)
         encoded_doc = encoded_doc[:sequence_length]
         if encoded_doc[-1] != tokenizer.token_to_id(tokenizer.pad_token):
-            # if not is_source:
             encoded_doc[-1] = tokenizer.token_to_id("<eos>")
         encoded.append(np.array(encoded_doc))
     return np.array(encoded)
@@ -155,21 +151,25 @@ def create_features_from_text_list(
 def get_source_tokenizer(
     train_dataset,
     source_language_code,
+    undot_text=False,
     tokenizer_class=WordTokenizer,
 ):
     if tokenizer_class == SentencePieceTokenizer:
-        # tokenizer = tokenizer_class(vocab_size=10**4)
         tokenizer = tokenizer_class(
-            vocab_size=5_000,
+            vocab_size=4_000,
             special_tokens=["<bos>", "<eos>"],
         )
     else:
         tokenizer = tokenizer_class(
             vocab_size=10**10,
             special_tokens=["<bos>", "<eos>"],
-            # vocab_size=30_000,
-        )  # high vocab size, higher than the possible vocab size :)
-    tokenizer.train(text="\n".join(tqdm(train_dataset[source_language_code])))
+        )
+    if undot_text:
+        tokenizer.train(
+            text="\n".join(tqdm(map(undot, train_dataset[source_language_code])))
+        )
+    else:
+        tokenizer.train(text="\n".join(tqdm(train_dataset[source_language_code])))
     # if tokenizer_class != SentencePieceTokenizer:
     #     vocab = {
     #         vocab: freq
@@ -186,21 +186,25 @@ def get_source_tokenizer(
 def get_target_tokenizer(
     train_dataset,
     target_language_code,
+    undot_text=False,
     tokenizer_class=WordTokenizer,
 ):
     if tokenizer_class == SentencePieceTokenizer:
         tokenizer = tokenizer_class(
-            # vocab_size=10**4,
-            vocab_size=5_000,
+            vocab_size=4_000,
             special_tokens=["<bos>", "<eos>"],
         )
     else:
         tokenizer = tokenizer_class(
             vocab_size=10**10,
-            # vocab_size=90_000,
             special_tokens=["<bos>", "<eos>"],
         )
-    tokenizer.train(text="\n".join(tqdm(train_dataset[target_language_code])))
+    if undot_text:
+        tokenizer.train(
+            text="\n".join(tqdm(map(undot, train_dataset[target_language_code])))
+        )
+    else:
+        tokenizer.train(text="\n".join(tqdm(train_dataset[target_language_code])))
     # delete 1-freq words if tokenizer class is not Sentencepiece
     # if tokenizer_class != SentencePieceTokenizer:
     #     vocab = {
@@ -221,8 +225,7 @@ def get_blue_score(
     target_sentences,
     source_tokenizer,
     target_tokenizer,
-    source_max_sequence_length,
-    target_max_sequence_length,
+    max_sequence_length,
     blue_n_gram=4,
     use_tqdm=True,
     show_translations_for=100,
@@ -230,7 +233,7 @@ def get_blue_score(
     # source_sentences = source_sentences[:100]
     # target_sentences = target_sentences[:100]
     source_sentences = [
-        f"<bos> {' '.join(source_tokenizer.split_text(sentence)[:source_max_sequence_length-2])} <eos>"
+        f"<bos> {' '.join(source_tokenizer.split_text(sentence))} <eos>"
         for sentence in source_sentences
     ]
     targets = [[f"<bos> {sentence} <eos>"] for sentence in target_sentences]
@@ -242,17 +245,17 @@ def get_blue_score(
             input_sentence=sentence,
             source_tokenizer=source_tokenizer,
             target_tokenizer=target_tokenizer,
-            max_sequence_length=target_max_sequence_length,
+            max_sequence_length=max_sequence_length,
         )
         for sentence in source_sentences
     ]
-    predictions = list(map(lambda text: text.replace("+ ", ""), predictions))
-    targets = list(
-        map(
-            lambda texts: [text.replace("+ ", "") for text in texts],
-            targets,
-        )
-    )
+    # predictions = list(map(lambda text: text.replace("+ ", ""), predictions))
+    # targets = list(
+    #     map(
+    #         lambda texts: [text.replace("+ ", "") for text in texts],
+    #         targets,
+    #     )
+    # )
     # predictions = list(map(lambda text: text.replace("+ ", ""), predictions))
     # targets = list(
     #     map(
@@ -267,9 +270,6 @@ def get_blue_score(
         print("*" * 80)
         if i > show_translations_for:
             break
-    blue_calculator = BLEUScore(n_gram=blue_n_gram)
-    blue_score = blue_calculator(predictions, targets)
-    print("blue score", blue_score)
     sacre_bleu_calculator = SacreBLEUScore(n_gram=blue_n_gram)
     sacre_blue_score = sacre_bleu_calculator(predictions, targets)
     print("sacre blue", sacre_blue_score)
