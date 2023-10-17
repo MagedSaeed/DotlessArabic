@@ -385,11 +385,14 @@ def training_pipeline(
         gpu_devices=gpu_devices,
         wandb_logger=wandb_logger,
         val_dataloader=val_dataloader,
+        max_epochs=constants.MAX_EPOCHS,
+        source_lang=source_language_code,
+        target_lang=target_language_code,
         train_dataloader=train_dataloader,
         validate_and_fit=validate_and_fit,
-        tokenizer_class=source_tokenizer_class,
-        max_epochs=constants.MAX_EPOCHS,
         callbacks=[timer_callback, per_epoch_timer],
+        source_tokenizer_class=source_tokenizer_class,
+        target_tokenizer_class=target_tokenizer_class,
     )
 
     if validate_and_fit:
