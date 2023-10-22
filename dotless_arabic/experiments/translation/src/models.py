@@ -1,6 +1,7 @@
 import math
 import re
 
+import numpy as np
 import torch
 from torch import Tensor, nn
 import torch.nn.functional as F
@@ -59,8 +60,8 @@ class PositionalEncoding(nn.Module):
 class TokenEmbedding(nn.Module):
     def __init__(self, vocab_size, emb_size, pad_token_id=1):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, emb_size, padding_idx=pad_token_id)
-        # self.embedding = nn.Embedding(vocab_size, emb_size)
+        # self.embedding = nn.Embedding(vocab_size, emb_size, padding_idx=pad_token_id)
+        self.embedding = nn.Embedding(vocab_size, emb_size)
         self.emb_size = emb_size
 
     def forward(self, tokens: Tensor):
@@ -91,12 +92,12 @@ class TranslationTransformer(LightningModule):
         self,
         src_vocab_size,
         tgt_vocab_size,
-        nhead=8,
-        emb_size=256,
+        nhead=4,
+        emb_size=512,
         pad_token_id=1,
-        num_decoder_layers=3,
-        num_encoder_layers=3,
-        dim_feedforward=2048,
+        num_decoder_layers=6,
+        num_encoder_layers=6,
+        dim_feedforward=1024,
         dropout: float = 0.1,
         learning_rate=0.0001,
     ):
@@ -204,36 +205,35 @@ class TranslationTransformer(LightningModule):
         target_tokenizer,
         max_sequence_length,
     ):
-        was_training = self.training is True
-        self.eval()
-        encoded_input_sentence = (
-            torch.tensor(
-                [
-                    source_tokenizer.token_to_id(token)
-                    for token in input_sentence.split()
-                ]
+        with torch.no_grad():
+            encoded_input_sentence = (
+                torch.tensor(
+                    [
+                        source_tokenizer.token_to_id(token)
+                        for token in input_sentence.split()
+                    ]
+                )
+                .view(1, -1)
+                .to(self.device)
             )
-            .view(1, -1)
-            .to(self.device)
-        )
-        target = "<bos> "
-        encoded_target = target_tokenizer.encode(target)
-        for i in range(max_sequence_length):
-            outputs = self(
-                src=encoded_input_sentence,
-                trg=torch.tensor(encoded_target).view(1, -1).to(self.device),
-            )
-            next_word_id = torch.argmax(outputs[:, i, :]).item()
-            encoded_target.append(next_word_id)
-            next_word = target_tokenizer.id_to_token(next_word_id)
-            target += f"{next_word.strip()} "
-            if next_word == "<eos>":
-                break
+            target = "<bos> "
+            encoded_target = [
+                target_tokenizer.token_to_id(token) for token in target.split()
+            ]
+            for i in range(max_sequence_length):
+                outputs = self(
+                    src=encoded_input_sentence,
+                    trg=torch.LongTensor(encoded_target).view(1, -1).to(self.device),
+                )
+                next_word_id = torch.argmax(outputs[0, -1, :]).item()
+                encoded_target.append(next_word_id)
+                next_word = target_tokenizer.id_to_token(next_word_id)
+                target += f"{next_word.strip()} "
+                if next_word == "<eos>":
+                    break
         # target = re.sub("\s+", "", target).strip()
         # target = target_tokenizer.detokenize(target)
         # target = re.sub("\s+", " ", target).strip()
-        if was_training:
-            self.train()
         # return " ".join(target_tokenizer.decode(target_tokenizer.encode(target)))
         return (
             target_tokenizer.detokenize(target_tokenizer.decode(encoded_target))

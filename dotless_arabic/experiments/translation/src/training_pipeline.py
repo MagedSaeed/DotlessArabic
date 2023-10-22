@@ -183,6 +183,7 @@ def training_pipeline(
         )
 
     if not is_dotted:
+        dotted_ar_test_dataset = test_dataset["ar"]
         log_content(
             content=f"""
             Undot Arabic text
@@ -378,7 +379,7 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
     wandb_logger.watch(translator, log="all")
-    validate_and_fit = False
+    validate_and_fit = True
     trainer = train_translator(
         text_type=text_type,
         translator=translator,
@@ -435,8 +436,9 @@ def training_pipeline(
     blue_score = get_blue_score(
         model=TranslationTransformer.load_from_checkpoint(
             trainer.checkpoint_callback.best_model_path
-            if validate_and_fit
-            else f"NMT/{text_type}/{source_tokenizer_class.__name__}/checkpoints/last.ckpt"  # take the last if validate_and_fit is False
+            # if validate_and_fit
+            # else f"NMT/{text_type}/{source_tokenizer_class.__name__}/checkpoints/last.ckpt"  # take the last if validate_and_fit is False
+            # else f"NMT/en_to_ar/SentencePieceTokenizer_to_SentencePieceTokenizer/dotted/checkpoints/epoch=7-val_loss=4.190-step=14485.ckpt"  # take the last if validate_and_fit is False
         ).to(constants.DEVICE),
         source_tokenizer=source_tokenizer,
         target_tokenizer=target_tokenizer,
@@ -447,13 +449,43 @@ def training_pipeline(
 
     log_content(
         content=f"""
-        Test blue score (sacre): {blue_score}
+        Test sacre blue score: {blue_score}
         """,
         results_file=results_file,
         print_to_console=print_to_console,
     )
 
     wandb_logger.experiment.log({"test-sacre-blue-score": blue_score})
+
+    if target_language_code == "ar" and not is_dotted:
+        blue_score_after_dotting_predictions = get_blue_score(
+            model=TranslationTransformer.load_from_checkpoint(
+                trainer.checkpoint_callback.best_model_path
+                # if validate_and_fit
+                # else f"NMT/{text_type}/{source_tokenizer_class.__name__}/checkpoints/last.ckpt"  # take the last if validate_and_fit is False
+                # else f"NMT/en_to_ar/SentencePieceTokenizer_to_SentencePieceTokenizer/dotted/checkpoints/epoch=7-val_loss=4.190-step=14485.ckpt"  # take the last if validate_and_fit is False
+            ).to(constants.DEVICE),
+            add_dots_to_predictions=True,
+            source_tokenizer=source_tokenizer,
+            target_tokenizer=target_tokenizer,
+            target_sentences=dotted_ar_test_dataset,
+            max_sequence_length=target_max_sequence_length,
+            source_sentences=test_dataset[source_language_code],
+        )
+
+        log_content(
+            content=f"""
+            Test sacre blue score after dotting predictions: {blue_score_after_dotting_predictions}
+            """,
+            results_file=results_file,
+            print_to_console=print_to_console,
+        )
+
+        wandb_logger.experiment.log(
+            {
+                "test-sacre-blue-score-dotting-predictions": blue_score_after_dotting_predictions
+            }
+        )
 
     wandb.finish()
 

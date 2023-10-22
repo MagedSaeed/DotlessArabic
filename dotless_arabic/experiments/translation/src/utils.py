@@ -23,8 +23,11 @@ from dotless_arabic.experiments.translation.src.processing import (
 )
 from dotless_arabic.processing.processing import undot
 
-from dotless_arabic.tokenizers import WordTokenizer, SentencePieceTokenizer
 from dotless_arabic.experiments.translation.src import constants
+from dotless_arabic.experiments.dots_retrieval.src.utils import (
+    add_dots_to_undotted_text,
+)
+from dotless_arabic.tokenizers import WordTokenizer, SentencePieceTokenizer
 
 
 def xavier_init(model):
@@ -69,13 +72,12 @@ def train_translator(
         save_on_train_epoch_end=False,
         filename="{epoch}-{val_loss:.3f}-{step}",
     )
-    callbacks = list()
     callbacks.append(checkpoint_callback)
     early_stopping_callback = EarlyStopping(
         monitor="val_loss",
         # min_delta=0.025,
         min_delta=0,
-        patience=10,
+        patience=50,
         check_finite=True,
     )
     callbacks.append(early_stopping_callback)
@@ -90,7 +92,7 @@ def train_translator(
     trainer = Trainer(
         deterministic=True,
         callbacks=callbacks,
-        gradient_clip_val=1,
+        gradient_clip_val=5,
         max_epochs=max_epochs,
         val_check_interval=0.25,
         # check_val_every_n_epoch=1,
@@ -160,7 +162,7 @@ def get_source_tokenizer(
 ):
     if tokenizer_class == SentencePieceTokenizer:
         tokenizer = tokenizer_class(
-            vocab_size=4_000,
+            vocab_size=8_000,
             special_tokens=["<bos>", "<eos>"],
         )
     else:
@@ -195,7 +197,7 @@ def get_target_tokenizer(
 ):
     if tokenizer_class == SentencePieceTokenizer:
         tokenizer = tokenizer_class(
-            vocab_size=4_000,
+            vocab_size=8_000,
             special_tokens=["<bos>", "<eos>"],
         )
     else:
@@ -233,6 +235,7 @@ def get_blue_score(
     blue_n_gram=4,
     use_tqdm=True,
     show_translations_for=100,
+    add_dots_to_predictions=False,
 ):
     # source_sentences = source_sentences[:100]
     # target_sentences = target_sentences[:100]
@@ -240,7 +243,8 @@ def get_blue_score(
         f"<bos> {' '.join(source_tokenizer.split_text(sentence))} <eos>"
         for sentence in source_sentences
     ]
-    targets = [[f"<bos> {sentence} <eos>"] for sentence in target_sentences]
+    targets = [[f"{sentence}"] for sentence in target_sentences]
+    # targets = [[f"<bos> {sentence} <eos>"] for sentence in target_sentences]
     if use_tqdm:
         source_sentences = tqdm(source_sentences)
         target_sentences = tqdm(target_sentences)
@@ -265,6 +269,20 @@ def get_blue_score(
     #     map(
     #         lambda texts: [text.replace("+ ", "") for text in texts],
     #         targets,
+    #     )
+    # )
+    predictions = list(
+        map(
+            lambda text: text.replace("<eos>", "").replace("<bos>", "").strip(),
+            predictions,
+        )
+    )
+    if add_dots_to_predictions:
+        predictions = list(map(add_dots_to_undotted_text, predictions))
+    # predictions = list(
+    #     map(
+    #         lambda text: f"<bos> {text.strip()} <eos>",
+    #         predictions,
     #     )
     # )
     for i, (s, p, t) in enumerate(zip(source_sentences, predictions, targets)):
@@ -294,6 +312,8 @@ def get_sequence_length(
         lengths.append(len(document))
     lengths = sorted(lengths)
     lengths_count = len(lengths)
-    percentile_index = math.floor(lengths_count * percentile)
+    percentile_index = (
+        math.floor(lengths_count * percentile) if 0 <= percentile < 1 else -1
+    )
     length = lengths[percentile_index]
     return length

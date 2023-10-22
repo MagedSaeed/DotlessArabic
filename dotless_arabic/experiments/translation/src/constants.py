@@ -7,8 +7,8 @@ from dotless_arabic.experiments.constants import *
 from dotless_arabic.tokenizers import WordTokenizer
 
 
-MAX_EPOCHS = 100
-DEFAULT_BATCH_SIZE = 64
+MAX_EPOCHS = 1_000
+DEFAULT_BATCH_SIZE = 256
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LIGHTING_ACCELERATOR = "auto"  # used by pytorch_lightning
@@ -19,6 +19,6 @@ CPU_DEVICES = 1  # I tried with higher values but this did not work
 
 CPU_COUNT = os.cpu_count()
 
-SEQUENCE_LENGTH_PERCENTILE = 0.95  # to neglect outliers documents in terms of length
+SEQUENCE_LENGTH_PERCENTILE = 0.9999  # to neglect outliers documents in terms of length
 
 DEFAULT_TOKENIZER_CLASS = WordTokenizer
