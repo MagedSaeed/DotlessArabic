@@ -11,11 +11,13 @@ from dotless_arabic.experiments.translation.src.utils import (
 
 def get_dataloader(
     dataset,
+    undot_text,
     source_language_code,
     target_language_code,
     source_tokenizer,
     target_tokenizer,
-    sequence_length,
+    source_sequence_length,
+    target_sequence_length,
     use_tqdm=True,
     shuffle=False,
     drop_last=False,
@@ -26,22 +28,24 @@ def get_dataloader(
         if use_tqdm
         else dataset[source_language_code]
     )
+    undot_text_source = undot_text if source_language_code == "ar" else False
+    undot_text_target = undot_text if target_language_code == "ar" else False
     target_dataset = (
         tqdm(dataset[target_language_code])
         if use_tqdm
         else dataset[target_language_code]
     )
     encoded_source_dataset = create_features_from_text_list(
-        is_source=True,
         text_list=source_dataset,
         tokenizer=source_tokenizer,
-        sequence_length=sequence_length,
+        undot_text=undot_text_source,
+        sequence_length=source_sequence_length,
     )
     encoded_target_dataset = create_features_from_text_list(
-        is_source=False,
         text_list=target_dataset,
         tokenizer=target_tokenizer,
-        sequence_length=sequence_length,
+        undot_text=undot_text_target,
+        sequence_length=target_sequence_length,
     )
     torch_dataset = TensorDataset(
         torch.from_numpy(encoded_source_dataset),

@@ -50,6 +50,18 @@ class WordTokenizer(tk.WordTokenizer):
         )
         self.vocab_size = len(self.vocab)
 
+    def detokenize(self, tokens):
+        """Convert tokens to a string
+
+        Args:
+            tokens (list): list of tokens
+
+        Returns:
+            str: detokenized string
+        """
+        detokenized = " ".join(tokens)
+        return detokenized
+
 
 class CharacterTokenizer(tk.CharacterTokenizer):
     @classmethod
@@ -138,22 +150,25 @@ class DisjointLetterTokenizer(tk.DisjointLetterTokenizer):
         self.vocab_size = len(self.vocab)
 
 
+DEFAULT_SEGMENTER = FarasaSegmenter(interactive=True)
+
+
 class FarasaMorphologicalTokenizer(tk.FarasaMorphologicalTokenizer):
     @classmethod
     @lru_cache(maxsize=10_000)
     def split_text(
         cls,
         text,
-        interactive_segmentation=True,
         segmenter=None,
         undot_text=False,
     ):
         if segmenter is None:
-            segmenter = FarasaSegmenter(interactive=interactive_segmentation)
+            segmenter = DEFAULT_SEGMENTER
         assert isinstance(
             segmenter,
             FarasaSegmenter,
         ), "segmenter should be an instance of FarasaSegmenter"
+
         text = segmenter.segment(text).replace(" ", " <##> ").replace("+", " ")
         if undot_text:
             return undot(text).split()
@@ -184,12 +199,24 @@ class FarasaMorphologicalTokenizer(tk.FarasaMorphologicalTokenizer):
                 text = f.read()
 
         tokens_frequency = defaultdict(int)
-        for word in WordTokenizer.split_text(text):
+        for word in self.split_text(text):
             tokens_frequency[word] += 1
 
         self.vocab = self._truncate_dict(dict(tokens_frequency))
         self.vocab = tokenize_vocab(vocab=self.vocab, tokenizer=self)
         self.vocab_size = len(self.vocab)
+
+    def detokenize(self, tokens):
+        """Convert tokens to a string
+
+        Args:
+            tokens (list): list of tokens
+
+        Returns:
+            str: detokenized string
+        """
+        detokenized = "".join(tokens).replace("<##>", " ")
+        return detokenized
 
 
 class SentencePieceTokenizer(tk.SentencePieceTokenizer):
