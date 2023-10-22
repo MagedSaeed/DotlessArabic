@@ -12,6 +12,7 @@ pyarabic==0.*
 requests==2.*
 scikit-learn==1.*
 transformers==4.*
+mosestokenizer==1.2.*
 pytorch-lightning==2.*
 git+https://github.com/MagedSaeed/tkseem.git
 https://github.com/kpu/kenlm/archive/master.zip
