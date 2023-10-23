@@ -34,6 +34,9 @@ from dotless_arabic.experiments.translation.src.utils import (
     get_blue_score,
     get_sequence_length,
 )
+from dotless_arabic.experiments.translation.src.callbacks import (
+    BleuDuringTrainingCallback,
+)
 
 from dotless_arabic.experiments.translation.src.models import (
     TranslationTransformer,
@@ -288,7 +291,7 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
-    # train_dataset = train_dataset[:100]
+    # train_dataset = train_dataset[:10_000]
     train_dataloader = get_dataloader(
         shuffle=True,
         batch_size=batch_size,
@@ -362,6 +365,16 @@ def training_pipeline(
 
     per_epoch_timer = EpochTimerCallback()
 
+    training_bleu_callback = BleuDuringTrainingCallback(
+        val_dataset=val_dataset[:100],
+        train_dataset=train_dataset[:100],
+        source_tokenizer=source_tokenizer,
+        target_tokenizer=target_tokenizer,
+        source_language_code=source_language_code,
+        target_language_code=target_language_code,
+        max_sequence_length=source_max_sequence_length,
+    )
+
     assert source_tokenizer.token_to_id(
         source_tokenizer.pad_token
     ) == target_tokenizer.token_to_id(target_tokenizer.pad_token)
@@ -391,7 +404,11 @@ def training_pipeline(
         target_lang=target_language_code,
         train_dataloader=train_dataloader,
         validate_and_fit=validate_and_fit,
-        callbacks=[timer_callback, per_epoch_timer],
+        callbacks=[
+            timer_callback,
+            per_epoch_timer,
+            training_bleu_callback,
+        ],
         source_tokenizer_class=source_tokenizer_class,
         target_tokenizer_class=target_tokenizer_class,
     )
