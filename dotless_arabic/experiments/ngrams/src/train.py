@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 
 from dotless_arabic.utils import execute_bash, log_content
 from dotless_arabic.experiments.ngrams.src import constants
-from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer
+from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer, CharacterTokenizer
 from dotless_arabic.experiments.ngrams.src.settings import configure_environment
 from dotless_arabic.experiments.ngrams.src.utils import (
     estimate_memory_to_use_by_lm_modeler,
@@ -177,6 +177,11 @@ def training_pipeline(
         "Tokenize the dataset",
         results_file=results_file,
     )
+
+    if "news" in dataset_name and tokenizer_class == CharacterTokenizer:
+        dataset = dataset[
+            :-1
+        ]  # seems that the last 1 example of news undotted dataset makes the whole system unstable!!
 
     if tokenizer_class == FarasaMorphologicalTokenizer:
         segmenter = FarasaSegmenter(interactive=True)
