@@ -23,7 +23,11 @@ from farasa.segmenter import FarasaSegmenter
 
 from dotless_arabic.processing import undot
 from dotless_arabic.experiments.nlms.src import constants, datasets
-from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer, WordTokenizer
+from dotless_arabic.tokenizers import (
+    FarasaMorphologicalTokenizer,
+    WordTokenizer,
+    SentencePieceTokenizer,
+)
 from dotless_arabic.experiments.nlms.src.models import LitRNNLM, LitTransformerLM
 
 
@@ -255,6 +259,8 @@ def get_tokenizer(
         special_tokens=["<bos>", "<eos>"],
     )
     tokenizer.train(text=dataset)
+    tokenizer.vocab["<##>"] = -1  # for the space character
+    tokenizer.vocab_size += 1
     return tokenizer
 
 
