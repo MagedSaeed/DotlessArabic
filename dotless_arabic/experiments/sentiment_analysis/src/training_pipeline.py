@@ -14,6 +14,7 @@ import wandb
 from dotless_arabic.experiments.sentiment_analysis.src.tuners import (
     tune_sentiment_analyzer_model,
 )
+from dotless_arabic.processing.processing import undot
 
 
 from dotless_arabic.utils import log_content
@@ -60,7 +61,7 @@ def training_pipeline(
     dataloader_workers=constants.CPU_COUNT,
 ):
     configure_environment()
-    if best_hparams is None:
+    if not best_hparams:
         best_hparams = {}
 
     train_dataset = collect_train_dataset_for_sentiment_analysis()
@@ -190,7 +191,12 @@ def training_pipeline(
     )
 
     sequence_length = get_sequence_length(
-        dataset=[tokenizer.tokenize_from_splits(document) for document in tqdm(x_train)]
+        dataset=[
+            tokenizer.tokenize_from_splits(document)
+            if is_dotted
+            else tokenizer.tokenize_from_splits(undot(document))
+            for document in tqdm(x_train)
+        ]
     )
 
     log_content(
