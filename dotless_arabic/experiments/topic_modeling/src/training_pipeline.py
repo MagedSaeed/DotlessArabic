@@ -15,6 +15,7 @@ from dotless_arabic.callbacks import EpochTimerCallback
 from dotless_arabic.experiments.topic_modeling.src.tuners import (
     tune_topic_modeling_model,
 )
+from dotless_arabic.processing.processing import undot
 
 
 from dotless_arabic.utils import log_content
@@ -62,7 +63,7 @@ def training_pipeline(
 ):
     configure_environment()
 
-    if best_params is None:
+    if not best_params:
         best_params = {}
 
     train_dataset = collect_train_dataset_for_topic_modeling()
@@ -202,7 +203,12 @@ def training_pipeline(
     )
 
     sequence_length = get_sequence_length(
-        dataset=[tokenizer.tokenize_from_splits(document) for document in tqdm(x_train)]
+        dataset=[
+            tokenizer.tokenize_from_splits(document)
+            if is_dotted
+            else tokenizer.tokenize_from_splits(undot(document))
+            for document in tqdm(x_train)
+        ]
     )
 
     log_content(
