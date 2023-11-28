@@ -11,6 +11,7 @@ if "." not in sys.path:
 from dotless_arabic.utils import log_content
 from dotless_arabic.tokenizers import TOKENIZERS_MAP
 from dotless_arabic.experiments.topic_modeling.src import constants
+from dotless_arabic.experiments.topic_modeling.src.best_hparams import best_hparams
 from dotless_arabic.experiments.topic_modeling.src.training_pipeline import (
     training_pipeline,
 )
@@ -100,6 +101,8 @@ def run(
     ###### Dotted Dataset Training #################
     ################################################
 
+    best_params = best_hparams["sanad"].get(tokenizer_class.__name__, {})
+
     if run_dotted:
         log_content(
             content=f"""
@@ -112,6 +115,7 @@ def run(
             is_dotted=True,
             batch_size=batch_size,
             gpu_devices=gpu_devices,
+            best_params=best_params,
             tokenizer_class=tokenizer_class,
             results_file=dotted_results_file_path,
         )
