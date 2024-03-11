@@ -66,6 +66,18 @@ def add_dots_to_undotted_text(undotted_text):
         text=undotted_text,
         tokenizer=source_tokenizer,
     )
+    # save unk positions
+    unk_positions = [
+        position
+        for position, token_id in enumerate(encoded_input)
+        if token_id == source_tokenizer.token_to_id(source_tokenizer.unk_token)
+    ]
+    # remove these unks as the model was not modeled with unks
+    encoded_input = [
+        token_id
+        for position, token_id in enumerate(encoded_input)
+        if position not in unk_positions
+    ]
     # define the model and load it from checkpoint
     model = load_model(
         vocab_size=source_tokenizer.vocab_size,
@@ -84,15 +96,27 @@ def add_dots_to_undotted_text(undotted_text):
     predictions = predictions.squeeze()
     predictions = predictions.tolist()
     predicted_text = "".join(target_tokenizer.decode(predictions))
-    predicted_text = (
-        predicted_text.replace("<PAD>", "")[: len(undotted_text)]
-        .strip()
-        .replace("▁", " ")
-    )
+    predicted_text = predicted_text.replace("<PAD>", "")
+    # replace unk positions with the original chars from undotted_text
+    for position in unk_positions:
+        predicted_text = (
+            predicted_text[:position]
+            + undotted_text[position]
+            + predicted_text[position:]
+        )
+
+    predicted_text = predicted_text[: len(undotted_text)].strip().replace("▁", " ")
     return predicted_text.strip()
 
 
-def calculate_text_metrics(predictions, labels, target_tokenizer, print_text=False):
+def calculate_text_metrics(
+    predictions,
+    labels,
+    target_tokenizer=None,
+    print_text=False,
+):
+    if target_tokenizer is None:
+        target_tokenizer = get_target_tokenizer()
     # drop pads, those pads are not necessary pad tokens!!
     # last_pad = predictions[-1]
     # for i,pad in reversed(list(enumerate(predictions))):
@@ -110,6 +134,31 @@ def calculate_text_metrics(predictions, labels, target_tokenizer, print_text=Fal
         predicted_text.replace("<PAD>", "")[: len(true_text)].strip().replace("▁", " ")
     )
     # predicted_text = re.sub(' +',' ',predicted_text)
+
+    if print_text:
+        print(predicted_text)
+        print(true_text)
+
+    wer = word_error_rate(preds=predicted_text, target=true_text)
+    cer = char_error_rate(preds=predicted_text, target=true_text)
+
+    return wer, cer
+
+
+def calculate_text_metrics_from_text_inputs(
+    predicted_text,
+    true_text,
+    target_tokenizer=None,
+    print_text=False,
+):
+    if target_tokenizer is None:
+        target_tokenizer = get_target_tokenizer()
+
+    true_text = true_text.replace("<PAD>", "").strip().replace("▁", " ")
+
+    predicted_text = (
+        predicted_text.replace("<PAD>", "")[: len(true_text)].strip().replace("▁", " ")
+    )
 
     if print_text:
         print(predicted_text)
