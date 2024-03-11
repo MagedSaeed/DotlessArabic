@@ -95,3 +95,23 @@ def collect_dataset_for_language_modeling(results_file=None):
     )
 
     return dataset
+
+
+def collect_dataset_for_dots_retreival():
+    # dataset = collect_dataset_for_analysis()
+    dataset = []
+    for dataset_collection_func in (
+        collect_quran_dataset_for_analysis,
+        collect_sanadset_hadeeth_dataset_for_analysis,
+        collect_poems_dataset_for_analysis,
+        collect_wikipedia_dataset_for_analysis,
+        collect_news_dataset_for_analysis,
+    ):
+        sub_dataset = dataset_collection_func()
+        sub_dataset = sub_dataset[: int(0.33 * len(sub_dataset))]
+        dataset += sub_dataset
+    dataset = dataset_dot_transform(dataset_newline_transform(dataset))
+    # consider samples with 500 samples length only
+    dataset = [item for item in tqdm(dataset) if len(item.replace(" ", "")) <= 200]
+    # dataset = list(filter(lambda document: len(document.split()) >= 30, tqdm(dataset)))
+    return dataset
