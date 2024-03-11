@@ -5,6 +5,7 @@ import requests
 from tqdm.auto import tqdm
 
 import datasets
+from dotless_arabic import constants
 
 from dotless_arabic.utils import log_content
 
@@ -94,8 +95,25 @@ def collect_parallel_dataset_for_translation(split="train"):
     return parallel_dataset
 
 
+def get_train_val_dataset_for_translation():
+    train_set = collect_parallel_dataset_for_translation(split="train")
+    train_val_split = train_set.train_test_split(
+        test_size=0.075,
+        seed=constants.RANDOM_SEED,
+    )
+    train_set = train_val_split["train"]
+    val_set = train_val_split["test"]
+    return train_set, val_set
+
+
 def collect_parallel_train_dataset_for_translation():
-    return collect_parallel_dataset_for_translation(split="train")
+    train_set, val_set = get_train_val_dataset_for_translation()
+    return train_set
+
+
+def collect_parallel_val_dataset_for_translation():
+    train_set, val_set = get_train_val_dataset_for_translation()
+    return val_set
 
 
 def collect_parallel_test_dataset_for_translation():
