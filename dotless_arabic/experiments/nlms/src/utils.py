@@ -1,3 +1,4 @@
+import os
 import math
 import shutil
 from collections import defaultdict
@@ -49,8 +50,9 @@ def generate_text(
     with torch.no_grad():
         hiddens = None
         for index in range(num_tokens):
-            prompt = " ".join(prompt.split()[-sequence_length:])
-            encoded = tokenizer.encode(prompt)
+            # prompt = " ".join(prompt.split()[-sequence_length:])
+            # encoded = tokenizer.encode(prompt)
+            encoded = [tokenizer.token_to_id(token) for token in prompt.split()]
             encoded = torch.LongTensor([encoded]).to(device)
             if lm_model.__class__ == LitRNNLM:
                 output, hiddens = lm_model(encoded, hiddens)
@@ -91,7 +93,9 @@ def generate_text(
                 generated_text += f" {predicted_token}"
             print("prompt is:", prompt)
     return "\n".join(
-        tokenizer.detokenize(line.split()) for line in generated_text.splitlines()
+        # tokenizer.detokenize(line.split()) for line in generated_text.splitlines()
+        line.replace(" ", "").replace("<##>", " ")
+        for line in generated_text.splitlines()
     )
 
 
@@ -348,15 +352,15 @@ def get_vocab_size(
     return vocab
 
 
-# def get_best_checkpoint(dataset_id, tokenizer_class, checkpoints_base_path="NLMs"):
-#     checkpoints_path = (
-#         f"{checkpoints_base_path}/{dataset_id}/{tokenizer_class.__name__}/checkpoints"
-#     )
-#     for file_name in os.listdir(checkpoints_path):
-#         if file_name.startswith("epoch"):
-#             print(f"checkpiont {file_name} found.")
-#             return f"{checkpoints_path}/{file_name}"
-#     print("Could NOT find a checkpoint!!")
+def get_best_checkpoint(
+    dataset_id, tokenizer_class, checkpoints_base_path="NLMs", model_type="RNN"
+):
+    checkpoints_path = f"{checkpoints_base_path}/{dataset_id}/{tokenizer_class.__name__}/{model_type}/checkpoints"
+    for file_name in os.listdir(checkpoints_path):
+        if file_name.startswith("epoch"):
+            print(f"checkpiont {file_name} found.")
+            return f"{checkpoints_path}/{file_name}"
+    print("Could NOT find a checkpoint!!")
 
 
 def get_sequence_length(
