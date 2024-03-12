@@ -1,3 +1,4 @@
+import numpy as np
 from tqdm.auto import tqdm
 
 import torch
@@ -16,8 +17,8 @@ def get_dataloader(
     target_language_code,
     source_tokenizer,
     target_tokenizer,
-    source_sequence_length,
     target_sequence_length,
+    source_sequence_length=None,
     use_tqdm=True,
     shuffle=False,
     drop_last=False,

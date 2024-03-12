@@ -1,12 +1,13 @@
+import os
 import json
+
+from sacremoses import MosesTokenizer
+
 from pytorch_lightning.callbacks import Timer
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.utilities.model_summary import ModelSummary
 import wandb
 from tqdm.auto import tqdm
-
-import mosestokenizer
-from farasa.segmenter import FarasaSegmenter
 
 from dotless_arabic.callbacks import EpochTimerCallback
 from dotless_arabic.experiments.translation.src.tuners import (
@@ -27,6 +28,8 @@ from dotless_arabic.experiments.translation.src.settings import (
 )
 from dotless_arabic.experiments.translation.src import constants
 from dotless_arabic.experiments.translation.src.utils import (
+    get_averaged_model,
+    get_best_checkpoint,
     get_oovs_rate,
     train_translator,
     get_source_tokenizer,
@@ -42,35 +45,25 @@ from dotless_arabic.experiments.translation.src.models import (
     TranslationTransformer,
 )
 
-# from dotless_arabic.datasets.open_subtitles_arbml_subset.collect import (
-#     collect_parallel_train_dataset_for_translation,
-#     collect_parallel_test_dataset_for_translation,
-# )
-
-# from dotless_arabic.datasets.ted_multi.collect import (
-#     collect_parallel_train_dataset_for_translation,
-#     collect_parallel_test_dataset_for_translation,
-#     collect_parallel_val_dataset_for_translation,
-# )
-
 from dotless_arabic.datasets.iwslt2017.collect import (
-    collect_parallel_train_dataset_for_translation,
     collect_parallel_val_dataset_for_translation,
     collect_parallel_test_dataset_for_translation,
+    collect_parallel_train_dataset_for_translation,
 )
 
 
 def training_pipeline(
     is_dotted,
-    batch_size,
     gpu_devices,
     results_file,
     source_tokenizer_class,
     target_tokenizer_class,
     source_language_code,
     target_language_code,
+    batch_size=None,
     best_params=None,
     print_to_console=True,
+    validate_and_fit=True,
 ):
     configure_environment()
 
@@ -79,13 +72,13 @@ def training_pipeline(
 
     text_type = "dotted" if is_dotted else "undotted"
 
+    if not validate_and_fit:
+        os.environ["WANDB_MODE"] = "disabled"
+
     wandb_logger = WandbLogger(
         project=f"NMT",
         name=f"{source_language_code}_to_{target_language_code}_{text_type}_{source_tokenizer_class.__name__}_to_{target_tokenizer_class.__name__}",
     )
-
-    # source_language_code = "en"
-    # target_language_code = "ar"
 
     log_content(
         content=f"""
@@ -95,9 +88,9 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
 
-    train_dataset = collect_parallel_train_dataset_for_translation().to_pandas()
-    val_dataset = collect_parallel_val_dataset_for_translation().to_pandas()
-    test_dataset = collect_parallel_test_dataset_for_translation().to_pandas()
+    train_dataset = collect_parallel_train_dataset_for_translation()
+    val_dataset = collect_parallel_val_dataset_for_translation()
+    test_dataset = collect_parallel_test_dataset_for_translation()
 
     log_content(
         content=f"""
@@ -107,83 +100,64 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
 
-    train_dataset["en"] = list(
-        map(
-            process_en,
-            tqdm(train_dataset["en"]),
-        )
-    )
-    val_dataset["en"] = list(
-        map(
-            process_en,
-            tqdm(val_dataset["en"]),
-        )
-    )
-    test_dataset["en"] = list(
-        map(
-            process_en,
-            tqdm(test_dataset["en"]),
-        )
-    )
+    def processing_map(example):
+        # example["ar"] = process_ar(example["ar"])
+        example["ar"] = process_ar(example["ar"])
+        example["en"] = process_en(example["en"])
+        return example
 
-    train_dataset["ar"] = list(
-        map(
-            process_ar,
-            tqdm(train_dataset["ar"]),
+    train_dataset = train_dataset.to_pandas()
+    val_dataset = val_dataset.to_pandas()
+    test_dataset = test_dataset.to_pandas()
+
+    train_dataset["ar"] = train_dataset["ar"].progress_map(
+        lambda text: process_ar(text)
+    )
+    val_dataset["ar"] = val_dataset["ar"].progress_map(lambda text: process_ar(text))
+    test_dataset["ar"] = test_dataset["ar"].progress_map(lambda text: process_ar(text))
+    train_dataset["en"] = train_dataset["en"].progress_map(
+        lambda text: process_en(text)
+    )
+    val_dataset["en"] = val_dataset["en"].progress_map(lambda text: process_en(text))
+    test_dataset["en"] = test_dataset["en"].progress_map(lambda text: process_en(text))
+
+    moses_tokenizer = MosesTokenizer()
+    train_dataset["en"] = train_dataset["en"].progress_map(
+        lambda text: moses_tokenizer.tokenize(
+            text,
+            return_str=True,
         )
     )
-    val_dataset["ar"] = list(
-        map(
-            process_ar,
-            tqdm(val_dataset["ar"]),
+    val_dataset["en"] = val_dataset["en"].progress_map(
+        lambda text: moses_tokenizer.tokenize(
+            text,
+            return_str=True,
         )
     )
-    test_dataset["ar"] = list(
-        map(
-            process_ar,
-            tqdm(test_dataset["ar"]),
+    test_dataset["en"] = test_dataset["en"].progress_map(
+        lambda text: moses_tokenizer.tokenize(
+            text,
+            return_str=True,
         )
     )
-
-    # if tokenizer_class == WordTokenizer:
-    #     log_content(
-    #         content=f"""
-    #         Segmenting arabic with farasa:
-    #         """,
-    #         results_file=results_file,
-    #         print_to_console=print_to_console,
-    #     )
-
-    #     segmenter = FarasaSegmenter(interactive=True)
-
-    #     train_dataset["ar"] = train_dataset["ar"].progress_map(
-    #         lambda text: segmenter.segment(text).replace("+", "+ ")
-    #     )
-    #     val_dataset["ar"] = val_dataset["ar"].progress_map(
-    #         lambda text: segmenter.segment(text).replace("+", "+ ")
-    #     )
-    #     test_dataset["ar"] = test_dataset["ar"].progress_map(
-    #         lambda text: segmenter.segment(text).replace("+", "+ ")
-    #     )
-
-    log_content(
-        content=f"""
-        Segmenting english with moses:
-        """,
-        results_file=results_file,
-        print_to_console=print_to_console,
+    train_dataset["ar"] = train_dataset["ar"].progress_map(
+        lambda text: moses_tokenizer.tokenize(
+            text,
+            return_str=True,
+        )
     )
-
-    with mosestokenizer.MosesTokenizer("en") as moses_tokenizer:
-        train_dataset["en"] = train_dataset["en"].progress_map(
-            lambda text: " ".join(moses_tokenizer(text))
+    val_dataset["ar"] = val_dataset["ar"].progress_map(
+        lambda text: moses_tokenizer.tokenize(
+            text,
+            return_str=True,
         )
-        val_dataset["en"] = val_dataset["en"].progress_map(
-            lambda text: " ".join(moses_tokenizer(text))
+    )
+    test_dataset["ar"] = test_dataset["ar"].progress_map(
+        lambda text: moses_tokenizer.tokenize(
+            text,
+            return_str=True,
         )
-        test_dataset["en"] = test_dataset["en"].progress_map(
-            lambda text: " ".join(moses_tokenizer(text))
-        )
+    )
 
     if not is_dotted:
         dotted_ar_test_dataset = test_dataset["ar"]
@@ -260,7 +234,8 @@ def training_pipeline(
                 source_tokenizer.split_text,
                 tqdm(train_dataset[source_language_code]),
             )
-        )
+        ),
+        # percentile=1,
     )
     target_max_sequence_length = get_sequence_length(
         dataset=list(
@@ -284,6 +259,37 @@ def training_pipeline(
     wandb_logger.experiment.log({"source-sequence-length": source_max_sequence_length})
     wandb_logger.experiment.log({"target-sequence-length": target_max_sequence_length})
 
+    sequence_length = max(source_max_sequence_length, target_max_sequence_length)
+    log_content(
+        content=f"""
+        Sequence Length: {sequence_length}
+        """,
+        # setting the sequence length to be the avg of the two
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+    wandb_logger.experiment.log({"sequence-length": sequence_length})
+
+    if batch_size is None:
+        # calculate the batch size from the number of tokens
+        log_content(
+            content=f"""
+            Calculating Batch Size as sequence_length/4_000
+            """,
+            results_file=results_file,
+            print_to_console=print_to_console,
+        )
+        batch_size = 4_000 // sequence_length
+        log_content(
+            content=f"""
+            Batch size: {batch_size}
+            """,
+            results_file=results_file,
+            print_to_console=print_to_console,
+        )
+
+    wandb_logger.experiment.log({"batch-size": batch_size})
+
     log_content(
         content=f"""
         Building DataLoaders
@@ -291,7 +297,7 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
-    # train_dataset = train_dataset[:10_000]
+
     train_dataloader = get_dataloader(
         shuffle=True,
         batch_size=batch_size,
@@ -299,10 +305,10 @@ def training_pipeline(
         undot_text=not is_dotted,
         source_tokenizer=source_tokenizer,
         target_tokenizer=target_tokenizer,
+        source_sequence_length=sequence_length,
+        target_sequence_length=sequence_length,
         source_language_code=source_language_code,
         target_language_code=target_language_code,
-        source_sequence_length=source_max_sequence_length,
-        target_sequence_length=target_max_sequence_length,
     )
     val_dataloader = get_dataloader(
         shuffle=False,
@@ -311,10 +317,10 @@ def training_pipeline(
         undot_text=not is_dotted,
         target_tokenizer=target_tokenizer,
         source_tokenizer=source_tokenizer,
+        source_sequence_length=sequence_length,
+        target_sequence_length=sequence_length,
         source_language_code=source_language_code,
         target_language_code=target_language_code,
-        source_sequence_length=source_max_sequence_length,
-        target_sequence_length=target_max_sequence_length,
     )
 
     test_dataloader = get_dataloader(
@@ -324,10 +330,10 @@ def training_pipeline(
         undot_text=not is_dotted,
         source_tokenizer=source_tokenizer,
         target_tokenizer=target_tokenizer,
+        source_sequence_length=sequence_length,
+        target_sequence_length=sequence_length,
         source_language_code=source_language_code,
         target_language_code=target_language_code,
-        source_sequence_length=source_max_sequence_length,
-        target_sequence_length=target_max_sequence_length,
     )
 
     log_content(
@@ -365,14 +371,16 @@ def training_pipeline(
 
     per_epoch_timer = EpochTimerCallback()
 
+    # this is usefull during experimentation
     training_bleu_callback = BleuDuringTrainingCallback(
-        val_dataset=val_dataset[:100],
-        train_dataset=train_dataset[:100],
+        show_translation_for=5,
+        val_dataset=val_dataset[:50],
+        train_dataset=train_dataset[:50],
         source_tokenizer=source_tokenizer,
         target_tokenizer=target_tokenizer,
+        max_sequence_length=sequence_length,
         source_language_code=source_language_code,
         target_language_code=target_language_code,
-        max_sequence_length=source_max_sequence_length,
     )
 
     assert source_tokenizer.token_to_id(
@@ -392,7 +400,7 @@ def training_pipeline(
         print_to_console=print_to_console,
     )
     wandb_logger.watch(translator, log="all")
-    validate_and_fit = True
+    # validate_and_fit = False # taken as an argument
     trainer = train_translator(
         text_type=text_type,
         translator=translator,
@@ -407,7 +415,7 @@ def training_pipeline(
         callbacks=[
             timer_callback,
             per_epoch_timer,
-            training_bleu_callback,
+            # training_bleu_callback,  # useful when experimenting, but may take time when training
         ],
         source_tokenizer_class=source_tokenizer_class,
         target_tokenizer_class=target_tokenizer_class,
@@ -450,49 +458,143 @@ def training_pipeline(
             print_to_console=print_to_console,
         )
 
-    blue_score = get_blue_score(
-        model=TranslationTransformer.load_from_checkpoint(
-            trainer.checkpoint_callback.best_model_path
-            # if validate_and_fit
-            # else f"NMT/{text_type}/{source_tokenizer_class.__name__}/checkpoints/last.ckpt"  # take the last if validate_and_fit is False
-            # else f"NMT/en_to_ar/SentencePieceTokenizer_to_SentencePieceTokenizer/dotted/checkpoints/epoch=7-val_loss=4.190-step=14485.ckpt"  # take the last if validate_and_fit is False
-        ).to(constants.DEVICE),
+    # get the model in the case validate_and_fit is False
+    best_model_checkpoint = get_best_checkpoint(
+        is_dotted=is_dotted,
+        source_language_code=source_language_code,
+        target_language_code=target_language_code,
+        source_tokenizer_class=source_tokenizer_class,
+        target_tokenizer_class=target_tokenizer_class,
+    )
+
+    averaged_model = get_averaged_model(
+        is_dotted=is_dotted,
+        model_instance=TranslationTransformer(
+            src_vocab_size=source_tokenizer.vocab_size,
+            tgt_vocab_size=target_tokenizer.vocab_size,
+            pad_token_id=source_tokenizer.token_to_id(source_tokenizer.pad_token),
+        ),
+        source_language_code=source_language_code,
+        target_language_code=target_language_code,
+        source_tokenizer_class=source_tokenizer_class,
+        target_tokenizer_class=target_tokenizer_class,
+    ).to(constants.DEVICE)
+
+    inferences_common_kwargs = dict(
+        is_dotted=is_dotted,
         source_tokenizer=source_tokenizer,
         target_tokenizer=target_tokenizer,
-        max_sequence_length=target_max_sequence_length,
+        max_sequence_length=sequence_length,
+        source_language_code=source_language_code,
+        target_language_code=target_language_code,
         source_sentences=test_dataset[source_language_code],
         target_sentences=test_dataset[target_language_code],
     )
 
+    blue_score_greedy_decode_best_model = get_blue_score(
+        model=TranslationTransformer.load_from_checkpoint(
+            trainer.checkpoint_callback.best_model_path
+            if validate_and_fit
+            else best_model_checkpoint
+        ).to(constants.DEVICE),
+        decode_with_beam_search=False,
+        **inferences_common_kwargs,
+    )
+
     log_content(
         content=f"""
-        Test sacre blue score: {blue_score}
+        Test sacre blue score (greedy decode) for best model: {blue_score_greedy_decode_best_model}
         """,
         results_file=results_file,
         print_to_console=print_to_console,
     )
 
-    wandb_logger.experiment.log({"test-sacre-blue-score": blue_score})
+    wandb_logger.experiment.log(
+        {
+            "test-sacre-blue-score-greedy-decode-best-model": blue_score_greedy_decode_best_model
+        }
+    )
+
+    blue_score_greed_decode_averaged_model = get_blue_score(
+        model=averaged_model,
+        decode_with_beam_search=False,
+        **inferences_common_kwargs,
+    )
+
+    log_content(
+        content=f"""
+        Test sacre blue score (greedy decode) for averaged model: {blue_score_greed_decode_averaged_model}
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
+    wandb_logger.experiment.log(
+        {
+            "test-sacre-blue-score-greedy-decode-averaged-model": blue_score_greed_decode_averaged_model
+        }
+    )
+
+    blue_score_beam_search_decode_best_model = get_blue_score(
+        model=TranslationTransformer.load_from_checkpoint(
+            trainer.checkpoint_callback.best_model_path
+            if validate_and_fit
+            else best_model_checkpoint
+        ).to(constants.DEVICE),
+        decode_with_beam_search=True,
+        **inferences_common_kwargs,
+    )
+
+    log_content(
+        content=f"""
+        Test sacre blue score (beam search decode) for best model: {blue_score_beam_search_decode_best_model}
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
+    wandb_logger.experiment.log(
+        {
+            "test-sacre-blue-score-beam-search-decode-best-model": blue_score_beam_search_decode_best_model
+        }
+    )
+
+    blue_score_beam_search_decode_averaged_model = get_blue_score(
+        model=averaged_model,
+        decode_with_beam_search=True,
+        **inferences_common_kwargs,
+    )
+
+    log_content(
+        content=f"""
+        Test sacre blue score (beam search decode) for averaged model: {blue_score_beam_search_decode_averaged_model}
+        """,
+        results_file=results_file,
+        print_to_console=print_to_console,
+    )
+
+    wandb_logger.experiment.log(
+        {
+            "test-sacre-blue-score-beam-search-decode-averaged-model": blue_score_beam_search_decode_averaged_model
+        }
+    )
 
     if target_language_code == "ar" and not is_dotted:
-        blue_score_after_dotting_predictions = get_blue_score(
+        inferences_common_kwargs["target_sentences"] = dotted_ar_test_dataset
+        blue_score_after_dotting_predictions_greedy_decode_best_model = get_blue_score(
             model=TranslationTransformer.load_from_checkpoint(
                 trainer.checkpoint_callback.best_model_path
-                # if validate_and_fit
-                # else f"NMT/{text_type}/{source_tokenizer_class.__name__}/checkpoints/last.ckpt"  # take the last if validate_and_fit is False
-                # else f"NMT/en_to_ar/SentencePieceTokenizer_to_SentencePieceTokenizer/dotted/checkpoints/epoch=7-val_loss=4.190-step=14485.ckpt"  # take the last if validate_and_fit is False
+                if validate_and_fit
+                else best_model_checkpoint
             ).to(constants.DEVICE),
             add_dots_to_predictions=True,
-            source_tokenizer=source_tokenizer,
-            target_tokenizer=target_tokenizer,
-            target_sentences=dotted_ar_test_dataset,
-            max_sequence_length=target_max_sequence_length,
-            source_sentences=test_dataset[source_language_code],
+            decode_with_beam_search=False,
+            **inferences_common_kwargs,
         )
 
         log_content(
             content=f"""
-            Test sacre blue score after dotting predictions: {blue_score_after_dotting_predictions}
+            Test sacre blue score after dotting predictions (greedy-decode) for best model: {blue_score_after_dotting_predictions_greedy_decode_best_model}
             """,
             results_file=results_file,
             print_to_console=print_to_console,
@@ -500,7 +602,80 @@ def training_pipeline(
 
         wandb_logger.experiment.log(
             {
-                "test-sacre-blue-score-dotting-predictions": blue_score_after_dotting_predictions
+                "test-sacre-blue-score-dotting-predictions-greedy-decode-best-model": blue_score_after_dotting_predictions_greedy_decode_best_model,
+            }
+        )
+
+        blue_score_after_dotting_predictions_greedy_decode_averaged_model = (
+            get_blue_score(
+                model=averaged_model,
+                add_dots_to_predictions=True,
+                decode_with_beam_search=False,
+                **inferences_common_kwargs,
+            )
+        )
+
+        log_content(
+            content=f"""
+            Test sacre blue score after dotting predictions (greedy-decode) for averaged model: {blue_score_after_dotting_predictions_greedy_decode_averaged_model}
+            """,
+            results_file=results_file,
+            print_to_console=print_to_console,
+        )
+
+        wandb_logger.experiment.log(
+            {
+                "test-sacre-blue-score-dotting-predictions-greedy-decode-averaged-model": blue_score_after_dotting_predictions_greedy_decode_averaged_model,
+            }
+        )
+
+        blue_score_after_dotting_predictions_beam_search_decode_best_model = (
+            get_blue_score(
+                model=TranslationTransformer.load_from_checkpoint(
+                    trainer.checkpoint_callback.best_model_path
+                    if validate_and_fit
+                    else best_model_checkpoint
+                ).to(constants.DEVICE),
+                add_dots_to_predictions=True,
+                decode_with_beam_search=True,
+                **inferences_common_kwargs,
+            )
+        )
+
+        log_content(
+            content=f"""
+            Test sacre blue score after dotting predictions (beam-search-decode) for best model: {blue_score_after_dotting_predictions_beam_search_decode_best_model}
+            """,
+            results_file=results_file,
+            print_to_console=print_to_console,
+        )
+
+        wandb_logger.experiment.log(
+            {
+                "test-sacre-blue-score-dotting-predictions-beam-search-decode-best-model": blue_score_after_dotting_predictions_beam_search_decode_best_model,
+            }
+        )
+
+        blue_score_after_dotting_predictions_beam_search_decode_averaged_model = (
+            get_blue_score(
+                model=averaged_model,
+                add_dots_to_predictions=True,
+                decode_with_beam_search=True,
+                **inferences_common_kwargs,
+            )
+        )
+
+        log_content(
+            content=f"""
+            Test sacre blue score after dotting predictions (beam-search-decode) for averaged model: {blue_score_after_dotting_predictions_beam_search_decode_averaged_model}
+            """,
+            results_file=results_file,
+            print_to_console=print_to_console,
+        )
+
+        wandb_logger.experiment.log(
+            {
+                "test-sacre-blue-score-dotting-predictions-beam-search-decode-averaged-model": blue_score_after_dotting_predictions_beam_search_decode_averaged_model,
             }
         )
 

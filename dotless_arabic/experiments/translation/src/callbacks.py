@@ -30,10 +30,13 @@ class BleuDuringTrainingCallback(Callback):
         self.show_translation_for = show_translation_for
 
     def on_train_epoch_end(self, trainer, pl_module):
+        # def on_train_end(self, trainer, pl_module):
         train_bleu_score = get_blue_score(
-            # use_tqdm=False,
+            use_tqdm=False,
             model=pl_module,
+            decode_with_beam_search=False,
             max_sequence_length=self.seqlen,
+            save_predictions_and_targets=False,
             source_tokenizer=self.source_tokenizer,
             target_tokenizer=self.target_tokenizer,
             show_translations_for=self.show_translation_for,
@@ -41,8 +44,9 @@ class BleuDuringTrainingCallback(Callback):
             target_sentences=self.train_dataset[self.target_language_code],
         )
         val_bleu_score = get_blue_score(
-            # use_tqdm=False,
+            use_tqdm=False,
             model=pl_module,
+            decode_with_beam_search=False,
             max_sequence_length=self.seqlen,
             source_tokenizer=self.source_tokenizer,
             target_tokenizer=self.target_tokenizer,
