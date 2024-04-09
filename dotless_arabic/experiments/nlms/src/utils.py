@@ -57,9 +57,7 @@ def generate_text(
             if lm_model.__class__ == LitRNNLM:
                 output, hiddens = lm_model(encoded, hiddens)
             elif lm_model.__class__ == LitTransformerLM:
-                model_class = lm_model.__class__
-                mask = model_class.generate_square_subsequent_mask(size=input.size(0))
-                output = lm_model(input, mask=mask, device=device)
+                output = lm_model(encoded, device=device)
             output = output[-1, -1, :]
             output = torch.softmax(output / temperature, dim=-1)
             predicted_token_id = torch.multinomial(output, num_samples=1).item()
@@ -153,10 +151,9 @@ def train_lm(
     # callbacks.append(StochasticWeightAveraging(0.1 * constants.LEARNING_RATE))
     early_stopping_callback = EarlyStopping(
         monitor="val_loss",
+        check_finite=True,
         min_delta=0.05,
         patience=20,
-        # patience=10,
-        check_finite=True,
     )
     callbacks.append(early_stopping_callback)
     if use_rich_progressbar:
@@ -175,7 +172,8 @@ def train_lm(
         deterministic=True,
         callbacks=callbacks,
         logger=wandb_logger,
-        gradient_clip_val=3,  # for transformer model, this value might be very small, say 0.25
+        # gradient_clip_val=3,  # for transformer model, this value might be very small, say 0.25
+        gradient_clip_val=0,  # for RNNs, this value was 3
         fast_dev_run=one_run,
         max_epochs=max_epochs,
         val_check_interval=0.25,

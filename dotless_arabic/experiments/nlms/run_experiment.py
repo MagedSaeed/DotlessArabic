@@ -138,7 +138,8 @@ def run(
     )
 
     if run_dotted:
-        dotted_results_file_path = f"{results_dir}/dotted_vocab_coverage_{vocab_coverage}_seqlen_percentile_{seqlen_percentile}.txt"
+        # model type has been added after running RNNs models, so their results files does not have the model_type
+        dotted_results_file_path = f"{results_dir}/dotted_vocab_coverage_{vocab_coverage}_seqlen_percentile_{seqlen_percentile}_{model_type}.txt"
 
         # delete the current logging file, if exists
 
@@ -155,7 +156,8 @@ def run(
             )
 
     if run_undotted:
-        undotted_results_file_path = f"{results_dir}/undotted_vocab_coverage_{vocab_coverage}_seqlen_percentile_{seqlen_percentile}.txt"
+        # model type has been added after running RNNs models, so their results files does not have the model_type
+        undotted_results_file_path = f"{results_dir}/undotted_vocab_coverage_{vocab_coverage}_seqlen_percentile_{seqlen_percentile}_{model_type}.txt"
 
         # delete the current logging file, if exists
 
