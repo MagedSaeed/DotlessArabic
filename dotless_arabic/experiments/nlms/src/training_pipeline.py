@@ -16,7 +16,7 @@ from dotless_arabic.datasets.utils import tokens_frequency
 from dotless_arabic.experiments.nlms.src.models import LitRNNLM, LitTransformerLM
 from dotless_arabic.experiments.nlms.src.tuners import tune_lm_model
 from dotless_arabic.experiments.nlms.src.settings import configure_environment
-from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer
+from dotless_arabic.tokenizers import FarasaMorphologicalTokenizer, WordTokenizer
 from dotless_arabic.experiments.nlms.src.utils import (
     generate_text,
     get_sequence_length,
@@ -245,10 +245,10 @@ def training_pipeline(
         model_class = LitTransformerLM
     else:
         raise ValueError(
-            f"Model Type {model_type} is not supported. Put either 'RNN' or 'Transformer'"
+            f"Model Type {model_type} is not supported. Supported models are 'RNN', 'Transformer'"
         )
 
-    if not best_hparams:
+    if not best_hparams and model_type.lower() == "rnn":  # tune only for RNNs
         # tune the model
         train_dataset_for_tuning = train_dataset[: int(len(train_dataset) * 0.1)]
 
@@ -281,6 +281,10 @@ def training_pipeline(
             train_dataloader=train_dataloader_for_tuning,
             val_dataloader=val_dataloader_for_tuning,
         )
+    elif model_type.lower() == "transformer":
+        best_hparams = {}
+        if "poems" in dataset_name and tokenizer_class == WordTokenizer:
+            best_hparams = {"learning_rate": 0.0001}  # special case for poems dataset
 
     lm_model = model_class(
         vocab_size=tokenizer.vocab_size,

@@ -1,3 +1,4 @@
+import os
 import math
 import shutil
 from collections import defaultdict
@@ -49,15 +50,14 @@ def generate_text(
     with torch.no_grad():
         hiddens = None
         for index in range(num_tokens):
-            prompt = " ".join(prompt.split()[-sequence_length:])
-            encoded = tokenizer.encode(prompt)
+            # prompt = " ".join(prompt.split()[-sequence_length:])
+            # encoded = tokenizer.encode(prompt)
+            encoded = [tokenizer.token_to_id(token) for token in prompt.split()]
             encoded = torch.LongTensor([encoded]).to(device)
             if lm_model.__class__ == LitRNNLM:
                 output, hiddens = lm_model(encoded, hiddens)
             elif lm_model.__class__ == LitTransformerLM:
-                model_class = lm_model.__class__
-                mask = model_class.generate_square_subsequent_mask(size=input.size(0))
-                output = lm_model(input, mask=mask, device=device)
+                output = lm_model(encoded, device=device)
             output = output[-1, -1, :]
             output = torch.softmax(output / temperature, dim=-1)
             predicted_token_id = torch.multinomial(output, num_samples=1).item()
@@ -91,7 +91,9 @@ def generate_text(
                 generated_text += f" {predicted_token}"
             print("prompt is:", prompt)
     return "\n".join(
-        tokenizer.detokenize(line.split()) for line in generated_text.splitlines()
+        # tokenizer.detokenize(line.split()) for line in generated_text.splitlines()
+        line.replace(" ", "").replace("<##>", " ")
+        for line in generated_text.splitlines()
     )
 
 
@@ -149,10 +151,9 @@ def train_lm(
     # callbacks.append(StochasticWeightAveraging(0.1 * constants.LEARNING_RATE))
     early_stopping_callback = EarlyStopping(
         monitor="val_loss",
+        check_finite=True,
         min_delta=0.05,
         patience=20,
-        # patience=10,
-        check_finite=True,
     )
     callbacks.append(early_stopping_callback)
     if use_rich_progressbar:
@@ -171,7 +172,8 @@ def train_lm(
         deterministic=True,
         callbacks=callbacks,
         logger=wandb_logger,
-        gradient_clip_val=3,  # for transformer model, this value might be very small, say 0.25
+        # gradient_clip_val=3,  # for transformer model, this value might be very small, say 0.25
+        gradient_clip_val=0,  # for RNNs, this value was 3
         fast_dev_run=one_run,
         max_epochs=max_epochs,
         val_check_interval=0.25,
@@ -348,15 +350,15 @@ def get_vocab_size(
     return vocab
 
 
-# def get_best_checkpoint(dataset_id, tokenizer_class, checkpoints_base_path="NLMs"):
-#     checkpoints_path = (
-#         f"{checkpoints_base_path}/{dataset_id}/{tokenizer_class.__name__}/checkpoints"
-#     )
-#     for file_name in os.listdir(checkpoints_path):
-#         if file_name.startswith("epoch"):
-#             print(f"checkpiont {file_name} found.")
-#             return f"{checkpoints_path}/{file_name}"
-#     print("Could NOT find a checkpoint!!")
+def get_best_checkpoint(
+    dataset_id, tokenizer_class, checkpoints_base_path="NLMs", model_type="RNN"
+):
+    checkpoints_path = f"{checkpoints_base_path}/{dataset_id}/{tokenizer_class.__name__}/{model_type}/checkpoints"
+    for file_name in os.listdir(checkpoints_path):
+        if file_name.startswith("epoch"):
+            print(f"checkpiont {file_name} found.")
+            return f"{checkpoints_path}/{file_name}"
+    print("Could NOT find a checkpoint!!")
 
 
 def get_sequence_length(

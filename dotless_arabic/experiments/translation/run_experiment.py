@@ -32,12 +32,12 @@ from dotless_arabic.experiments.translation.src.training_pipeline import (
 @click.option(
     "--source_lang",
     help="Source Language",
-    type=click.Choice(["en", "ar"]),
+    # type=click.Choice(["en", "ar"]),
 )
 @click.option(
     "--target_lang",
     help="Target Language",
-    type=click.Choice(["en", "ar"]),
+    # type=click.Choice(["en", "ar"]),
 )
 @click.option(
     "--gpu_devices",
@@ -45,12 +45,12 @@ from dotless_arabic.experiments.translation.src.training_pipeline import (
     type=str,
     default=str(constants.GPU_DEVICES),
 )
-@click.option(
-    "--batch_size",
-    help="Batch size to consider in various data setups",
-    type=int,
-    default=constants.DEFAULT_BATCH_SIZE,
-)
+# @click.option(
+#     "--batch_size",
+#     help="Batch size to consider in various data setups",
+#     type=int,
+#     default=constants.DEFAULT_BATCH_SIZE,
+# )
 @click.option(
     "--run_dotted",
     help="Run DOTTED experiment. This is True by default",
@@ -63,15 +63,22 @@ from dotless_arabic.experiments.translation.src.training_pipeline import (
     type=bool,
     default=True,
 )
+@click.option(
+    "--inference_only",
+    help="Run inference on a trained model (needs the model to be trained saved first)",
+    type=bool,
+    default=False,
+)
 def run(
     source_tokenizer_class,
     target_tokenizer_class,
     source_lang,
     target_lang,
     gpu_devices,
-    batch_size,
+    # batch_size,
     run_dotted,
     run_undotted,
+    inference_only,
 ):
     assert (
         run_dotted or run_undotted
@@ -118,10 +125,11 @@ def run(
 
         best_params = training_pipeline(
             is_dotted=True,
-            batch_size=batch_size,
+            # batch_size=batch_size,
             gpu_devices=gpu_devices,
             source_language_code=source_lang,
             target_language_code=target_lang,
+            validate_and_fit=not inference_only,
             results_file=dotted_results_file_path,
             source_tokenizer_class=source_tokenizer_class,
             target_tokenizer_class=target_tokenizer_class,
@@ -156,11 +164,12 @@ def run(
 
         training_pipeline(
             is_dotted=False,
-            batch_size=batch_size,
+            # batch_size=batch_size,
             gpu_devices=gpu_devices,
             best_params=best_params,
             source_language_code=source_lang,
             target_language_code=target_lang,
+            validate_and_fit=not inference_only,
             results_file=undotted_results_file_path,
             source_tokenizer_class=source_tokenizer_class,
             target_tokenizer_class=target_tokenizer_class,

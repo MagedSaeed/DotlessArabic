@@ -141,3 +141,10 @@ MeterClassification
 .jupyter_ystore.db
 
 **/lightning_logs
+*bin*
+DotsRetrieval*
+NMT*
+TM
+NER
+POSTagging
+dotless_arabic/experiments/translation/good_translation_models/ar_en_seq_len_0.95_b_25.036/epoch=8-val_loss=3.386-step=19376.ckpt

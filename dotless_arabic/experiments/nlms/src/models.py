@@ -180,26 +180,61 @@ class LitRNNLM(LightningModule):
 
 
 # Temporarily leave PositionalEncoding module here. Will be moved somewhere else.
+# class PositionalEncoding(nn.Module):
+#     r"""Inject some information about the relative or absolute position of the tokens in the sequence.
+#         The positional encodings have the same dimension as the embeddings, so that the two can be summed.
+#         Here, we use sine and cosine functions of different frequencies.
+#     .. math:
+#         \text{PosEncoder}(pos, 2i) = sin(pos/10000^(2i/d_model))
+#         \text{PosEncoder}(pos, 2i+1) = cos(pos/10000^(2i/d_model))
+#         \text{where pos is the word position and i is the embed idx)
+#     Args:
+#         d_model: the embed dim (required).
+#         dropout: the dropout value (default=0.1).
+#         max_len: the max. length of the incoming sequence (default=5000).
+#     Examples:
+#         >>> pos_encoder = PositionalEncoding(d_model)
+#     """
+
+#     def __init__(self, d_model, dropout=0.1, max_len=5000):
+#         super(PositionalEncoding, self).__init__()
+#         self.dropout = nn.Dropout(p=dropout)
+
+#         pe = torch.zeros(max_len, d_model)
+#         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+#         div_term = torch.exp(
+#             torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)
+#         )
+#         pe[:, 0::2] = torch.sin(position * div_term)
+#         pe[:, 1::2] = torch.cos(position * div_term)
+#         pe = pe.unsqueeze(0).transpose(0, 1)
+#         self.register_buffer("pe", pe)
+
+#     def forward(self, x):
+#         r"""Inputs of forward function
+#         Args:
+#             x: the sequence fed to the positional encoder model (required).
+#         Shape:
+#             x: [sequence length, batch size, embed dim]
+#             output: [sequence length, batch size, embed dim]
+#         Examples:
+#             >>> output = pos_encoder(x)
+#         """
+
+#         x = x + self.pe[: x.size(0), :]
+#         return self.dropout(x)
+
+
 class PositionalEncoding(nn.Module):
-    r"""Inject some information about the relative or absolute position of the tokens in the sequence.
-        The positional encodings have the same dimension as the embeddings, so that the two can be summed.
-        Here, we use sine and cosine functions of different frequencies.
-    .. math:
-        \text{PosEncoder}(pos, 2i) = sin(pos/10000^(2i/d_model))
-        \text{PosEncoder}(pos, 2i+1) = cos(pos/10000^(2i/d_model))
-        \text{where pos is the word position and i is the embed idx)
-    Args:
-        d_model: the embed dim (required).
-        dropout: the dropout value (default=0.1).
-        max_len: the max. length of the incoming sequence (default=5000).
-    Examples:
-        >>> pos_encoder = PositionalEncoding(d_model)
-    """
+    def __init__(self, d_model, max_len=5000, dropout=0.1):
+        """
+        Args
+            d_model: Hidden dimensionality of the input.
+            max_len: Maximum length of a sequence to expect.
+        """
+        super().__init__()
 
-    def __init__(self, d_model, dropout=0.1, max_len=5000):
-        super(PositionalEncoding, self).__init__()
-        self.dropout = nn.Dropout(p=dropout)
-
+        # Create matrix of [SeqLen, HiddenDim] representing the positional encoding for max_len inputs
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(
@@ -207,21 +242,16 @@ class PositionalEncoding(nn.Module):
         )
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
-        pe = pe.unsqueeze(0).transpose(0, 1)
+        pe = pe.unsqueeze(0)
+
+        # register_buffer => Tensor which is not a parameter, but should be part of the modules state.
+        # Used for tensors that need to be on the same device as the module.
+        # persistent=False tells PyTorch to not add the buffer to the state dict (e.g. when we save the model)
         self.register_buffer("pe", pe)
+        self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, x):
-        r"""Inputs of forward function
-        Args:
-            x: the sequence fed to the positional encoder model (required).
-        Shape:
-            x: [sequence length, batch size, embed dim]
-            output: [sequence length, batch size, embed dim]
-        Examples:
-            >>> output = pos_encoder(x)
-        """
-
-        x = x + self.pe[: x.size(0), :]
+        x = x + self.pe[:, : x.size(1)].requires_grad_(False)
         return self.dropout(x)
 
 
@@ -230,13 +260,13 @@ class LitTransformerLM(LightningModule):
     def __init__(
         self,
         vocab_size,
-        heads=2,
-        layers=2,
+        heads=8,
+        layers=3,
+        dropout=0.1,
         pad_token_id=1,
-        learning_rate=5,  # high learning rate is usefule in such models
-        dropout=constants.DROPOUT_PROB,
-        hidden_dim=constants.HIDDEN_SIZE,
-        embeddings_dim=constants.EMBEDDING_SIZE,
+        hidden_dim=2048,
+        embeddings_dim=512,
+        learning_rate=0.001,
     ):
         super(LitTransformerLM, self).__init__()
         self.save_hyperparameters()
@@ -245,7 +275,7 @@ class LitTransformerLM(LightningModule):
         self.embed_dim = embeddings_dim
         self.pad_token_id = pad_token_id
 
-        self.pos_encoder = PositionalEncoding(embeddings_dim, dropout)
+        self.pos_encoder = PositionalEncoding(embeddings_dim, dropout=dropout)
         encoder_layers = nn.TransformerEncoderLayer(
             nhead=heads,
             dropout=dropout,
@@ -260,52 +290,24 @@ class LitTransformerLM(LightningModule):
         )
         self.transformer_encoder = nn.TransformerEncoder(encoder_layers, layers)
         self.linear = nn.Linear(embeddings_dim, self.vocab_size)
-
+        # torch metrics
         self.train_ppl = torchmetrics.text.Perplexity(ignore_index=self.pad_token_id)
         self.val_ppl = torchmetrics.text.Perplexity(ignore_index=self.pad_token_id)
         self.test_ppl = torchmetrics.text.Perplexity(ignore_index=self.pad_token_id)
 
-        self.init_weights()
-
-    def init_weights(self):
-        initrange = 0.1
-        self.embedding.weight.data.uniform_(-initrange, initrange)
-        self.linear.bias.data.zero_()
-        self.linear.weight.data.uniform_(-initrange, initrange)
-
-    def forward(self, src, mask=None, src_key_padding_mask=None, **kwargs):
+    def forward(self, src, **kwargs):
         src = self.embedding(src) * math.sqrt(self.embed_dim)
         src = self.pos_encoder(src)
-        output = self.transformer_encoder(
-            src,
-            mask=mask,
-            # src_key_padding_mask=src_key_padding_mask,
+        src_mask = nn.Transformer.generate_square_subsequent_mask(src.size(1)).to(
+            self.device
         )
+        output = self.transformer_encoder(src, mask=src_mask)
         output = self.linear(output)
         return output
 
-    @staticmethod
-    def generate_square_subsequent_mask(
-        size,
-        device="cuda" if torch.cuda.is_available() else "cpu",
-    ):
-        mask = (torch.triu(torch.ones(size, size)) == 1).transpose(0, 1)
-        mask = (
-            mask.float()
-            .masked_fill(mask == 0, float("-inf"))
-            .masked_fill(mask == 1, float(0.0))
-        ).to(device)
-        return mask
-
-    def step(self, batch, return_outputs=False):
+    def step(self, batch, return_outputs=True):
         inputs, labels = batch
-        src_mask = self.generate_square_subsequent_mask(size=inputs.size(1))
-        pads_mask = (inputs == self.pad_token_id).clone().detach()
-        outputs = self(
-            inputs,
-            src_mask=src_mask,
-            src_key_padding_mask=pads_mask,
-        )
+        outputs = self(inputs)
         loss = F.cross_entropy(
             outputs.view(-1, self.vocab_size),
             labels.view(-1),
@@ -317,10 +319,7 @@ class LitTransformerLM(LightningModule):
 
     def training_step(self, batch, batch_idx):
         inputs, targets = batch
-        loss, outputs = self.step(
-            batch,
-            return_outputs=True,
-        )
+        loss, outputs = self.step(batch)
         ppl = self.train_ppl(outputs, targets)
         self.log("ppl", ppl, prog_bar=True)
         self.log("loss", loss, prog_bar=True)
@@ -328,10 +327,7 @@ class LitTransformerLM(LightningModule):
 
     def validation_step(self, batch, batch_idx):
         inputs, targets = batch
-        loss, outputs = self.step(
-            batch,
-            return_outputs=True,
-        )
+        loss, outputs = self.step(batch)
         ppl = self.train_ppl(outputs, targets)
         self.log("val_ppl", ppl, prog_bar=True)
         self.log("val_loss", loss, prog_bar=True)
@@ -339,23 +335,20 @@ class LitTransformerLM(LightningModule):
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
         inputs, targets = batch
-        loss, outputs = self.step(
-            batch,
-            return_outputs=True,
-        )
+        loss, outputs = self.step(batch)
         ppl = self.train_ppl(outputs, targets)
         self.log("test_ppl", ppl)
         self.log("test_loss", loss, prog_bar=True)
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.SGD(
+        optimizer = torch.optim.RAdam(
             self.parameters(),
             lr=self.learning_rate,
         )
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             optimizer=optimizer,
-            factor=0.5,
+            factor=0.25,
             patience=1,
             verbose=True,
         )

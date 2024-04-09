@@ -16,7 +16,7 @@ def configure_environment():
     torch.cuda.empty_cache()  # to free gpu memory
     nltk.download("stopwords")
     seed_everything(42, workers=True)
-    os.environ["WANDB_MODE"] = "disabled"
+    # os.environ["WANDB_MODE"] = "disabled"
     torch.autograd.set_detect_anomaly(True)
     os.environ["CUDA_LAUNCH_BLOCKING"] = "1"  # to see CUDA errors
     # other options: https://stackoverflow.com/questions/15197286/how-can-i-flush-gpu-memory-using-cuda-physical-reset-is-unavailable
