@@ -1,5 +1,5 @@
 ####################################################################################################
-Undotted Training Started at 2024-03-23 15:06:37.524316 for tokenizer: FarasaMorphologicalTokenizer
+Undotted Training Started at 2024-04-10 04:08:23.263218 for tokenizer: FarasaMorphologicalTokenizer
 ####################################################################################################
 ####################################################################################################
 Some of the Dataset Samples after undotting:
@@ -22,7 +22,7 @@ Considered Vocab (from WordTokenizer): 8,783
 All Vocab (WordTokenizer): 12,106
 ####################################################################################################
 ####################################################################################################
-Tokenizer Vocab Size: 7,040
+Tokenizer Vocab Size: 5,591
 ####################################################################################################
 ####################################################################################################
 Calculating Sequence Length:
@@ -56,49 +56,49 @@ Test DataLoader: 9
 | Name                | Type               | Params
 -----------------------------------------------------------
 0 | pos_encoder         | PositionalEncoding | 0
-1 | embedding           | Embedding          | 3.6 M
+1 | embedding           | Embedding          | 2.9 M
 2 | transformer_encoder | TransformerEncoder | 9.5 M
-3 | linear              | Linear             | 3.6 M
+3 | linear              | Linear             | 2.9 M
 4 | train_ppl           | Perplexity         | 0
 5 | val_ppl             | Perplexity         | 0
 6 | test_ppl            | Perplexity         | 0
 -----------------------------------------------------------
-16.7 M    Trainable params
+15.2 M    Trainable params
 0         Non-trainable params
-16.7 M    Total params
-66.693    Total estimated model params size (MB)
+15.2 M    Total params
+60.752    Total estimated model params size (MB)
 ####################################################################################################
 ####################################################################################################
 Perplexity Results for Train,Validation, and Test Dataloaders:
 [
 {
-"test_ppl/dataloader_idx_0": 4.219330787658691,
-"test_loss/dataloader_idx_0": 1.4386427402496338
+"test_ppl/dataloader_idx_0": 5.496988296508789,
+"test_loss/dataloader_idx_0": 1.7031444311141968
 },
 {
-"test_ppl/dataloader_idx_1": 12.561095237731934,
-"test_loss/dataloader_idx_1": 2.5275118350982666
+"test_ppl/dataloader_idx_1": 11.203083038330078,
+"test_loss/dataloader_idx_1": 2.4132800102233887
 },
 {
-"test_ppl/dataloader_idx_2": 12.481832504272461,
-"test_loss/dataloader_idx_2": 2.5215401649475098
+"test_ppl/dataloader_idx_2": 11.160655975341797,
+"test_loss/dataloader_idx_2": 2.4093985557556152
 }
 ]
 ####################################################################################################
 ####################################################################################################
-Training OOVs rate: 2.11
-Validation OOVs rate: 2.11
-Test OOVs rate: 2.11
+Training OOVs rate: 1.26
+Validation OOVs rate: 1.26
+Test OOVs rate: 1.26
 ####################################################################################################
 ####################################################################################################
-Training Time: 262.965 seconds
+Training Time: 277.709 seconds
 ####################################################################################################
 ####################################################################################################
-Average training Time for one epoch: 21.913 seconds
+Average training Time for one epoch: 21.362 seconds
 ####################################################################################################
 ####################################################################################################
-<bos>ولا بكلف بفسا الا وسعها ولا بصبعك أحر الابهار
+<bos>ومن ابابه ابابه لابابه وعمله صالحا ولا بحرن
 ####################################################################################################
 ####################################################################################################
-Undotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2024-03-23 15:12:04.405723
+Undotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2024-04-10 04:14:05.486821
 ####################################################################################################

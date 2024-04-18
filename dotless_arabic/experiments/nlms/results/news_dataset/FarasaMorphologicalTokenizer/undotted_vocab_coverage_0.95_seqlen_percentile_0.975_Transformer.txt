@@ -1,5 +1,5 @@
 ####################################################################################################
-Undotted Training Started at 2024-03-29 03:46:42.832755 for tokenizer: FarasaMorphologicalTokenizer
+Undotted Training Started at 2024-04-13 08:47:46.089853 for tokenizer: FarasaMorphologicalTokenizer
 ####################################################################################################
 ####################################################################################################
 Some of the Dataset Samples after undotting:
@@ -22,7 +22,7 @@ Considered Vocab (from WordTokenizer): 46,095
 All Vocab (WordTokenizer): 617,597
 ####################################################################################################
 ####################################################################################################
-Tokenizer Vocab Size: 41,399
+Tokenizer Vocab Size: 23,482
 ####################################################################################################
 ####################################################################################################
 Calculating Sequence Length:
@@ -56,49 +56,49 @@ Test DataLoader: 6,661
 | Name                | Type               | Params
 -----------------------------------------------------------
 0 | pos_encoder         | PositionalEncoding | 0
-1 | embedding           | Embedding          | 21.2 M
+1 | embedding           | Embedding          | 12.0 M
 2 | transformer_encoder | TransformerEncoder | 9.5 M
-3 | linear              | Linear             | 21.2 M
+3 | linear              | Linear             | 12.0 M
 4 | train_ppl           | Perplexity         | 0
 5 | val_ppl             | Perplexity         | 0
 6 | test_ppl            | Perplexity         | 0
 -----------------------------------------------------------
-51.9 M    Trainable params
+33.5 M    Trainable params
 0         Non-trainable params
-51.9 M    Total params
-207.565   Total estimated model params size (MB)
+33.5 M    Total params
+134.105   Total estimated model params size (MB)
 ####################################################################################################
 ####################################################################################################
 Perplexity Results for Train,Validation, and Test Dataloaders:
 [
 {
-"test_ppl/dataloader_idx_0": 6.952041149139404,
-"test_loss/dataloader_idx_0": 1.9369264841079712
+"test_ppl/dataloader_idx_0": 7.074809551239014,
+"test_loss/dataloader_idx_0": 1.9544004201889038
 },
 {
-"test_ppl/dataloader_idx_1": 7.135108470916748,
-"test_loss/dataloader_idx_1": 1.962884545326233
+"test_ppl/dataloader_idx_1": 7.224435806274414,
+"test_loss/dataloader_idx_1": 1.9753079414367676
 },
 {
-"test_ppl/dataloader_idx_2": 7.1369733810424805,
-"test_loss/dataloader_idx_2": 1.9630553722381592
+"test_ppl/dataloader_idx_2": 7.221851825714111,
+"test_loss/dataloader_idx_2": 1.9748791456222534
 }
 ]
 ####################################################################################################
 ####################################################################################################
-Training OOVs rate: 3.78
-Validation OOVs rate: 3.78
-Test OOVs rate: 3.78
+Training OOVs rate: 1.17
+Validation OOVs rate: 1.17
+Test OOVs rate: 1.17
 ####################################################################################################
 ####################################################################################################
-Training Time: 169658.921 seconds
+Training Time: 125530.122 seconds
 ####################################################################################################
 ####################################################################################################
-Average training Time for one epoch: 21207.365 seconds
+Average training Time for one epoch: 15691.265 seconds
 ####################################################################################################
 ####################################################################################################
-<bos>وفال البفربر ان الأموال البى بفدمها الصبدو ٯ الدولى
+<bos>وبابع بحن بعمل على الاربفاء بالفطاع السباحى في ال
 ####################################################################################################
 ####################################################################################################
-Undotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2024-03-31 13:49:12.754728
+Undotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2024-04-15 02:59:08.564185
 ####################################################################################################
