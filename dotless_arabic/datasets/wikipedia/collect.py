@@ -68,5 +68,5 @@ def collect_dataset_for_language_modeling(results_file=None):
 def collect_dataset_for_dots_retreival():
     dataset = collect_dataset_for_analysis()
     dataset = dataset_dot_transform(dataset_newline_transform(dataset))
-    # dataset = list(filter(lambda document: len(document.split()) >= 30, tqdm(dataset)))
+    dataset = list(filter(lambda document: len(document.split()) >= 30, tqdm(dataset)))
     return dataset

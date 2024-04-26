@@ -9,9 +9,9 @@ best_hparams = {
             learning_rate=0.01,
         ),
         "FarasaMorphologicalTokenizer": dict(
-            num_layers=2,
-            rnn_hiddens=256,
-            rnn_dropout=0.25,
+            num_layers=3,
+            rnn_hiddens=128,
+            rnn_dropout=0.5,
             dropout_prob=0.5,
             embedding_size=256,
             learning_rate=0.001,

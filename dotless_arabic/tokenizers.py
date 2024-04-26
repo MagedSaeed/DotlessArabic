@@ -11,7 +11,7 @@ from farasa.segmenter import FarasaSegmenter
 from dotless_arabic.processing import undot
 
 
-def tokenize_vocab(vocab, tokenizer):
+def tokenize_words_vocab(vocab, tokenizer):
     tokenized_vocab = defaultdict(int)
     for vocab, frequency in vocab.items():
         if vocab in tokenizer.special_tokens + [
@@ -104,7 +104,7 @@ class CharacterTokenizer(tk.CharacterTokenizer):
             tokens_frequency[word] += 1
 
         self.vocab = self._truncate_dict(dict(tokens_frequency))
-        self.vocab = tokenize_vocab(vocab=self.vocab, tokenizer=self)
+        self.vocab = tokenize_words_vocab(vocab=self.vocab, tokenizer=self)
         self.vocab_size = len(self.vocab)
 
 
@@ -146,7 +146,7 @@ class DisjointLetterTokenizer(tk.DisjointLetterTokenizer):
             tokens_frequency[word] += 1
 
         self.vocab = self._truncate_dict(dict(tokens_frequency))
-        self.vocab = tokenize_vocab(vocab=self.vocab, tokenizer=self)
+        self.vocab = tokenize_words_vocab(vocab=self.vocab, tokenizer=self)
         self.vocab_size = len(self.vocab)
 
 
@@ -199,11 +199,11 @@ class FarasaMorphologicalTokenizer(tk.FarasaMorphologicalTokenizer):
                 text = f.read()
 
         tokens_frequency = defaultdict(int)
-        for word in self.split_text(text):
+        for word in WordTokenizer.split_text(text):
             tokens_frequency[word] += 1
 
         self.vocab = self._truncate_dict(dict(tokens_frequency))
-        self.vocab = tokenize_vocab(vocab=self.vocab, tokenizer=self)
+        self.vocab = tokenize_words_vocab(vocab=self.vocab, tokenizer=self)
         self.vocab_size = len(self.vocab)
 
     def detokenize(self, tokens):

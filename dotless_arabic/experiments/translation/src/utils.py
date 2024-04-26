@@ -349,6 +349,7 @@ def get_blue_score(
     use_tqdm=True,
     is_dotted=True,
     detokenize=True,
+    predictions=None,
     show_translations_for=100,
     decode_with_beam_search=False,
     add_dots_to_predictions=False,
@@ -358,26 +359,27 @@ def get_blue_score(
     if use_tqdm:
         source_sentences = tqdm(source_sentences)
         target_sentences = tqdm(target_sentences)
-    if not decode_with_beam_search:
-        predictions = [
-            model.translate(
-                input_sentence=sentence,
-                source_tokenizer=source_tokenizer,
-                target_tokenizer=target_tokenizer,
-                max_sequence_length=max_sequence_length,
-            )
-            for sentence in source_sentences
-        ]
-    else:
-        predictions = [
-            model.translate_with_beam_search(
-                input_sentence=sentence,
-                source_tokenizer=source_tokenizer,
-                target_tokenizer=target_tokenizer,
-                max_sequence_length=max_sequence_length,
-            )
-            for sentence in source_sentences
-        ]
+    if not predictions:
+        if not decode_with_beam_search:
+            predictions = [
+                model.translate(
+                    input_sentence=sentence,
+                    source_tokenizer=source_tokenizer,
+                    target_tokenizer=target_tokenizer,
+                    max_sequence_length=max_sequence_length,
+                )
+                for sentence in source_sentences
+            ]
+        else:
+            predictions = [
+                model.translate_with_beam_search(
+                    input_sentence=sentence,
+                    source_tokenizer=source_tokenizer,
+                    target_tokenizer=target_tokenizer,
+                    max_sequence_length=max_sequence_length,
+                )
+                for sentence in source_sentences
+            ]
     predictions = list(
         map(
             lambda text: text.replace("<eos>", "").replace("<bos>", "").strip(),

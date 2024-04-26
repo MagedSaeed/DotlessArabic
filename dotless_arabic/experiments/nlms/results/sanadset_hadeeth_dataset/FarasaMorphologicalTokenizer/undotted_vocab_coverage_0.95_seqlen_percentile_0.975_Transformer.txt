@@ -1,5 +1,5 @@
 ####################################################################################################
-Undotted Training Started at 2024-03-24 03:59:52.026681 for tokenizer: FarasaMorphologicalTokenizer
+Undotted Training Started at 2024-04-10 13:18:52.528228 for tokenizer: FarasaMorphologicalTokenizer
 ####################################################################################################
 ####################################################################################################
 Some of the Dataset Samples after undotting:
@@ -22,7 +22,7 @@ Considered Vocab (from WordTokenizer): 23,291
 All Vocab (WordTokenizer): 215,762
 ####################################################################################################
 ####################################################################################################
-Tokenizer Vocab Size: 20,966
+Tokenizer Vocab Size: 12,020
 ####################################################################################################
 ####################################################################################################
 Calculating Sequence Length:
@@ -56,49 +56,49 @@ Test DataLoader: 1,308
 | Name                | Type               | Params
 -----------------------------------------------------------
 0 | pos_encoder         | PositionalEncoding | 0
-1 | embedding           | Embedding          | 10.7 M
+1 | embedding           | Embedding          | 6.2 M
 2 | transformer_encoder | TransformerEncoder | 9.5 M
-3 | linear              | Linear             | 10.8 M
+3 | linear              | Linear             | 6.2 M
 4 | train_ppl           | Perplexity         | 0
 5 | val_ppl             | Perplexity         | 0
 6 | test_ppl            | Perplexity         | 0
 -----------------------------------------------------------
-30.9 M    Trainable params
+21.8 M    Trainable params
 0         Non-trainable params
-30.9 M    Total params
-123.789   Total estimated model params size (MB)
+21.8 M    Total params
+87.111    Total estimated model params size (MB)
 ####################################################################################################
 ####################################################################################################
 Perplexity Results for Train,Validation, and Test Dataloaders:
 [
 {
-"test_ppl/dataloader_idx_0": 4.360010623931885,
-"test_loss/dataloader_idx_0": 1.468833327293396
+"test_ppl/dataloader_idx_0": 4.420802116394043,
+"test_loss/dataloader_idx_0": 1.4829086065292358
 },
 {
-"test_ppl/dataloader_idx_1": 4.734334945678711,
-"test_loss/dataloader_idx_1": 1.5507322549819946
+"test_ppl/dataloader_idx_1": 4.712343215942383,
+"test_loss/dataloader_idx_1": 1.5464919805526733
 },
 {
-"test_ppl/dataloader_idx_2": 4.729645729064941,
-"test_loss/dataloader_idx_2": 1.549829363822937
+"test_ppl/dataloader_idx_2": 4.707276344299316,
+"test_loss/dataloader_idx_2": 1.545363426208496
 }
 ]
 ####################################################################################################
 ####################################################################################################
-Training OOVs rate: 2.14
-Validation OOVs rate: 2.14
-Test OOVs rate: 2.14
+Training OOVs rate: 1.20
+Validation OOVs rate: 1.20
+Test OOVs rate: 1.20
 ####################################################################################################
 ####################################################################################################
-Training Time: 35165.651 seconds
+Training Time: 30168.350 seconds
 ####################################################################################################
 ####################################################################################################
-Average training Time for one epoch: 3907.294 seconds
+Average training Time for one epoch: 3016.835 seconds
 ####################################################################################################
 ####################################################################################################
-<bos>فال فال رسول الله صلى الله علبه وسلم المومن باكل في
+<bos>فال فال رسول الله صلى الله علبه وسلم من ببى لالله
 ####################################################################################################
 ####################################################################################################
-Undotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2024-03-24 15:26:20.790578
+Undotted Training Finished for tokenizer FarasaMorphologicalTokenizer at 2024-04-10 22:54:15.827886
 ####################################################################################################
