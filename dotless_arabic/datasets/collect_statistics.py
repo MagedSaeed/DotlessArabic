@@ -14,7 +14,11 @@ if "." not in sys.path:
 from dotless_arabic.utils import log_content
 from dotless_arabic.experiments import constants
 from dotless_arabic.tokenizers import TOKENIZERS_MAP
-from dotless_arabic.processing import process, undot
+from dotless_arabic.processing import (
+    process,
+    undot,
+    undot_with_letters_random_remapping,
+)
 from dotless_arabic.datasets.utils import (
     tokens_frequency,
     calculate_entropy,
@@ -42,7 +46,6 @@ from dotless_arabic.datasets.utils import (
     help="Redo all tokens frequencies counts calculations from scratch i.e. do not use the cached frequencies in the json files",
 )
 def run(dataset, tokenizer_class, redo_counts):
-
     dataset_name = dataset + "_dataset"
 
     current_dir = Path(__file__).resolve().parent
@@ -78,7 +81,7 @@ def run(dataset, tokenizer_class, redo_counts):
 
     dataset = constants.COLLECT_DATASET_FOR_ANALYSIS[dataset](
         results_file=statistics_file_path
-    )
+    )[:1_000_000]
 
     log_content(
         content=f"""
@@ -303,6 +306,114 @@ def run(dataset, tokenizer_class, redo_counts):
         content=f"""
         Some of the Dataset Samples after undotting:
         {constants.NEW_LINE.join(map(undot,dataset[:5]))}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
+        Unique Vocabulary Count: {len(undotted_counter.keys()):,}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
+        All Undotted Tokens Count: {sum(undotted_counter.values()):,}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
+        undotted vocab/undotted tokens: {len(undotted_counter.keys())/sum(undotted_counter.values()):,.4f}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    undotted_entropy = calculate_entropy(tokens_frequency=undotted_counter)
+
+    log_content(
+        content=f"""
+        Undotted Tokens Entropy: {undotted_entropy:.4f}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
+        Average tokens length: {sum(map(len,undotted_counter.keys()))/len(undotted_counter.keys()):,.4f}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    threshold = 0.1
+    truncated_undotted_counter = dict(
+        list(undotted_counter.items())[: int(threshold * len(undotted_counter))]
+    )
+
+    log_content(
+        content=f"""
+        Top {threshold}% average tokens length: {sum(map(len,truncated_undotted_counter.keys()))/len(truncated_undotted_counter.keys()):,.4f}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
+        dotted voacb - undotted vocab: {len(counter.keys())-len(undotted_counter.keys()):,}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
+        Undotted Statistics Analysis Finished for dataset {dataset_name} tokenized by {tokenizer_class.__name__} at {datetime.now()}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    ##########################################################################
+    ###### Undotted with letters random remapping Dataset statistics #########
+    ##########################################################################
+
+    log_content(
+        content=f"""
+        Undotted with random letters remapping Statistics Analysis Started at {datetime.now()} for dataset {dataset_name} tokenized by {tokenizer_class.__name__}
+        """,
+        results_file=statistics_file_path,
+    )
+
+    log_content(
+        content=f"""
+            Undotting Dataset
+            """,
+        results_file=statistics_file_path,
+    )
+
+    undotted_dataset = list()
+
+    log_content(
+        content=f"""
+            Undotting the first sample showing the random letters remapping
+            {undotted_dataset.append(undot_with_letters_random_remapping(text=dataset[0],print_new_mapping=True))}
+            """,
+        results_file=statistics_file_path,
+    )
+
+    undotted_dataset += list(
+        map(
+            undot_with_letters_random_remapping,
+            tqdm(dataset[1:]),
+        )
+    )
+
+    undotted_counter = tokens_frequency(dataset=tuple(undotted_dataset))
+
+    log_content(
+        content=f"""
+        Some of the Dataset Samples after undotting:
+        {constants.NEW_LINE.join(map(undot,undotted_dataset[:5]))}
         """,
         results_file=statistics_file_path,
     )

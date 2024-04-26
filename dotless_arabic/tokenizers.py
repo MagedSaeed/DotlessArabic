@@ -199,7 +199,7 @@ class FarasaMorphologicalTokenizer(tk.FarasaMorphologicalTokenizer):
                 text = f.read()
 
         tokens_frequency = defaultdict(int)
-        for word in self.split_text(text):
+        for word in WordTokenizer.split_text(text):
             tokens_frequency[word] += 1
 
         self.vocab = self._truncate_dict(dict(tokens_frequency))

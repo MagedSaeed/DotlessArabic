@@ -1,4 +1,6 @@
 import re
+import random
+from pprint import pprint
 
 from tqdm.auto import tqdm
 
@@ -59,7 +61,7 @@ def process(text, separators=[".", ":", "،", ",", "؛", "؟", "!"]):
     return text.strip()
 
 
-def undot(text, process_first=False):
+def undot(text, process_first=False, letters_mapping=constants.LETTERS_MAPPING):
     """
     this function does not add a new line.
     make sure to append a newline afterwards
@@ -80,14 +82,43 @@ def undot(text, process_first=False):
             word = word[:-1].replace("ي", constants.BAA_SHAPE) + word[-1]
         word = word.translate(
             word.maketrans(
-                "".join(constants.LETTERS_MAPPING.keys()),
-                "".join(constants.LETTERS_MAPPING.values()),
+                "".join(letters_mapping.keys()),
+                "".join(letters_mapping.values()),
             )
         )
         undotted_text += word
         if not word.isspace():
             undotted_text += " "
     return undotted_text.strip()
+
+
+def undot_with_letters_random_remapping(
+    text,
+    seed=1,
+    process_first=False,
+    return_mapping=False,
+    print_new_mapping=False,
+):
+    if process_first:
+        text = process(text)
+    randomizer = random.Random(seed)
+    original_letters = list(constants.LETTERS_MAPPING.keys())
+    shuffled_letters = randomizer.sample(original_letters, len(original_letters))
+    shuffled_letters_mapping = {
+        letter: dotless_letter
+        for letter, dotless_letter in zip(
+            shuffled_letters,
+            constants.LETTERS_MAPPING.values(),
+        )
+    }
+    if print_new_mapping:
+        pprint(shuffled_letters_mapping)
+    if return_mapping:
+        return (
+            undot(text=text, letters_mapping=shuffled_letters_mapping),
+            shuffled_letters_mapping,
+        )
+    return undot(text=text, letters_mapping=shuffled_letters_mapping)
 
 
 def dataset_dot_transform(dataset, use_tqdm=True):
