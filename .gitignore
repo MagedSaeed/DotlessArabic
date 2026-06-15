@@ -148,3 +148,20 @@ TM
 NER
 POSTagging
 dotless_arabic/experiments/translation/good_translation_models/ar_en_seq_len_0.95_b_25.036/epoch=8-val_loss=3.386-step=19376.ckpt
+
+# Model checkpoints (large, regenerable training outputs)
+*.ckpt
+**/checkpoints/
+NMT/
+NMT copy/
+TM/
+DotsRetrieval/
+DotsRetrieval40SourceChars/
+# dots_retrieval/bin/ is NOT ignored: the small tokenizer .model files there are
+# committed; only the large .ckpt inside it is ignored via the *.ckpt rule above
+
+# Datasets (large, downloadable/regenerable)
+dotless_arabic/datasets/sanadset_hadeeth/sanadset.csv
+
+# Scratch file
+tmp.txt

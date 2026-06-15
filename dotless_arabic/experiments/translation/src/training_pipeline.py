@@ -51,6 +51,12 @@ from dotless_arabic.datasets.iwslt2017.collect import (
     collect_parallel_train_dataset_for_translation,
 )
 
+# from dotless_arabic.datasets.multi30k.collect import (
+#     collect_parallel_train_dataset_for_translation,
+#     collect_parallel_val_dataset_for_translation,
+#     collect_parallel_test_dataset_for_translation,
+# )
+
 
 def training_pipeline(
     is_dotted,
@@ -246,18 +252,28 @@ def training_pipeline(
         )
     )
 
+    sequence_length = min(source_max_sequence_length, target_max_sequence_length)
+
     log_content(
         content=f"""
-        Source Max Doc Length: {source_max_sequence_length}
-        Target Max Doc Length: {target_max_sequence_length}
+        Sequence Length: {sequence_length}
         """,
         # setting the sequence length to be the avg of the two
         results_file=results_file,
         print_to_console=print_to_console,
     )
+    # log_content(
+    #     content=f"""
+    #     Source Max Doc Length: {source_max_sequence_length}
+    #     Target Max Doc Length: {target_max_sequence_length}
+    #     """,
+    #     # setting the sequence length to be the avg of the two
+    #     results_file=results_file,
+    #     print_to_console=print_to_console,
+    # )
 
-    wandb_logger.experiment.log({"source-sequence-length": source_max_sequence_length})
-    wandb_logger.experiment.log({"target-sequence-length": target_max_sequence_length})
+    # wandb_logger.experiment.log({"source-sequence-length": source_max_sequence_length})
+    # wandb_logger.experiment.log({"target-sequence-length": target_max_sequence_length})
 
     sequence_length = max(source_max_sequence_length, target_max_sequence_length)
     log_content(
@@ -297,7 +313,6 @@ def training_pipeline(
         results_file=results_file,
         print_to_console=print_to_console,
     )
-
     train_dataloader = get_dataloader(
         shuffle=True,
         batch_size=batch_size,

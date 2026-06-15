@@ -20,7 +20,7 @@ train_dataset = (
         prepare_columns,
         remove_columns=["translation"],
     )
-    # .select(range(1_000))
+    # .select(range(10_000))
 )
 val_dataset = (
     dataset["validation"]
@@ -48,7 +48,6 @@ test_dataset = (
     .select(
         range(len(dataset["test"]) - 1205, len(dataset["test"]))
     )  # select only 2015 test set, refer to the dataset card: (https://huggingface.co/datasets/iwslt2017/blob/c18a4f81a47ae6fa079fe9d32db288ddde38451d/iwslt2017.py#L151) and this research (https://www.researchgate.net/profile/Aliakbar-Abdurahimov/publication/368275060_NLP_project_final_report_1/links/63dea67364fc8606381a53ba/NLP-project-final-report-1.pdf)
-    # ).select(range(100))
 )
 
 

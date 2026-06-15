@@ -6,7 +6,6 @@ from dotless_arabic.experiments.constants import *
 
 from dotless_arabic.tokenizers import WordTokenizer
 
-
 MAX_EPOCHS = 1_000
 DEFAULT_BATCH_SIZE = 64
 
